@@ -1,1 +1,11 @@
 # .gitignore file 
+
+__pycache__/
+*.py[cod]
+
+
+env/
+venv/
+
+# 忽略日誌文件
+*.log
