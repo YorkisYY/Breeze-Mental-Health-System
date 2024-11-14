@@ -7,5 +7,5 @@ __pycache__/
 env/
 venv/
 
-# 忽略日誌文件
+
 *.log
