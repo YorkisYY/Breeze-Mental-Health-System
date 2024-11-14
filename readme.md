@@ -1,16 +1,17 @@
-Second commit
+## Second Commit
 ----------
-York Tseng:
-//1.remove the gui file as we don't want to use it
-//2.basic functionality of the program was created in user and the entry logic of main functionality
-//3.after my test the table can be created and the data can be inserted into the table
-//4.the program can be run by the username and password can be compared with the data with csv file 
+**York Tseng:**
 
-2024.11.14.1:04
+- 1. Removed the GUI file as we don't want to use it.
+- 2. Created the basic functionality of the program in `user` and implemented the entry logic in the main functionality.
+- 3. After testing, the table can be created and data can be inserted into the table.
+- 4. The program can run, allowing the username and password to be compared with data in the CSV file.
 
-First commit
+**Date:** 2024.11.14.1:04
+## First commit
 ----------
-York Tseng:
-//Create the project on GitHub. Commit the starter code from moodle.
+**York Tseng:**
 
-2024.11.11 1:06
+- 1. Create the project on GitHub. Commit the starter code from moodle.
+
+**Date:**2024.11.11 1:06
