@@ -8,7 +8,8 @@
 - 4. The program can run, allowing the username and password to be compared with data in the CSV file
 - 5. user can change their own username and password 
 - 6. registation would compare the username with the data in the CSV file, avoiding the same username.
-- 7. need update for MHWP function
+- 7. create the __intit__ file to form the package file 
+- 8. !need update for MHWP function!
 
 ## Second Commit
 ----------
