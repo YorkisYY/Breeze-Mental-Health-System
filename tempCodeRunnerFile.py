@@ -1,6 +1,7 @@
 from model.registration import register_user, initialize_csv
 from model.login import login_user
 import os
+from model.user import User
 
 FILE_PATH = "user_data.csv"
 
@@ -24,7 +25,7 @@ def main():
     print("            ███████ █████   ██      ██      ██    ██   ")
     print("            ██   ██ ██      ██      ██      ██    ██   ")
     print("            ██   ██ ███████ ███████ ███████  ██████    ")
-    print("            🌞🌞🌞  Welcome to                  🌞🌞🌞")
+    print("            🌞🌞🌞   Welcome to    🌞🌞🌞")
     print("            🌞🌞🌞  Breeze Mental Health System  🌞🌞🌞")
     print("=" * 60)
 
@@ -54,6 +55,7 @@ def main():
                         print("1. Update Another User's Info")
                         print("2. Delete Another User")
                         print("3. Logout")
+                        print("For deleting a user, please read the csv file to make sure the username:")
 
                         admin_choice = input("Select an option (1/2/3): ")
                         if admin_choice == '1':
