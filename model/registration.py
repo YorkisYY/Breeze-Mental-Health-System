@@ -2,54 +2,74 @@ import os
 import pandas as pd
 from model.user import User
 
-FILE_PATH = "user_data.csv"
+# File path to store user data
+FILE_PATH = "patient_data.csv"
 
-# Initialize CSV file if it doesn't exist
+# Initialize the CSV file with default headers if it doesn't already exist
 def initialize_csv(file_path):
-    """Initialize the CSV file if it doesn't exist."""
     if not os.path.exists(file_path):
         with open(file_path, 'w') as f:
+            # Write the CSV headers: username, password, and role
             f.write("username,password,role\n")
 
+# Check if the username is unique for a specific role
 def is_username_unique(username, role, file_path):
-    """Check if the username already exists with the specified role in the CSV file."""
     if os.path.exists(file_path):
+        # Read the existing CSV file
         df = pd.read_csv(file_path)
-        # Check if there is a user with the same username and role
+        # Check if a row exists with the same username and role
         if not df[(df['username'] == username) & (df['role'] == role)].empty:
-            return False
-    return True
+            return False  # Username is not unique
+    return True  # Username is unique
 
+# Function to handle user registration
 def register_user(file_path):
-    """Register a new user, with an extra check for admin registration."""
+    # Prompt user to enter username and password
     username = input("Enter username: ").strip()
     password = input("Enter password: ").strip()
-    role = input("Enter role (user/admin): ").strip().lower()
-    
-    # Check for empty inputs and valid role
-    if not username:
-        print("Username cannot be empty.")
-        return
-    if not password:
-        print("Password cannot be empty.")
-        return
-    if role not in ["user", "admin"]:
-        print("Invalid role. Please enter 'user' or 'admin'.")
+
+    # Display available roles for the user to select
+    print("\nAvailable roles:")
+    print("1. Patient")  
+    print("2. Doctor")
+    print("3. Mental Health Worker")
+    print("4. Admin")
+    role_choice = input("\nSelect role (1-4): ").strip()
+
+    # Mapping role choices to their corresponding role strings
+    roles = {
+        "1": "patient",
+        "2": "doctor",
+        "3": "mhw",  # Mental Health Worker
+        "4": "admin"
+    }
+
+    # Validate the role choice
+    if role_choice not in roles:
+        print("Invalid role selection.")
         return
 
-    # Admin registration requires the admin code
-    if role == "admin":
-        admin_code = input("Enter admin registration code: ").strip()
-        if admin_code != "0000":
-            print("Invalid admin code. Admin registration failed.")
-            return
-    
-    # Check if username is unique for the given role
-    if not is_username_unique(username, role, file_path):
-        print(f"The username '{username}' is already used for role '{role}'. Please choose a different one.")
+    role = roles[role_choice]  # Get the corresponding role string
+
+    # Ensure username and password are not empty
+    if not username or not password:
+        print("Username and password cannot be empty.")
         return
-    
-    # Create and save the new user
+
+    # For special roles, require a verification code
+    if role in ["admin", "doctor", "mhw"]:
+        verification_code = input(f"Enter {role} registration code: ").strip()
+        # Verify the code (currently set to "0000" for all roles)
+        if verification_code != "0000":
+            print(f"Invalid {role} code. Registration failed.")
+            return
+
+    # Check if the username is unique for the selected role
+    if not is_username_unique(username, role, file_path):
+        print(f"Username '{username}' already exists for role '{role}'.")
+        return
+
+    # Create a new user instance and save it to the CSV file
     new_user = User(username, password, role)
     new_user.save_to_csv(file_path)
     print("Registration successful!")
