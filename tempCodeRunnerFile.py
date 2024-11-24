@@ -1,5 +1,5 @@
-from model.registration import register_user, initialize_csv
-from model.login import login_user
+from services.registration import register_user, initialize_csv
+from services.login import login_user
 import os
 from model.user import User
 
