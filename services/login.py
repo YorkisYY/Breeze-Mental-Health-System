@@ -59,6 +59,6 @@ def handle_login(file_path):
                 handle_mhw_menu(user, file_path)
             case "patient":
                 handle_patient_menu(user, file_path)
-    return False
+    return True
 
     

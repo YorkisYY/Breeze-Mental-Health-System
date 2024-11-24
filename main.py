@@ -11,33 +11,36 @@ initialize_csv(FILE_PATH)
 
 def handle_exit():
     print("Exiting the system now.")
-    return True
+    return False
 
 def handle_invalid():
     print("Invalid choice, please try again.")
-    return False
+    return True
+
+def show_menu():
+    print("\nChoose an option:")
+    print("1. Register")
+    print("2. Login")
+    print("3. Exit")
+    return input("Select an option (1/2/3): ")
 
 def main():
     # Display welcome banner with original ASCII art 
     display_banner()
+    choice = show_menu()
     
-    while True:
-        # Main menu options
-        print("\nChoose an option:")
-        print("1. Register")
-        print("2. Login")
-        print("3. Exit")
-        choice = input("Select an option (1/2/3): ")
+    menu_actions = {
+        '1': lambda: register_user(FILE_PATH),
+        '2': lambda: handle_login(FILE_PATH),
+        '3': lambda: False,
+    }
+    #@mikrostiff: break on false
+    #@mikrostiff: ")()" is not a tyoo. the () executes the result of menu_actions      
+    while menu_actions.get(choice, handle_invalid)():
+        choice = show_menu()
+
         
-        menu_actions = {
-            '1': lambda: register_user(FILE_PATH) or False,
-            '2': lambda: handle_login(FILE_PATH),
-            '3': lambda: handle_exit(),
-            }
-        #@mikrostiff: ")()" is not a tyoo
-        result = menu_actions.get(choice, handle_invalid)() 
-        
-        
+ 
 if __name__ == "__main__":
    main()
    
