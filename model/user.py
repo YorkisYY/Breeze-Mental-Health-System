@@ -194,27 +194,124 @@ class User:
         # Implementation for viewing records
         pass
 
-    def book_appointment(self, doctor, date, time):
-        """Book appointment for patient"""
+    def book_appointment(self, mhwp_username, date, start_time, end_time, schedule_file, appointment_file):
+        """
+        Allow a patient to book an appointment with an MHW.
+        Checks for availability and records the booking.
+        """
         if self.role != "patient":
             print("Only patients can book appointments.")
             return False
-        appointment = {
-            "doctor": doctor,
-            "date": date,
-            "time": time,
-            "status": "pending"
-        }
-        self.appointments.append(appointment)
-        return True
 
-    def manage_appointments(self, action, appointment_id):
-        """Manage appointments for medical staff"""
-        if self.role not in ["doctor", "mhw"]:
-            print("Only medical staff can manage appointments.")
+        try:
+            # Read MHW schedule
+            schedule = pd.read_csv(schedule_file)
+            mhwp_schedule = schedule[(schedule['mhwp_username'] == mhwp_username) &
+                                     (schedule['date'] == date)]
+
+            # Check if the selected time slot exists in MHW's schedule
+            available_slot = mhwp_schedule[
+                (mhwp_schedule['start_time'] == start_time) & (mhwp_schedule['end_time'] == end_time)
+            ]
+            if available_slot.empty:
+                print("The selected time slot is not available in the MHW's schedule. Please choose another.")
+                return False
+
+            # Check if the selected time slot is already booked
+            appointments = pd.read_csv(appointment_file)
+            booked_slot = appointments[
+                (appointments['mhwp_username'] == mhwp_username) &
+                (appointments['date'] == date) &
+                (appointments['start_time'] == start_time)
+            ]
+            if not booked_slot.empty:
+                print("The selected time slot is already booked. Please choose another.")
+                return False
+
+            # Append the appointment to the appointments.csv file
+            appointment = {
+                "patient_username": self.username,
+                "mhwp_username": mhwp_username,
+                "date": date,
+                "start_time": start_time,
+                "end_time": end_time,
+                "status": "pending"
+            }
+            appointment_df = pd.DataFrame([appointment])
+            appointment_df.to_csv(appointment_file, mode='a', header=not pd.read_csv(appointment_file).shape[0], index=False)
+            print("Appointment booked successfully!")
+            return True
+
+        except FileNotFoundError as e:
+            print(f"Error: {e}")
             return False
-        # Implementation for managing appointments
-        pass
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return False
+
+
+    def view_appointments(self, appointment_file):
+        """
+        Allow an admin to view all appointments for patients and MHWs.
+        """
+        if self.role != "admin":
+            print("Only admins can view all appointments.")
+            return False
+
+        try:
+            appointments = pd.read_csv(appointment_file)
+            if appointments.empty:
+                print("No appointments found.")
+            else:
+                print(appointments[['patient_username', 'mhwp_username', 'date', 'start_time', 'end_time', 'status']])
+        except FileNotFoundError:
+            print("Appointment file not found.")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+
+
+
+    def manage_appointments(self, appointment_file, action, patient_username=None, date=None, start_time=None):
+        """
+        Manage appointments (confirm, cancel, or view) for MHWs.
+        """
+        if self.role != "mhwp":
+            print("Only MHWs can manage appointments.")
+            return False
+
+        try:
+            appointments = pd.read_csv(appointment_file)
+
+            if action == "view":
+                # View all appointments related to the MHW
+                user_appointments = appointments[appointments['mhwp_username'] == self.username]
+                if user_appointments.empty:
+                    print("No appointments found.")
+                else:
+                    print(user_appointments[['patient_username', 'date', 'start_time', 'end_time', 'status']])
+
+            elif action in ["confirm", "cancel"]:
+                # Confirm or cancel a specific appointment
+                appointment_filter = (appointments['patient_username'] == patient_username) & \
+                                     (appointments['date'] == date) & \
+                                     (appointments['start_time'] == start_time) & \
+                                     (appointments['mhwp_username'] == self.username)
+                if not appointment_filter.any():
+                    print("Appointment not found.")
+                    return False
+
+                new_status = "confirmed" if action == "confirm" else "cancelled"
+                appointments.loc[appointment_filter, 'status'] = new_status
+                appointments.to_csv(appointment_file, index=False)
+                print(f"Appointment has been {new_status}.")
+                return True
+
+        except FileNotFoundError:
+            print("Appointment file not found.")
+            return False
+        except Exception as e:
+            print(f"Error while managing appointments: {e}")
+            return False
 
     def display_info(self):
         """Display user information."""

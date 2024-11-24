@@ -7,7 +7,7 @@ def handle_patient_menu(user, file_path):
         print("1. Update Personal Info")
         print("2. Change Password")
         print("3. View Medical Records")
-        print("4. Book Appointment")
+        print("4. Book/Cancel Appointment")
         print("5. Delete Account")
         print("6. Track Mood")
         print("7. Logout")
@@ -21,8 +21,35 @@ def handle_patient_menu(user, file_path):
             user.update_password(file_path, new_password)
         elif patient_choice == '3':
             print("Medical records feature coming soon...")
-        elif patient_choice == '4':
-            print("Appointment booking feature coming soon...")
+
+        elif patient_choice == '4':  # Book/Cancel appointment
+            print("\nBook/Cancel Appointment:")
+            print("1. Book an appointment")
+            print("2. Cancel an appointment")
+
+            appointment_choice = input("Select an option (1/2): ").strip()
+
+            if appointment_choice == "1":  # Book an appointment
+                mhwp_username = input("Enter MHW username: ").strip()
+                date = input("Enter appointment date (YYYY-MM-DD): ").strip()
+                start_time = input("Enter start time (HH:MM): ").strip()
+                end_time = input("Enter end time (HH:MM): ").strip()
+
+                if user.book_appointment(mhwp_username, date, start_time, end_time, "data/mhwp_schedule.csv", "data/appointments.csv"):
+                    print("Appointment booked successfully!")
+                else:
+                    print("Failed to book the appointment. Try again.")
+
+            elif appointment_choice == "2":  # Cancel an appointment
+                date = input("Enter appointment date (YYYY-MM-DD): ").strip()
+                start_time = input("Enter appointment start time (HH:MM): ").strip()
+
+                if user.manage_appointments("data/appointments.csv", "cancel", user.username, date, start_time):
+                    print("Appointment cancelled successfully!")
+                else:
+                    print("Failed to cancel the appointment.")
+            else:
+                print("Invalid choice.")
         elif patient_choice == '5':
             confirm = input("Confirm delete account? (yes/no): ")
             if confirm.lower() == "yes":
