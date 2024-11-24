@@ -1,3 +1,5 @@
+# handles all login related function and user interface 
+
 import pandas as pd
 from model.user import User  
 from model.admin import handle_admin_menu

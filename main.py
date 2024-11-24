@@ -25,22 +25,21 @@ def show_menu():
     return input("Select an option (1/2/3): ")
 
 def main():
-    # Display welcome banner with original ASCII art 
-    display_banner()
-    choice = show_menu()
+    
+    display_banner() # Display welcome banner with original ASCII art 
+    choice = show_menu() # show original login choice.
     
     menu_actions = {
         '1': lambda: register_user(FILE_PATH),
         '2': lambda: handle_login(FILE_PATH),
-        '3': lambda: False,
+        '3': lambda: handle_exit(),
     }
     #@mikrostiff: break on false
     #@mikrostiff: ")()" is not a tyoo. the () executes the result of menu_actions      
     while menu_actions.get(choice, handle_invalid)():
         choice = show_menu()
 
-        
  
 if __name__ == "__main__":
-   main()
+    main()
    
