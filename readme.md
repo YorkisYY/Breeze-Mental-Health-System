@@ -19,7 +19,11 @@
         * modularize mhw's login page to handle_mhw_menu() to \\model\\mhwp.py
         * modularize patient's login page to handle_patient_menu() to \\model\\patient.py
 2. Add patient mood tracking page.
+2. Add patient mood tracking page.
     1. see \\services\\mood_tracking.py; the function is called when choose the corresponding selection in handle_patient_menu().
+3. fix the bug that cause the program to exit after registration.
+4. remove \\data\\patient_data.csv since it is redundant. All user info stored in \\data\\user_data.csv
+5. place all the csv file path in config.py. The csv file path for classes and functions are easily controlled in this way. State 'from config import XXX_DATA_PATH' at the top of your code.
 3. fix the bug that cause the program to exit after registration.
 4. remove \\data\\patient_data.csv since it is redundant. All user info stored in \\data\\user_data.csv
 5. place all the csv file path in config.py. The csv file path for classes and functions are easily controlled in this way. State 'from config import XXX_DATA_PATH' at the top of your code.
