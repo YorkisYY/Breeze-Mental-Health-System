@@ -1,11 +1,12 @@
-def handle_mhw_menu(user):
+def handle_mhwp_menu(user):
     while True:
         print("\nMental Health Worker Options:")
         print("1. View Patient Records")
         print("2. Add Counseling Notes")
         print("3. Manage Appointments")
         print("4. Logout")
-        
+
+        mhwp_choice = input("Select an option (1-4): ")
         if mhwp_choice == '3':  # Manage appointments
             print("\nManage Appointments:")
             print("1. View all appointments")
@@ -25,12 +26,11 @@ def handle_mhw_menu(user):
             else:
                 print("Invalid choice.")
 
-
-
-        mhw_choice = input("Select an option (1-4): ")
-        if mhw_choice == '4':
+        elif mhwp_choice == '4':
             print("Logging out of MHW session.")
             break
-        else:
+        elif mhwp_choice == '2' | mhwp_choice == '1':
             print("This feature is coming soon...")
+        else:
+            print("Invalid choice, please try again.")
        

@@ -1,3 +1,11 @@
+## Sixth Commit
+----------
+**Arthur Hou: 2024_11_25 02:48**
+
+# merge qxj's commit on mhwp's functions
+- 1. change all instance of mhw to mhwp for naming consistency.
+- 2. modify slight to mhwp.py for robustness.
+
 ## Fifth Commit
 ----------
 **Arthur Hou: 2024_11_24 20:09**

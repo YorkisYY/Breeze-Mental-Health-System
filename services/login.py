@@ -4,7 +4,7 @@ import pandas as pd
 from model.user import User  
 from model.admin import handle_admin_menu
 from model.doctor import handle_doctor_menu
-from model.mhwp import handle_mhw_menu
+from model.mhwp import handle_mhwp_menu
 from model.patient import handle_patient_menu
 
 
@@ -56,10 +56,10 @@ def handle_login():
                 if not verify_staff("doctor"):
                     return False
                 handle_doctor_menu(user)
-            case "mhw":
-                if not verify_staff("mhw"):
+            case "mhwp":
+                if not verify_staff("mhwp"):
                     return False
-                handle_mhw_menu(user)
+                handle_mhwp_menu(user)
             case "patient":
                 handle_patient_menu(user)
     return True

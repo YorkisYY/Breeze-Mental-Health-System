@@ -23,7 +23,7 @@ def register_user():
     print("\nAvailable roles:")
     print("1. Patient")  
     print("2. Doctor")
-    print("3. Mental Health Worker")
+    print("3. Mental Health Wellbeing Personnel")
     print("4. Admin")
     role_choice = input("\nSelect role (1-4): ").strip()
 
@@ -31,7 +31,7 @@ def register_user():
     roles = {
         "1": "patient",
         "2": "doctor",
-        "3": "mhw",  # Mental Health Worker
+        "3": "mhwp",  # Mental Health Worker
         "4": "admin"
     }
 
@@ -48,7 +48,7 @@ def register_user():
         return True
 
     # For special roles, require a verification code
-    if role in ["admin", "doctor", "mhw"]:
+    if role in ["admin", "doctor", "mhwp"]:
         verification_code = input(f"Enter {role} registration code: ").strip()
         # Verify the code (currently set to "0000" for all roles)
         if verification_code != "0000":
