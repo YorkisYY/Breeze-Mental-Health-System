@@ -3,35 +3,52 @@ import hashlib
 from config import USER_DATA_PATH
 
 class User:
-    def __init__(self, username, password, role):
+    def __init__(self, username, password, role, email=None, emergency_email=None):
         self.username = username
         self.password = self.hash_password(password)
         self.role = role
+        self.email = email
+        self.emergency_email = emergency_email
         self.medical_records = []
         self.appointments = []
-
     def hash_password(self, password):
         """Hash password using SHA-256."""
         return hashlib.sha256(password.encode()).hexdigest()
-
     def save_to_csv(self):
-        """Save user information to CSV, ensuring no duplicate usernames."""
-        if self.check_if_exists():
-            print("Username has been used. Please choose a different one.")
-            return False
-        user_data = {"username": [self.username], "password": [self.password], "role": [self.role]}
-        df = pd.DataFrame(user_data)
-        df.to_csv(USER_DATA_PATH, mode='a', index=False, header=False)
-        return True
+        try:
+            try:
+                df = pd.read_csv(USER_DATA_PATH)
+                df['email'] = df['email'].astype(str)
+                df['emergency_email'] = df['emergency_email'].astype(str)
+                if self.username in df['username'].values:
+                    print("Username has been used. Please choose a different one.")
+                    return False
+            except FileNotFoundError:
+                df = pd.DataFrame(columns=["username", "password", "role", "email", "emergency_email"])
 
+            new_user = pd.DataFrame({
+                "username": [self.username],
+                "password": [self.password],
+                "role": [self.role],
+                "email": [self.email if self.email else ""],
+                "emergency_email": [self.emergency_email if self.emergency_email else ""]
+            })
+
+            df = pd.concat([df, new_user], ignore_index=True)
+            df.to_csv(USER_DATA_PATH, index=False,na_rep='')
+            return True
+        except Exception as e:
+            print(f"Error saving user data: {str(e)}")
+            return False
     def load_from_csv(self):
-        """Load user info from CSV to check if user exists."""
         try:
             df = pd.read_csv(USER_DATA_PATH)
             user_info = df[df['username'] == self.username]
             if not user_info.empty:
                 self.password = user_info.iloc[0]['password']
                 self.role = user_info.iloc[0]['role']
+                self.email = user_info.iloc[0]['email']
+                self.emergency_email = user_info.iloc[0]['emergency_email']
                 return True
             return False
         except FileNotFoundError:
@@ -46,7 +63,7 @@ class User:
         except FileNotFoundError:
             return False
 
-    def update_info(self, new_username=None, new_password=None):
+    def update_info(self, new_username=None, new_password=None, new_email=None, new_emergency_email=None):
         """Update user information if changes are made."""
         if not self.load_from_csv():
             print("User does not exist.")
@@ -54,15 +71,8 @@ class User:
 
         try:
             df = pd.read_csv(USER_DATA_PATH)
-
-            if new_username == self.username:
-                print("New username same as current. No changes made.")
-                return False
-
-            hashed_new_password = self.hash_password(new_password) if new_password else None
-            if hashed_new_password == self.password:
-                print("New password same as current. No changes made.")
-                return False
+            df['email'] = df['email'].astype(str)
+            df['emergency_email'] = df['emergency_email'].astype(str)
 
             if new_username:
                 if new_username in df['username'].values:
@@ -70,12 +80,22 @@ class User:
                     return False
                 df.loc[df['username'] == self.username, 'username'] = new_username
                 self.username = new_username
+            if new_email:
+                if new_email == self.email:
+                    print("New email same as current. No changes made.")
+                else:
+                    df.loc[df['username'] == self.username, 'email'] = new_email
+                    self.email = new_email
 
-            if new_password:
-                df.loc[df['username'] == self.username, 'password'] = hashed_new_password
-                self.password = hashed_new_password
-
-            df.to_csv(USER_DATA_PATH, index=False)
+            if new_emergency_email:
+                if new_emergency_email == self.emergency_email:
+                    print("New emergency email same as current. No changes made.") 
+                else:
+                    df.loc[df['username'] == self.username, 'emergency_email'] = new_emergency_email
+                    self.emergency_email = new_emergency_email
+                df.loc[df['username'] == self.username, 'emergency_email'] = new_emergency_email
+                self.emergency_email = new_emergency_email
+            df.to_csv(USER_DATA_PATH, index=False,na_rep ='')
             print("User information updated successfully.")
             return True
 
@@ -100,7 +120,7 @@ class User:
             df.loc[df['username'] == self.username, 'password'] = hashed_new_password
             self.password = hashed_new_password
 
-            df.to_csv(USER_DATA_PATH, index=False)
+            df.to_csv(USER_DATA_PATH, index=False,na_rep='')
             print("User password updated successfully.")
             return True
 
@@ -113,12 +133,12 @@ class User:
         try:
             df = pd.read_csv(USER_DATA_PATH)
             df = df[df['username'] != self.username]
-            df.to_csv(USER_DATA_PATH, index=False)
+            df.to_csv(USER_DATA_PATH, index=False,na_rep='')
             print("User deleted successfully.")
         except FileNotFoundError:
             print("User data file not found.")
 
-    def admin_update_user(self, target_username, new_username=None, new_password=None):
+    def admin_update_user(self, target_username, new_username=None, new_password=None, new_email=None, new_emergency_email=None):
         """Admin method to update other users."""
         if self.role != "admin":
             print("Only admin users can update others.")
@@ -126,74 +146,43 @@ class User:
 
         try:
             df = pd.read_csv(USER_DATA_PATH)
+            
+            # Convert email columns to string type
+            df['email'] = df['email'].astype(str)
+            df['emergency_email'] = df['emergency_email'].astype(str)
+            
             if target_username not in df['username'].values:
                 print("Target user does not exist.")
                 return False
 
-            if new_username == target_username:
-                print("New username same as current.")
-                return False
-
             target_user = df[df['username'] == target_username].iloc[0]
-            hashed_new_password = self.hash_password(new_password) if new_password else None
             
-            if hashed_new_password and hashed_new_password == target_user['password']:
-                print("New password same as current.")
-                return False
-
+            if new_password:
+                hashed_new_password = self.hash_password(new_password)
+                if hashed_new_password == target_user['password']:
+                    print("New password same as current.")
+                    return False
+                df.loc[df['username'] == target_username, 'password'] = hashed_new_password
+                
             if new_username:
                 if new_username in df['username'].values:
                     print("Username already in use.")
                     return False
                 df.loc[df['username'] == target_username, 'username'] = new_username
 
-            if new_password:
-                df.loc[df['username'] == target_username, 'password'] = hashed_new_password
+            if new_email:
+                df.loc[df['username'] == target_username, 'email'] = new_email
+                
+            if new_emergency_email:
+                df.loc[df['username'] == target_username, 'emergency_email'] = new_emergency_email
 
-            df.to_csv(USER_DATA_PATH, index=False)
+            df.to_csv(USER_DATA_PATH, index=False,na_rep='')
             print("User updated successfully by admin.")
             return True
 
-        except FileNotFoundError:
-            print("User data file not found.")
+        except Exception as e:
+            print(f"Error updating user: {str(e)}")
             return False
-
-    def admin_delete_user(self, target_username):
-        """Admin method to delete other users."""
-        if self.role != "admin":
-            print("Only admin users can delete others.")
-            return False
-
-        try:
-            df = pd.read_csv(USER_DATA_PATH)
-            if target_username not in df['username'].values:
-                print("Target user does not exist.")
-                return False
-
-            df = df[df['username'] != target_username]
-            df.to_csv(USER_DATA_PATH, index=False)
-            print(f"User '{target_username}' deleted by admin.")
-            return True
-
-        except FileNotFoundError:
-            print("User data file not found.")
-            return False
-
-    def add_medical_record(self, record):
-        """Add medical record for patient"""
-        if self.role not in ["doctor", "mhw"]:
-            print("Only medical staff can add records.")
-            return False
-        self.medical_records.append(record)
-        return True
-
-    def view_medical_records(self, patient_username):
-        """View patient medical records"""
-        if self.role not in ["admin", "doctor", "mhw"]:
-            print("Unauthorized to view records.") 
-            return None
-        # Implementation for viewing records
-        pass
 
     def book_appointment(self, mhwp_username, date, start_time, end_time, schedule_file, appointment_file):
         """
@@ -239,7 +228,7 @@ class User:
                 "status": "pending"
             }
             appointment_df = pd.DataFrame([appointment])
-            appointment_df.to_csv(appointment_file, mode='a', header=not pd.read_csv(appointment_file).shape[0], index=False)
+            appointment_df.to_csv(appointment_file, mode='a', header=not pd.read_csv(appointment_file).shape[0], index=False,na_rep='')
             print("Appointment booked successfully!")
             return True
 
@@ -317,3 +306,24 @@ class User:
     def display_info(self):
         """Display user information."""
         print(f"Username: {self.username}, Role: {self.role}")
+    def admin_delete_user(self, username):
+        if self.role != "admin":
+            print("Only admin users can delete others.")
+            return False
+        
+        try:
+            df = pd.read_csv(USER_DATA_PATH)
+            if username not in df['username'].values:
+                print("User does not exist.")
+                return False
+            
+            df = df[df['username'] != username]
+            df.to_csv(USER_DATA_PATH, index=False, na_rep='')
+            print(f"User '{username}' deleted successfully by admin.")
+            return True
+        except FileNotFoundError:
+            print("User data file not found.")
+            return False
+        except Exception as e:
+            print(f"Error deleting user: {str(e)}")
+            return False

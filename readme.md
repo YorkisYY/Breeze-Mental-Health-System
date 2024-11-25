@@ -4,6 +4,8 @@
 ### Fix up the bug of the previous commit related to logout within admin and mhwp, and modify the code of mhwp.py
 1.remove the doctor.py, as the role is not needed 
 2.remove the code related to doctor which would create bugs.
+3. append the function that patients can change their username, email,emergency_email now
+4. append the function that admin can change others' email, emergency_email.
 
 ## Sixth Commit
 ----------

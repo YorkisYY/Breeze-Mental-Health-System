@@ -2,28 +2,41 @@ import os
 from services.mood_tracking import MoodEntry
 
 def handle_patient_menu(user):
-
     while True:
         print("\nPatient Options:")
         print("1. Update Personal Info")
         print("2. Change Password")
-        print("3. View Medical Records")
-        print("4. Book/Cancel Appointment")
-        print("5. Delete Account")
-        print("6. Track Mood")
-        print("7. Logout")
+        print("3. Change email")
+        print("4. Change emergency email")
+        print("5. View Medical Records")
+        print("6. Book/Cancel Appointment")
+        print("7. Delete Account")
+        print("8. Track Mood")
+        print("9. Logout")
         
-        patient_choice = input("Select an option (1-7): ")
+        patient_choice = input("Select an option (1-9): ")
         if patient_choice == '1':
             new_username = input("Enter new username: ").strip()
             user.update_info(new_username=new_username)
         elif patient_choice == '2':
             new_password = input("Enter new password: ").strip()
             user.update_password(new_password)
-        elif patient_choice == '3':
+        elif patient_choice == '3':  # new funcs to change email
+            new_email = input("Enter new email: ").strip()
+            if user.update_info(new_email=new_email):  
+                print("Email updated successfully!")
+            else:
+                print("Failed to update email. Try again.")
+        elif patient_choice == '4':  # new option for emergency email
+            new_emergency_email = input("Enter new emergency email: ").strip()
+            if user.update_info(new_emergency_email=new_emergency_email):
+                print("Emergency email updated successfully!")
+            else:
+                print("Failed to update emergency email. Try again.")
+        elif patient_choice == '5':
             print("Medical records feature coming soon...")
 
-        elif patient_choice == '4':  # Book/Cancel appointment
+        elif patient_choice == '6':  # Book/Cancel appointment
             print("\nBook/Cancel Appointment:")
             print("1. Book an appointment")
             print("2. Cancel an appointment")
@@ -51,15 +64,15 @@ def handle_patient_menu(user):
                     print("Failed to cancel the appointment.")
             else:
                 print("Invalid choice.")
-        elif patient_choice == '5':
+        elif patient_choice == '7':
             confirm = input("Confirm delete account? (yes/no): ")
             if confirm.lower() == "yes":
                 user.delete_from_csv()
                 print("Account deleted successfully.")
                 break
-        elif patient_choice == '6':
+        elif patient_choice == '8':
             handle_mood_tracking(user)
-        elif patient_choice == '7':
+        elif patient_choice == '9':
             print("Logging out.")
             break
         else:

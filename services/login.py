@@ -51,10 +51,6 @@ def handle_login():
                 if not verify_staff("admin"):
                     return False
                 handle_admin_menu(user)
-            case "doctor":
-                if not verify_staff("doctor"):
-                    return False
-                handle_doctor_menu(user)
             case "mhwp":
                 if not verify_staff("mhwp"):
                     return False
