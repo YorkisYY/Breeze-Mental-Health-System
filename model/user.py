@@ -145,45 +145,57 @@ class User:
             return False
 
         try:
+
             df = pd.read_csv(USER_DATA_PATH)
             
-            # Convert email columns to string type
-            df['email'] = df['email'].astype(str)
-            df['emergency_email'] = df['emergency_email'].astype(str)
+            df['email'] = df['email'].fillna("").astype(str)
+            df['emergency_email'] = df['emergency_email'].fillna("").astype(str)
             
+
             if target_username not in df['username'].values:
                 print("Target user does not exist.")
                 return False
 
-            target_user = df[df['username'] == target_username].iloc[0]
-            
+
+            user_index = df[df['username'] == target_username].index[0]
+
+
+            if new_username and new_username != target_username:
+                if new_username in df['username'].values:
+                    print("New username is already in use.")
+                    return False
+                df.loc[user_index, 'username'] = new_username
+                print(f"Username updated to '{new_username}'.")
+
             if new_password:
                 hashed_new_password = self.hash_password(new_password)
-                if hashed_new_password == target_user['password']:
-                    print("New password same as current.")
+                if hashed_new_password == df.loc[user_index, 'password']:
+                    print("New password is the same as the current one.")
                     return False
-                df.loc[df['username'] == target_username, 'password'] = hashed_new_password
-                
-            if new_username:
-                if new_username in df['username'].values:
-                    print("Username already in use.")
-                    return False
-                df.loc[df['username'] == target_username, 'username'] = new_username
+                df.loc[user_index, 'password'] = hashed_new_password
+                print("Password updated successfully.")
 
-            if new_email:
-                df.loc[df['username'] == target_username, 'email'] = new_email
-                
-            if new_emergency_email:
-                df.loc[df['username'] == target_username, 'emergency_email'] = new_emergency_email
 
-            df.to_csv(USER_DATA_PATH, index=False,na_rep='')
-            print("User updated successfully by admin.")
+            if new_email and new_email != df.loc[user_index, 'email']:
+                df.loc[user_index, 'email'] = new_email
+                print(f"Email updated to '{new_email}'.")
+
+            if new_emergency_email and new_emergency_email != df.loc[user_index, 'emergency_email']:
+                df.loc[user_index, 'emergency_email'] = new_emergency_email
+                print(f"Emergency email updated to '{new_emergency_email}'.")
+
+
+            df.to_csv(USER_DATA_PATH, index=False, na_rep="")
+            print("Admin user update completed successfully.")
             return True
 
+        except FileNotFoundError:
+            print("User data file not found.")
+            return False
         except Exception as e:
             print(f"Error updating user: {str(e)}")
             return False
-
+        
     def book_appointment(self, mhwp_username, date, start_time, end_time, schedule_file, appointment_file):
         """
         Allow a patient to book an appointment with an MHW.

@@ -7,7 +7,7 @@ def handle_admin_menu(user):
         print("4. View all the appointments")
         print("5. Logout")
 
-        admin_choice = input("Select an option (1-4): ")
+        admin_choice = input("Select an option (1-5): ")
         if admin_choice == '1':
             target_username = input("Enter the username to update: ")
             new_username = input("Enter the new username (blank to keep): ").strip()
