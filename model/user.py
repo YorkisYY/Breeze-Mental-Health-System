@@ -196,25 +196,50 @@ class User:
             print(f"Error updating user: {str(e)}")
             return False
         
-    def book_appointment(self, mhwp_username, date, start_time, end_time, schedule_file, appointment_file):
+    def book_appointment(self, mhwp_username, date, start_time, end_time, user_data_file, schedule_file, appointment_file):
         """
         Allow a patient to book an appointment with an MHW.
-        Checks for availability based on existing appointments and ensures no overlapping time slots.
+        If schedule is empty, allow any time slot unless it conflicts with existing appointments.
         """
         if self.role != "patient":
             print("Only patients can book appointments.")
             return False
 
         try:
-            # Ensure the MHW exists (if schedule is empty, allow any MHW)
+            # Verify MHW existence and role from user_data.csv
             try:
-                schedule = pd.read_csv(schedule_file)
-                if not schedule.empty and mhwp_username not in schedule['mhwp_username'].unique():
-                    print(f"Error: MHW '{mhwp_username}' does not exist or has no available schedule.")
+                user_data = pd.read_csv(user_data_file)
+                mhwp_record = user_data[(user_data['username'] == mhwp_username) & (user_data['role'] == 'mhwp')]
+                if mhwp_record.empty:
+                    print(f"Error: MHW '{mhwp_username}' does not exist or is not a valid MHW.")
                     return False
             except FileNotFoundError:
-                # If schedule file does not exist, assume no restrictions
-                schedule = pd.DataFrame(columns=['mhwp_username', 'date', 'start_time', 'end_time'])
+                print("Error: user_data.csv file not found.")
+                return False
+
+            # Check MHW schedule in mhwp_schedule.csv (allow any time if schedule is empty)
+            try:
+                schedule = pd.read_csv(schedule_file)
+                if not schedule.empty:
+                    mhwp_schedule = schedule[(schedule['mhwp_username'] == mhwp_username) & (schedule['date'] == date)]
+                    if not mhwp_schedule.empty:
+                        # Convert times to comparable formats
+                        mhwp_schedule['start_time'] = pd.to_datetime(mhwp_schedule['start_time'], format='%H:%M')
+                        mhwp_schedule['end_time'] = pd.to_datetime(mhwp_schedule['end_time'], format='%H:%M')
+                        input_start_time = pd.to_datetime(start_time, format='%H:%M')
+                        input_end_time = pd.to_datetime(end_time, format='%H:%M')
+
+                        # Check for overlapping time slots in the schedule
+                        overlapping_slot = mhwp_schedule[
+                            ((mhwp_schedule['start_time'] <= input_start_time) & (mhwp_schedule['end_time'] > input_start_time)) |
+                            ((mhwp_schedule['start_time'] < input_end_time) & (mhwp_schedule['end_time'] >= input_end_time)) |
+                            ((mhwp_schedule['start_time'] >= input_start_time) & (mhwp_schedule['end_time'] <= input_end_time))
+                        ]
+                        if not overlapping_slot.empty:
+                            print("The selected time slot is not available in the MHW's schedule. Please choose another.")
+                            return False
+            except FileNotFoundError:
+                print("Warning: mhwp_schedule.csv not found. Assuming no schedule restrictions.")
 
             # Check for conflicting appointments
             try:
@@ -229,8 +254,8 @@ class User:
             input_start_time = pd.to_datetime(start_time, format='%H:%M')
             input_end_time = pd.to_datetime(end_time, format='%H:%M')
 
-            # Check for overlapping time slots
-            overlapping_slot = appointments[
+            # Check for overlapping time slots in appointments
+            overlapping_appointment = appointments[
                 (appointments['mhwp_username'] == mhwp_username) &
                 (appointments['date'] == date) &
                 (
@@ -239,11 +264,11 @@ class User:
                     ((appointments['start_time'] >= input_start_time) & (appointments['end_time'] <= input_end_time))
                 )
             ]
-            if not overlapping_slot.empty:
+            if not overlapping_appointment.empty:
                 print("The selected time slot overlaps with an existing appointment. Please choose another.")
                 return False
 
-            # If no conflicts, proceed to book the appointment
+            # Record the appointment in appointments.csv
             appointment = {
                 "patient_username": self.username,
                 "mhwp_username": mhwp_username,
@@ -253,7 +278,6 @@ class User:
                 "status": "pending"
             }
             appointment_df = pd.DataFrame([appointment])
-            # Write the new appointment to the file
             try:
                 appointment_df.to_csv(appointment_file, mode='a', header=not pd.read_csv(appointment_file).shape[0], index=False)
             except FileNotFoundError:

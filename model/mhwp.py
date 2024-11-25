@@ -4,7 +4,7 @@ from os.path import exists
 from datetime import datetime, timedelta
 import calendar
 
-from notification import send_email_notification, get_email_by_username
+from utils.notification import send_email_notification, get_email_by_username
 
 def list_appointments_for_mhw(mhw_username, file_path):
     """List appointments for the currently logged-in MHW"""

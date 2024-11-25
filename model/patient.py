@@ -1,6 +1,6 @@
 import os
 from services.mood_tracking import MoodEntry
-from notification import send_email_notification, get_email_by_username
+from utils.notification import send_email_notification, get_email_by_username
 
 def handle_patient_menu(user):
     while True:
