@@ -1,3 +1,10 @@
+## Seventh Commit
+----------
+**CHAO-WEI : 2024_11_25 11:58**
+### Fix up the bug of the previous commit related to logout within admin and mhwp, and modify the code of mhwp.py
+1.remove the doctor.py, as the role is not needed 
+2.remove the code related to doctor which would create bugs.
+
 ## Sixth Commit
 ----------
 **Arthur Hou: 2024_11_25 02:48**
@@ -30,14 +37,14 @@
 
 ## Fourth Commit
 ----------
-**York Tseng:**
+**CHAO-WEI:**
 
 - 1. Added roles of MHWP, Doctor into menu
 - 2. Change the entire frame
 
 ## Third Commit
 ----------
-**York Tseng:**
+**CHAO-WEI:**
 
 - 1. Added the admin function which can allow admin to manage other users's data such as delete, update.
 - 2. user now can cancel their own account, and the admin can delete the user's data.
@@ -50,7 +57,7 @@
 
 ## Second Commit
 ----------
-**York Tseng:**
+**CHAO-WEI:**
 
 - 1. Removed the GUI file as we don't want to use it.
 - 2. Created the basic functionality of the program in `user` and implemented the entry logic in the main functionality.
@@ -60,7 +67,7 @@
 **Date:** 2024.11.14.1:04
 ## First commit
 ----------
-**York Tseng:**
+**CHAO-WEI:**
 
 - 1. Create the project on GitHub. Commit the starter code from moodle.
 

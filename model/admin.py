@@ -5,7 +5,7 @@ def handle_admin_menu(user):
         print("2. Delete Another User")
         print("3. View System Statistics")
         print("4. View all the appointment")
-        print("4. Logout")
+        print("5. Logout")
 
         admin_choice = input("Select an option (1-4): ")
         if admin_choice == '1':
@@ -18,7 +18,7 @@ def handle_admin_menu(user):
             user.admin_delete_user(target_username)
         elif admin_choice == '3':
             print("System statistics feature coming soon...")
-        elif admin_choice == '5':  # View all appointments
+        elif admin_choice == '4':  # View all appointments
             user.view_appointments("data/appointments.csv")
 
         elif admin_choice == '5':

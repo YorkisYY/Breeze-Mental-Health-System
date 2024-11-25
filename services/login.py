@@ -3,7 +3,6 @@
 import pandas as pd
 from model.user import User  
 from model.admin import handle_admin_menu
-from model.doctor import handle_doctor_menu
 from model.mhwp import handle_mhwp_menu
 from model.patient import handle_patient_menu
 

@@ -22,17 +22,15 @@ def register_user():
     # Display available roles for the user to select
     print("\nAvailable roles:")
     print("1. Patient")  
-    print("2. Doctor")
-    print("3. Mental Health Wellbeing Personnel")
-    print("4. Admin")
+    print("2. Mental Health Wellbeing Personnel")
+    print("3. Admin")
     role_choice = input("\nSelect role (1-4): ").strip()
 
     # Mapping role choices to their corresponding role strings
     roles = {
         "1": "patient",
-        "2": "doctor",
-        "3": "mhwp",  # Mental Health Worker
-        "4": "admin"
+        "2": "mhwp",  # Mental Health Worker
+        "3": "admin"
     }
 
     # Validate the role choice
@@ -48,7 +46,7 @@ def register_user():
         return True
 
     # For special roles, require a verification code
-    if role in ["admin", "doctor", "mhwp"]:
+    if role in ["admin", "mhwp"]:
         verification_code = input(f"Enter {role} registration code: ").strip()
         # Verify the code (currently set to "0000" for all roles)
         if verification_code != "0000":
