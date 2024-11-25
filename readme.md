@@ -1,3 +1,10 @@
+## Eigth Commit
+----------
+**CHAO-WEI : 2024_11_25 18:05**
+### add up initial functions for mhwp calender and mhwp and debugs
+1. add the function for mhwp calender
+
+
 ## Seventh Commit
 ----------
 **CHAO-WEI : 2024_11_25 11:58**
