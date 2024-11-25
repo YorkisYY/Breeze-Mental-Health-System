@@ -1,13 +1,15 @@
-from services.registration import register_user, initialize_csv
+from services.registration import register_user
 from services.login import handle_login
 import os
 from utils.display_banner import display_banner
 
+# # Create data directory if it doesn't exist
+# DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+# if not os.path.exists(DATA_DIR):
+#     os.makedirs(DATA_DIR)
 
-# data directory and Initialize CSV file if it doesn't exist
-FILE_PATH = "data\\patient_data.csv"
-MOOD_DATA_PATH = "data\\mood_data.csv"
-initialize_csv(FILE_PATH)
+# # CSV file directory
+# USER_FILE_PATH = os.path.join(DATA_DIR, 'user_data.csv')
 
 def handle_exit():
     print("Exiting the system now.")
@@ -30,8 +32,8 @@ def main():
     choice = show_menu() # show original login choice.
     
     menu_actions = {
-        '1': lambda: register_user(FILE_PATH),
-        '2': lambda: handle_login(FILE_PATH),
+        '1': lambda: register_user(),
+        '2': lambda: handle_login(),
         '3': lambda: handle_exit(),
     }
     #@mikrostiff: break on false

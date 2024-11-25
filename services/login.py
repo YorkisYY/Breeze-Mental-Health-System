@@ -7,7 +7,8 @@ from model.doctor import handle_doctor_menu
 from model.mhwp import handle_mhw_menu
 from model.patient import handle_patient_menu
 
-def login_user(file_path):
+
+def login_user():
    """Authenticate and login user.
    Args:
        file_path: Path to user data CSV file
@@ -21,7 +22,7 @@ def login_user(file_path):
    user = User(username, password, "temp")
    
    # Verify credentials
-   if user.load_from_csv(file_path):
+   if user.load_from_csv():
        hashed_password = user.hash_password(password) 
        if user.password == hashed_password:
            print(f"Login successful! Welcome, {user.username}!")
@@ -42,25 +43,25 @@ def verify_staff(role):
         print("Verification failed. Access denied.")
         return False
 
-def handle_login(file_path):
-    user = login_user(file_path)
+def handle_login():
+    user = login_user()
     if user:
-        print(f"Login successful! You are logged in as {user.role}.")
+        print(f"You are logged in as {user.role}.")
         match user.role:
             case "admin":
                 if not verify_staff("admin"):
                     return False
-                handle_admin_menu(user, file_path)
+                handle_admin_menu(user)
             case "doctor":
                 if not verify_staff("doctor"):
                     return False
-                handle_doctor_menu(user, file_path)
+                handle_doctor_menu(user)
             case "mhw":
                 if not verify_staff("mhw"):
                     return False
-                handle_mhw_menu(user, file_path)
+                handle_mhw_menu(user)
             case "patient":
-                handle_patient_menu(user, file_path)
+                handle_patient_menu(user)
     return True
 
     

@@ -1,4 +1,9 @@
-def handle_doctor_menu(user, file_path):
+def handle_doctor_menu(user):
+    '''Handle the doctor related pages
+    
+    '''
+    # # import doctor related data file path.
+    # from config import OTHER_DATA_PATH
     while True:
         print("\nDoctor Options:")
         print("1. View Patient Records")

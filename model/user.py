@@ -1,5 +1,6 @@
 import pandas as pd
 import hashlib
+from config import USER_DATA_PATH
 
 class User:
     def __init__(self, username, password, role):
@@ -13,20 +14,20 @@ class User:
         """Hash password using SHA-256."""
         return hashlib.sha256(password.encode()).hexdigest()
 
-    def save_to_csv(self, file_path):
+    def save_to_csv(self):
         """Save user information to CSV, ensuring no duplicate usernames."""
-        if self.check_if_exists(file_path):
+        if self.check_if_exists():
             print("Username has been used. Please choose a different one.")
             return False
         user_data = {"username": [self.username], "password": [self.password], "role": [self.role]}
         df = pd.DataFrame(user_data)
-        df.to_csv(file_path, mode='a', index=False, header=False)
+        df.to_csv(USER_DATA_PATH, mode='a', index=False, header=False)
         return True
 
-    def load_from_csv(self, file_path):
+    def load_from_csv(self):
         """Load user info from CSV to check if user exists."""
         try:
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(USER_DATA_PATH)
             user_info = df[df['username'] == self.username]
             if not user_info.empty:
                 self.password = user_info.iloc[0]['password']
@@ -37,22 +38,22 @@ class User:
             print("User data file not found.")
             return False
 
-    def check_if_exists(self, file_path):
+    def check_if_exists(self):
         """Check if user exists in CSV."""
         try:
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(USER_DATA_PATH)
             return self.username in df['username'].values
         except FileNotFoundError:
             return False
 
-    def update_info(self, file_path, new_username=None, new_password=None):
+    def update_info(self, new_username=None, new_password=None):
         """Update user information if changes are made."""
-        if not self.load_from_csv(file_path):
+        if not self.load_from_csv():
             print("User does not exist.")
             return False
 
         try:
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(USER_DATA_PATH)
 
             if new_username == self.username:
                 print("New username same as current. No changes made.")
@@ -74,7 +75,7 @@ class User:
                 df.loc[df['username'] == self.username, 'password'] = hashed_new_password
                 self.password = hashed_new_password
 
-            df.to_csv(file_path, index=False)
+            df.to_csv(USER_DATA_PATH, index=False)
             print("User information updated successfully.")
             return True
 
@@ -82,14 +83,14 @@ class User:
             print("User data file not found.")
             return False
 
-    def update_password(self, file_path, new_password):
+    def update_password(self, new_password):
         """Update user password."""
-        if not self.load_from_csv(file_path):
+        if not self.load_from_csv():
             print("User does not exist.")
             return False
 
         try:
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(USER_DATA_PATH)
 
             hashed_new_password = self.hash_password(new_password)
             if hashed_new_password == self.password:
@@ -99,7 +100,7 @@ class User:
             df.loc[df['username'] == self.username, 'password'] = hashed_new_password
             self.password = hashed_new_password
 
-            df.to_csv(file_path, index=False)
+            df.to_csv(USER_DATA_PATH, index=False)
             print("User password updated successfully.")
             return True
 
@@ -107,24 +108,24 @@ class User:
             print("User data file not found.")
             return False
 
-    def delete_from_csv(self, file_path):
+    def delete_from_csv(self):
         """Delete user from CSV file."""
         try:
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(USER_DATA_PATH)
             df = df[df['username'] != self.username]
-            df.to_csv(file_path, index=False)
+            df.to_csv(USER_DATA_PATH, index=False)
             print("User deleted successfully.")
         except FileNotFoundError:
             print("User data file not found.")
 
-    def admin_update_user(self, file_path, target_username, new_username=None, new_password=None):
+    def admin_update_user(self, target_username, new_username=None, new_password=None):
         """Admin method to update other users."""
         if self.role != "admin":
             print("Only admin users can update others.")
             return False
 
         try:
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(USER_DATA_PATH)
             if target_username not in df['username'].values:
                 print("Target user does not exist.")
                 return False
@@ -149,7 +150,7 @@ class User:
             if new_password:
                 df.loc[df['username'] == target_username, 'password'] = hashed_new_password
 
-            df.to_csv(file_path, index=False)
+            df.to_csv(USER_DATA_PATH, index=False)
             print("User updated successfully by admin.")
             return True
 
@@ -157,20 +158,20 @@ class User:
             print("User data file not found.")
             return False
 
-    def admin_delete_user(self, file_path, target_username):
+    def admin_delete_user(self, target_username):
         """Admin method to delete other users."""
         if self.role != "admin":
             print("Only admin users can delete others.")
             return False
 
         try:
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(USER_DATA_PATH)
             if target_username not in df['username'].values:
                 print("Target user does not exist.")
                 return False
 
             df = df[df['username'] != target_username]
-            df.to_csv(file_path, index=False)
+            df.to_csv(USER_DATA_PATH, index=False)
             print(f"User '{target_username}' deleted by admin.")
             return True
 

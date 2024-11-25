@@ -1,7 +1,8 @@
 import os
 from services.mood_tracking import MoodEntry
 
-def handle_patient_menu(user, file_path):
+def handle_patient_menu(user):
+
     while True:
         print("\nPatient Options:")
         print("1. Update Personal Info")
@@ -15,10 +16,10 @@ def handle_patient_menu(user, file_path):
         patient_choice = input("Select an option (1-7): ")
         if patient_choice == '1':
             new_username = input("Enter new username: ").strip()
-            user.update_info(file_path, new_username=new_username)
+            user.update_info(new_username=new_username)
         elif patient_choice == '2':
             new_password = input("Enter new password: ").strip()
-            user.update_password(file_path, new_password)
+            user.update_password(new_password)
         elif patient_choice == '3':
             print("Medical records feature coming soon...")
         elif patient_choice == '4':
@@ -26,7 +27,7 @@ def handle_patient_menu(user, file_path):
         elif patient_choice == '5':
             confirm = input("Confirm delete account? (yes/no): ")
             if confirm.lower() == "yes":
-                user.delete_from_csv(file_path)
+                user.delete_from_csv()
                 print("Account deleted successfully.")
                 break
         elif patient_choice == '6':
@@ -50,9 +51,7 @@ def handle_mood_tracking(user):
     if color_choice in ["1", "2", "3", "4", "5"]:
         comments = input("Would you like to add any comments about your mood? ").strip()
         mood_entry = MoodEntry(user.username, color_choice, comments)
-        DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
-        MOOD_DATA_PATH = os.path.join(DATA_DIR, 'mood_data.csv')
-        mood_entry.save_mood_entry(MOOD_DATA_PATH)
+        mood_entry.save_mood_entry()
         
         display_mood_history(user.username)
     else:
@@ -60,6 +59,6 @@ def handle_mood_tracking(user):
 
 def display_mood_history(username):
     print("\nYour recent mood history:")
-    history = MoodEntry.get_user_mood_history("mood_data.csv", username)
+    history = MoodEntry.get_user_mood_history(username)
     if not history.empty:
         print(history[['timestamp', 'color_code', 'comments']].head())
