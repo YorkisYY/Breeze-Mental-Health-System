@@ -1,5 +1,6 @@
 import os
 from services.mood_tracking import MoodEntry
+from notification import send_email_notification, get_email_by_username
 
 def handle_patient_menu(user):
     while True:
@@ -51,6 +52,19 @@ def handle_patient_menu(user):
 
                 if user.book_appointment(mhwp_username, date, start_time, end_time, "data/mhwp_schedule.csv", "data/appointments.csv"):
                     print("Appointment booked successfully!")
+                    # Notify MHW about the booking
+                    mhwp_email = get_email_by_username(mhwp_username)
+                    if mhwp_email:
+                        subject = "New Appointment Booked"
+                        message = (
+                            f"Dear {mhwp_username},\n\n"
+                            f"A new appointment has been booked by {user.username} on {date} at {start_time} - {end_time}.\n\n"
+                            "Regards,\nMental Health Support System"
+                        )
+                        send_email_notification(mhwp_email, subject, message)
+                        print("Notification email sent to the MHW.")
+                    else:
+                        print("Error: Could not retrieve MHW's email address.")
                 else:
                     print("Failed to book the appointment. Try again.")
 
@@ -60,6 +74,19 @@ def handle_patient_menu(user):
 
                 if user.manage_appointments("data/appointments.csv", "cancel", user.username, date, start_time):
                     print("Appointment cancelled successfully!")
+                    # Notify MHW about the cancellation
+                    mhwp_email = get_email_by_username(mhwp_username)
+                    if mhwp_email:
+                        subject = "Appointment Cancelled"
+                        message = (
+                            f"Dear {mhwp_username},\n\n"
+                            f"The appointment with {user.username} on {date} at {start_time} has been cancelled by the patient.\n\n"
+                            "Regards,\nMental Health Support System"
+                        )
+                        send_email_notification(mhwp_email, subject, message)
+                        print("Notification email sent to the MHW.")
+                    else:
+                        print("Error: Could not retrieve MHW's email address.")
                 else:
                     print("Failed to cancel the appointment.")
             else:
