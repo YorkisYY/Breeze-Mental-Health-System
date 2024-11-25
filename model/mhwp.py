@@ -1,4 +1,4 @@
-def handle_mhw_menu(user, file_path):
+def handle_mhw_menu(user):
     while True:
         print("\nMental Health Worker Options:")
         print("1. View Patient Records")

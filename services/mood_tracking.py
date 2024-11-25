@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime
+from config import MOOD_DATA_PATH
 
 class MoodEntry:
     def __init__(self, username, color_code, comments, timestamp=None):
@@ -17,7 +18,7 @@ class MoodEntry:
             "5": "Red"
         }
 
-    def save_mood_entry(self, file_path):
+    def save_mood_entry(self):
         """Save mood entry to CSV file"""
         try:
             # Create DataFrame with the new entry
@@ -30,12 +31,12 @@ class MoodEntry:
 
             # Append to existing file or create new one
             try:
-                df = pd.read_csv(file_path)
+                df = pd.read_csv(MOOD_DATA_PATH)
                 df = pd.concat([df, new_entry], ignore_index=True)
             except FileNotFoundError:
                 df = new_entry
 
-            df.to_csv(file_path, index=False)
+            df.to_csv(MOOD_DATA_PATH, index=False)
             print("Mood entry saved successfully!")
             return True
 
@@ -44,10 +45,10 @@ class MoodEntry:
             return False
 
     @staticmethod
-    def get_user_mood_history(file_path, username):
+    def get_user_mood_history(username):
         """Retrieve mood history for a specific user"""
         try:
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(MOOD_DATA_PATH)
             user_moods = df[df['username'] == username]
             return user_moods.sort_values('timestamp', ascending=False)
         except FileNotFoundError:
