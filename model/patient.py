@@ -1,9 +1,8 @@
 import os
 from services.mood_tracking import MoodEntry
 from services.meditation import handle_search_meditation
-from services.comment import add_comment
-from services.questionnaire import submit_questionnaire
-from services.questionnaire import remind_to_complete_questionnaire
+from services.comment import add_comment,get_mhwp_for_patient
+from services.questionnaire import submit_questionnaire,remind_to_complete_questionnaire
 from services.journaling import enter_journaling
 from utils.notification import send_email_notification, get_email_by_username
 
@@ -21,13 +20,14 @@ def handle_patient_menu(user):
         print("6. Book/Cancel Appointment")
         print("7. Enter a Journaling")
         print("8. Submit a Mood Questionnaire")
-        print("9. Leave a comment for your MHWP")
+        print("9. Leave a Comment for Your MHWP")
         print("10. Explore Meditation Resources")
         print("11. Delete Account")
         print("12. Track Mood")
         print("13. Logout")
         
         patient_choice = input("Select an option (1-13): ")
+        
         if patient_choice == '1':
             new_username = input("Enter new username: ").strip()
             user.update_info(new_username=new_username)
@@ -111,17 +111,23 @@ def handle_patient_menu(user):
         elif patient_choice == '7':  # Journaling
             enter_journaling(user.username)
                 
-        elif patient_choice == '8':  # 心理问卷
+        elif patient_choice == '8':  # Questionnaire
             submit_questionnaire(user.username)      
     
-        elif patient_choice == '9':  # 添加评论
-            # 获取患者和 MHWP 的用户名（假设可以从 user 和 appointment 关联）
-            mhwp_username = "dr_green"  # 从预约文件中获取
-            comment = input("Enter your comment for your MHW: ").strip()
-            add_comment(user.username, mhwp_username, comment) 
+        elif patient_choice == '9':  # Comment
+            mhwp_username = get_mhwp_for_patient(user.username)
+            if mhwp_username:
+                try:
+                    rating = float(input("Enter a rating for your MHWP (0-5): ").strip())
+                    comment = input("Enter your comment for your MHWP: ").strip()
+                    add_comment(user.username, mhwp_username, rating, comment)
+                except ValueError:
+                    print("Invalid input. Rating must be a number.")
+            else:
+                print("Unable to find your MHWP. Comment not saved.")
                        
-        elif patient_choice == '10':  # 新增处理逻辑
-            handle_search_meditation()  # 调用冥想资源功能
+        elif patient_choice == '10':  # Meditation
+            handle_search_meditation()  
             
         elif patient_choice == '11':
             confirm = input("Confirm delete account? (yes/no): ")
@@ -136,6 +142,7 @@ def handle_patient_menu(user):
         elif patient_choice == '13':
             print("Logging out.")
             break
+        
         else:
             print("Invalid choice, please try again.")
 

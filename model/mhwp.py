@@ -143,7 +143,7 @@ def handle_mhwp_menu(user):
         print("3. Manage Appointments")
         print("4. Set Up Your Availability")
         print("5. View Your Current Schedule")
-        print("6. View comments from your patients")
+        print("6. View Comments from Your Patients")
         print("7. Logout")
 
         mhwp_choice = input("Select an option (1-7): ").strip()
@@ -223,7 +223,7 @@ def handle_mhwp_menu(user):
         elif mhwp_choice == '5':  # View current schedule
             display_current_schedule(user.username, "data/mhwp_schedule.csv")
 
-        elif mhwp_choice == '6':  # 查看评论
+        elif mhwp_choice == '6':  # View comments
             view_comments(user)
 
         elif mhwp_choice == '7':  # Logout

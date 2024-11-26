@@ -3,15 +3,21 @@ from datetime import datetime
 
 COMMENTS_FILE = "data/comments.csv"
 
-def add_comment(patient_username, mhwp_username, comment):
+def add_comment(patient_username, mhwp_username, rating, comment):
     """
-    添加评论到评论文件。
+    添加患者对 MHWP 的评价（评分和评论）到评论文件。
     """
     try:
+        # 验证评分范围
+        if not (0 <= rating <= 5):
+            print("Invalid rating. Please provide a rating between 0 and 5.")
+            return
+
         # 准备评论数据
         comment_data = {
             "patient_username": patient_username,
             "mhwp_username": mhwp_username,
+            "rating": rating,
             "comment": comment,
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
@@ -19,7 +25,7 @@ def add_comment(patient_username, mhwp_username, comment):
         # 读取或创建评论文件
         try:
             comments_df = pd.read_csv(COMMENTS_FILE)
-            comments_df = comments_df.append(comment_data, ignore_index=True)
+            comments_df = pd.concat([comments_df, pd.DataFrame([comment_data])], ignore_index=True)
         except FileNotFoundError:
             # 如果文件不存在，则创建新文件
             comments_df = pd.DataFrame([comment_data])
@@ -48,13 +54,30 @@ def view_comments(mhwp_username):
         else:
             print(f"\nComments for MHWP '{mhwp_username}':")
             print("------------------------------------------------------------------")
-            print("Patient      | Comment                               | Timestamp")
+            print("Patient      | Rating | Comment                               | Timestamp")
             print("------------------------------------------------------------------")
             for _, row in mhwp_comments.iterrows():
-                print(f"{row['patient_username']:<12} | {row['comment']:<40} | {row['timestamp']}")
+                print(f"{row['patient_username']:<12} | {row['rating']:<6} | {row['comment']:<40} | {row['timestamp']}")
             print("------------------------------------------------------------------")
 
     except FileNotFoundError:
         print("No comments file found. Please initialize it first.")
     except Exception as e:
         print(f"Error viewing comments: {e}")
+
+
+def get_mhwp_for_patient(patient_username, file_path="data/appointments.csv"):
+    """
+    从 appointments.csv 文件中获取患者的 MHWP 用户名。
+    """
+    try:
+        appointments = pd.read_csv(file_path)
+        mhwp_record = appointments[appointments["patient_username"] == patient_username]
+        if not mhwp_record.empty:
+            return mhwp_record.iloc[0]["mhwp_username"]
+        else:
+            print("No MHWP found for this patient.")
+            return None
+    except FileNotFoundError:
+        print(f"Error: File {file_path} not found.")
+        return None
