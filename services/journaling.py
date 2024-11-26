@@ -24,7 +24,7 @@ def enter_journaling(username):
     # 保存到 journaling.csv
     try:
         journal_df = pd.read_csv(JOURNAL_FILE)
-        journal_df = journal_df.append(new_entry, ignore_index=True)
+        journal_df = pd.concat([journal_df, pd.DataFrame([new_entry])], ignore_index=True)
     except FileNotFoundError:
         journal_df = pd.DataFrame([new_entry])
 
