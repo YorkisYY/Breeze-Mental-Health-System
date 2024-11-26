@@ -9,10 +9,11 @@ def send_email_notification(recipient_email, subject, message):
     """
     try:
         # Email configuration
-        sender_email = "your_email@example.com"  # Replace with your email
-        sender_password = "your_password"        # Replace with your email password
-        smtp_server = "smtp.example.com"         # Replace with your SMTP server
-        smtp_port = 587                          # Common SMTP port for TLS
+        smtp_server = "smtp.gmail.com"
+        smtp_port = 587
+        sender_email = "your-email@gmail.com"
+        sender_password = "your-email-password"  
+
 
         # Create the email
         msg = MIMEMultipart()
