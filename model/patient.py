@@ -1,5 +1,6 @@
 import os
 from services.mood_tracking import MoodEntry
+from services.meditation import handle_search_meditation
 from utils.notification import send_email_notification, get_email_by_username
 
 def handle_patient_menu(user):
@@ -11,9 +12,11 @@ def handle_patient_menu(user):
         print("4. Change emergency email")
         print("5. View Medical Records")
         print("6. Book/Cancel Appointment")
-        print("7. Delete Account")
-        print("8. Track Mood")
-        print("9. Logout")
+        print("7. Comment on Your MHWP")
+        print("8. Explore Meditation Resources")
+        print("9. Delete Account")
+        print("10. Track Mood")
+        print("11. Logout")
         
         patient_choice = input("Select an option (1-9): ")
         if patient_choice == '1':
@@ -91,15 +94,17 @@ def handle_patient_menu(user):
                     print("Failed to cancel the appointment.")
             else:
                 print("Invalid choice.")
-        elif patient_choice == '7':
+        elif patient_choice == '8':  # 新增处理逻辑
+            handle_search_meditation()  # 调用冥想资源功能
+        elif patient_choice == '9':
             confirm = input("Confirm delete account? (yes/no): ")
             if confirm.lower() == "yes":
                 user.delete_from_csv()
                 print("Account deleted successfully.")
                 break
-        elif patient_choice == '8':
+        elif patient_choice == '10':
             handle_mood_tracking(user)
-        elif patient_choice == '9':
+        elif patient_choice == '11':
             print("Logging out.")
             break
         else:
