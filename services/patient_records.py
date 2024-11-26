@@ -46,7 +46,7 @@ def patient_record_menu(patient_username):
     while True:
         print(f"\nPatient: {patient_username}")
         print("1. View Mood Tracker")
-        print("2. View Journaling Entries")
+        print("2. View Patient Journaling")
         print("3. View Mental Health Assessments")
         print("4. Add Record to Patient")
         print("5. Return to Main Menu")
@@ -55,7 +55,7 @@ def patient_record_menu(patient_username):
         if choice == "1":
             view_mood_tracker(patient_username)
         elif choice == "2":
-            view_journaling_entries(patient_username)
+            view_patient_journaling(patient_username)
         elif choice == "3":
             view_mental_health_assessments(patient_username)
         elif choice == "4":
@@ -83,20 +83,20 @@ def view_mood_tracker(patient_username):
         print("Mood Tracker file not found.")
 
 
-def view_journaling_entries(patient_username):
+def view_patient_journaling(patient_username):
     """
     查看患者的 Journaling 数据。
     """
-    print("\n2. Journaling Entries:")
+    print("\n2. Patient Journaling:")
     try:
         journal_df = pd.read_csv(JOURNAL_ENTRIES_FILE)
         patient_journal = journal_df[journal_df["username"] == patient_username]
         if not patient_journal.empty:
             print(patient_journal[["entry", "timestamp"]].to_string(index=False))
         else:
-            print("No journaling entries available.")
+            print("No journaling available.")
     except FileNotFoundError:
-        print("Journal Entries file not found.")
+        print("Journaling file not found.")
 
 
 def view_mental_health_assessments(patient_username):
@@ -115,11 +115,15 @@ def view_mental_health_assessments(patient_username):
         print("Mental Assessments file not found.")
 
 
-def add_patient_record(patient_username):
+
+def add_patient_record(patient_username, mhwp_username):
     """
-    为患者添加心理状态记录和备注。
+    为患者添加手动评价
     """
-    print("\n4. Add Patient Record:")
+    print("\nAdd Patient Record:")
+    
+    # 手动输入 condition
+    CONDITIONS = ["Anxiety", "Depression", "Autism", "Stress"]
     print("Select a mental condition to record:")
     for idx, condition in enumerate(CONDITIONS, start=1):
         print(f"{idx}. {condition}")
@@ -131,21 +135,26 @@ def add_patient_record(patient_username):
         print("Invalid selection.")
         return
 
+    # 手动输入 notes
     notes = input("Enter notes or additional details (optional): ").strip()
 
-    # 保存记录到 mental_assessments.csv
-    new_record = {
+    # 生成新评价数据
+    new_note = {
         "patient_username": patient_username,
-        "mhwp_username": None,  # 在此场景中不需要指定 MHWP
+        "mhwp_username": mhwp_username,
         "date": pd.Timestamp.now().strftime("%Y-%m-%d"),
-        "score": None,  # 不涉及分数
-        "status": condition
+        "condition": condition,
+        "notes": notes
     }
-    try:
-        assessments_df = pd.read_csv(MENTAL_ASSESSMENTS_FILE)
-        assessments_df = assessments_df.append(new_record, ignore_index=True)
-    except FileNotFoundError:
-        assessments_df = pd.DataFrame([new_record])
 
-    assessments_df.to_csv(MENTAL_ASSESSMENTS_FILE, index=False)
-    print("Patient record added successfully!")
+    # 保存记录到 patient_notes.csv
+    try:
+        notes_df = pd.read_csv("data/patient_notes.csv")
+        notes_df = notes_df.append(new_note, ignore_index=True)
+    except FileNotFoundError:
+        notes_df = pd.DataFrame([new_note])
+
+    notes_df.to_csv("data/patient_notes.csv", index=False)
+    print("Patient note added successfully!")
+
+

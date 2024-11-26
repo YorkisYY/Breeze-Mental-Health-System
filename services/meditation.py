@@ -1,6 +1,6 @@
 import pandas as pd
 
-def load_resources_from_file(file_path="resources.csv"):
+def load_resources_from_file(file_path="meditation_resources.csv"):
     """加载 CSV 文件并返回 DataFrame"""
     try:
         return pd.read_csv(file_path)
