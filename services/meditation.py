@@ -8,7 +8,6 @@ def load_resources_from_file(file_path="resources.csv"):
         print(f"Error: {file_path} not found.")
         return None
 
-
 def search_resources_from_file(df, keyword):
     """根据关键字在 DataFrame 中搜索资源"""
     matches = df[df["Keyword"].str.contains(keyword, case=False)]
@@ -17,6 +16,41 @@ def search_resources_from_file(df, keyword):
     else:
         return None
 
+# 模糊搜索工具
+def levenshtein_distance(s1, s2):
+    """计算两个字符串的 Levenshtein 距离"""
+    if len(s1) < len(s2):
+        return levenshtein_distance(s2, s1)
+
+    if len(s2) == 0:
+        return len(s1)
+
+    previous_row = range(len(s2) + 1)
+    for i, c1 in enumerate(s1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+
+    return previous_row[-1]
+
+def similarity_ratio(s1, s2):
+    """计算两个字符串的相似度（1 - Levenshtein 距离归一化）"""
+    max_len = max(len(s1), len(s2))
+    if max_len == 0:
+        return 1.0
+    return 1 - levenshtein_distance(s1, s2) / max_len
+
+def custom_fuzzy_search(keyword, choices, threshold=0.6):
+    """基于相似度的模糊搜索"""
+    matches = []
+    for choice in choices:
+        if similarity_ratio(keyword, choice) >= threshold:
+            matches.append(choice)
+    return matches
 
 # 定义类别和子选项
 CATEGORIES = {
@@ -109,7 +143,6 @@ def handle_needs_based_search(df):
 
         if sub_option in category["options"]:
             selected_option = category["options"][sub_option]
-            # 在资源中查找匹配的链接
             matches = df[df["Title"].str.contains(selected_option, case=False)]
             if not matches.empty:
                 print("\nHere are your resources:")
@@ -123,17 +156,30 @@ def handle_needs_based_search(df):
         print("Invalid category.")
 
 def handle_keyword_search(df):
-    """直接通过关键字搜索资源"""
+    """直接通过关键字搜索资源，支持模糊匹配"""
     while True:
         keyword = input("\nEnter a keyword to search for resources (or type 'exit' to return): ").strip().lower()
         if keyword == "exit":
             print("Returning to the previous menu.")
             break
 
-        result = search_resources_from_file(df, keyword)
-        if result is not None and not result.empty:
-            print("\nFound the following resources:")
-            for _, row in result.iterrows():
+        # 优先检查精确匹配
+        exact_matches = df[df["Keyword"] == keyword]
+        if not exact_matches.empty:
+            print("\nExact match found:")
+            for _, row in exact_matches.iterrows():
                 print(f"- {row['Title']}: {row['URL']}")
+            continue
+
+        # 如果没有精确匹配，进行模糊匹配
+        all_keywords = df["Keyword"].tolist()
+        fuzzy_matches = custom_fuzzy_search(keyword, all_keywords)
+
+        if fuzzy_matches:
+            print("\nHere are the closest matches:")
+            for match in fuzzy_matches:
+                result = df[df["Keyword"] == match]
+                for _, row in result.iterrows():
+                    print(f"- {row['Title']}: {row['URL']}")
         else:
             print(f"No resources found for '{keyword}'. Try another keyword.")

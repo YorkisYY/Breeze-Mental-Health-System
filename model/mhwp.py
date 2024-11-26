@@ -3,7 +3,7 @@ from os.path import exists
 
 from datetime import datetime, timedelta
 import calendar
-
+from services.comment import view_comments_for_mhwp
 from utils.notification import send_email_notification, get_email_by_username
 
 def list_appointments_for_mhw(mhw_username, file_path):
@@ -142,7 +142,8 @@ def handle_mhwp_menu(user):
         print("3. Manage Appointments")
         print("4. Set Up Your Availability")
         print("5. View Your Current Schedule")
-        print("6. Logout")
+        print("6. View comments from your patients")
+        print("7. Logout")
 
         mhwp_choice = input("Select an option (1-6): ").strip()
         
@@ -221,7 +222,10 @@ def handle_mhwp_menu(user):
         elif mhwp_choice == '5':  # View current schedule
             display_current_schedule(user.username, "data/mhwp_schedule.csv")
 
-        elif mhwp_choice == '6':  # Logout
+        elif mhwp_choice == '7':  # 查看评论
+            view_comments_for_mhwp(user)
+
+        elif mhwp_choice == '7':  # Logout
             print("Logout successful. Goodbye!")
             break
         
