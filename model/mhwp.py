@@ -1,8 +1,10 @@
 import csv
 from os.path import exists
+
 from datetime import datetime, timedelta
 import calendar
 
+from utils.notification import send_email_notification, get_email_by_username
 
 def list_appointments_for_mhw(mhw_username, file_path):
     """List appointments for the currently logged-in MHW"""
@@ -185,6 +187,20 @@ def handle_mhwp_menu(user):
                                     selected_appointment['start_time']
                                 )
                                 print(f"Appointment successfully {action}ed!")
+                                # Send email notification
+                                patient_email = get_email_by_username(selected_appointment['patient_username'])
+                                if patient_email:
+                                    subject = f"Your appointment has been {action}ed"
+                                    message = (
+                                        f"Dear {selected_appointment['patient_username']},\n\n"
+                                        f"Your appointment with {user.username} on {selected_appointment['date']} "
+                                        f"at {selected_appointment['start_time']} has been {action}ed.\n\n"
+                                        "Regards,\nMental Health Support System"
+                                    )
+                                    send_email_notification(patient_email, subject, message)
+                                    print(f"Notification email sent to {selected_appointment['patient_username']}.")
+                                else:
+                                    print("Error: Could not retrieve patient's email address.")
                             except Exception as e:
                                 print(f"Error processing appointment: {str(e)}")
                         else:
