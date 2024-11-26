@@ -3,10 +3,13 @@ from services.mood_tracking import MoodEntry
 from services.meditation import handle_search_meditation
 from services.comment import add_comment
 from services.questionnaire import submit_questionnaire
-
+from services.questionnaire import remind_to_complete_questionnaire
 from utils.notification import send_email_notification, get_email_by_username
 
 def handle_patient_menu(user):
+    
+    remind_to_complete_questionnaire(user.username)
+    
     while True:
         print("\nPatient Options:")
         print("1. Update Personal Info")

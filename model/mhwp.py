@@ -4,6 +4,7 @@ from os.path import exists
 from datetime import datetime, timedelta
 import calendar
 from services.comment import view_comments_for_mhwp
+from services.patient_records import view_patient_records
 from utils.notification import send_email_notification, get_email_by_username
 
 def list_appointments_for_mhw(mhw_username, file_path):
@@ -148,7 +149,7 @@ def handle_mhwp_menu(user):
         mhwp_choice = input("Select an option (1-6): ").strip()
         
         if mhwp_choice == '1':  # View Patient Records
-            print("This feature is coming soon...")
+            view_patient_records(user.username)
 
         elif mhwp_choice == '2':  # Add Counseling Notes
             print("This feature is coming soon...")
