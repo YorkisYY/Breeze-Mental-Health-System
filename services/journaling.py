@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import datetime
 
-JOURNAL_FILE = "data/journal_entries.csv"
+JOURNAL_FILE = "data/patient_journaling.csv"
 
 def enter_journaling(username):
     """
