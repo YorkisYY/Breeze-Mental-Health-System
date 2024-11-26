@@ -2,6 +2,7 @@ import os
 from services.mood_tracking import MoodEntry
 from services.meditation import handle_search_meditation
 from services.comment import add_comment
+from services.questionnaire import submit_questionnaire
 
 from utils.notification import send_email_notification, get_email_by_username
 
@@ -14,11 +15,12 @@ def handle_patient_menu(user):
         print("4. Change emergency email")
         print("5. View Medical Records")
         print("6. Book/Cancel Appointment")
-        print("7. Leave a comment for your MHWP")
-        print("8. Explore Meditation Resources")
-        print("9. Delete Account")
-        print("10. Track Mood")
-        print("11. Logout")
+        print("7. Submit a Mood Questionnaire")
+        print("8. Leave a comment for your MHWP")
+        print("9. Explore Meditation Resources")
+        print("10. Delete Account")
+        print("11. Track Mood")
+        print("12. Logout")
         
         patient_choice = input("Select an option (1-9): ")
         if patient_choice == '1':
@@ -96,22 +98,30 @@ def handle_patient_menu(user):
                     print("Failed to cancel the appointment.")
             else:
                 print("Invalid choice.")
-        elif patient_choice == '7':  # 添加评论
+                
+        elif patient_choice == '7':  # 心理问卷
+            submit_questionnaire(user.username)
+
+        elif patient_choice == '8':  # 添加评论
             # 获取患者和 MHWP 的用户名（假设可以从 user 和 appointment 关联）
             mhwp_username = "dr_green"  # 从预约文件中获取
             comment = input("Enter your comment for your MHW: ").strip()
-            add_comment(user.username, mhwp_username, comment)        
-        elif patient_choice == '8':  # 新增处理逻辑
+            add_comment(user.username, mhwp_username, comment) 
+                   
+        elif patient_choice == '9':  # 新增处理逻辑
             handle_search_meditation()  # 调用冥想资源功能
-        elif patient_choice == '9':
+            
+        elif patient_choice == '10':
             confirm = input("Confirm delete account? (yes/no): ")
             if confirm.lower() == "yes":
                 user.delete_from_csv()
                 print("Account deleted successfully.")
                 break
-        elif patient_choice == '10':
-            handle_mood_tracking(user)
+            
         elif patient_choice == '11':
+            handle_mood_tracking(user)
+            
+        elif patient_choice == '12':
             print("Logging out.")
             break
         else:
