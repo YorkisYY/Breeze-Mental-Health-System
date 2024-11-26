@@ -222,7 +222,7 @@ def handle_mhwp_menu(user):
         elif mhwp_choice == '5':  # View current schedule
             display_current_schedule(user.username, "data/mhwp_schedule.csv")
 
-        elif mhwp_choice == '7':  # 查看评论
+        elif mhwp_choice == '6':  # 查看评论
             view_comments_for_mhwp(user)
 
         elif mhwp_choice == '7':  # Logout
