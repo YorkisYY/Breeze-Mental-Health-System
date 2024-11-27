@@ -29,6 +29,7 @@ def handle_patient_menu(user):
         patient_choice = input("Select an option (1-13): ")
         
         if patient_choice == '1':
+<<<<<<< HEAD
             try:
                 new_username = input("Enter new username: ").strip()
                 if not new_username:
@@ -49,6 +50,11 @@ def handle_patient_menu(user):
                     print("Failed to update username. Please try again.")
             except Exception as e:
                 print(f"Error updating username: {str(e)}")
+=======
+            new_username = input("Enter new username: ").strip()
+            user.update_info(new_username=new_username)
+            
+>>>>>>> 05147549f0b7bc4e4b42355e50ed84cc0044c1c2
         elif patient_choice == '2':
             new_password = input("Enter new password: ").strip()
             user.update_password(new_password)

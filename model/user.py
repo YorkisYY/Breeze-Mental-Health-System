@@ -347,7 +347,11 @@ class User:
         except Exception as e:
             print(f"Error in admin update: {str(e)}")
             return False
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 05147549f0b7bc4e4b42355e50ed84cc0044c1c2
     def book_appointment(self, mhwp_username, date, start_time, end_time, user_data_file, schedule_file, appointment_file):
         """
         Allow a patient to book an appointment with an MHW.
