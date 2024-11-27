@@ -2,7 +2,7 @@ import pandas as pd
 
 APPOINTMENTS_FILE = "data/appointments.csv"
 MOOD_DATA_FILE = "data/mood_data.csv"
-JOURNAL_ENTRIES_FILE = "data/journal_entries.csv"
+JOURNAL_ENTRIES_FILE = "data/patient_journaling.csv"
 MENTAL_ASSESSMENTS_FILE = "data/mental_assessments.csv"
 
 CONDITIONS = ["Anxiety", "Depression", "Autism", "Stress"]
