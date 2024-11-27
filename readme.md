@@ -1,3 +1,23 @@
+## tenth Commit
+----------
+**Chao-Wei: 2024_11_27 21:19**
+1. Add up patient.csv for the future upcoming feature.
+2. the patient.csv would be simlutaneously updated with the user_data.csv.
+3. Add up the admin allocation function for patients.
+
+
+## ninth Commit 
+---------- 
+**Shaoxiong Bai: 2024_11_26 21:19** 
+### add up a series of new features
+1. Add up a new patient comment and MHWP reading feature. Particularly, add new comment.py and commnents.csv
+2. Add up a new patient journaling and MHWP reading feature. Particularly, add new journaling.py and patient_journaling.csv
+3. Add up a new automatic questionnaire for patient mental health status and MHWP reading feature. Particularly, add new questionnaire.py and mental_assessments.csv  
+4. Add up a new patient note for the MHWP feature. Particularly, add new patient_notes.csv
+5. Add up a new meditation resource viewing feature. Particularly, add new meditation.py and meditation_resources.csv
+6. Integrate the MHWP view patient records feature, including (1)view mood tracker, (2)view patient journaling, (3)view mental health assessments, and (4)add patient record. Particularly, add a brand new patient_records.py file
+7. Add up a series of buttons in mhwp.py and patient.py files.
+
 ## Eigth Commit
 ----------
 **CHAO-WEI : 2024_11_25 18:05**

@@ -1,3 +1,3 @@
-patient_username,mhwp_username,date,start_time,end_time,status
-patient1,mhwp1,2024-11-20,09:00,10:00,pending
-patient2,mhwp1,2024-11-20,10:00,11:00,confirmed
+#user(patient:a), user mhwp(j) , date(i.e2024/11,24),timeslot(i.e 9:00 -10:00),timeslot2( i.e 10:00~11:00), stauts (the appointment is approveed or not) three status: confirmed, canceled, pending
+#two time slots because patient can book maximum 2 hours   
+#everyone"s mhwp attending record 
