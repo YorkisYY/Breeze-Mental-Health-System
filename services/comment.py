@@ -25,7 +25,12 @@ def add_comment(patient_username, mhwp_username, rating, comment):
         # 读取或创建评论文件
         try:
             comments_df = pd.read_csv(COMMENTS_FILE)
-            comments_df = pd.concat([comments_df, pd.DataFrame([comment_data])], ignore_index=True)
+            # 如果读取的 DataFrame 是空的，直接用新数据替换
+            if comments_df.empty:
+                comments_df = pd.DataFrame([comment_data])
+            else:
+                # 非空情况下，拼接新数据
+                comments_df = pd.concat([comments_df, pd.DataFrame([comment_data])], ignore_index=True)
         except FileNotFoundError:
             # 如果文件不存在，则创建新文件
             comments_df = pd.DataFrame([comment_data])

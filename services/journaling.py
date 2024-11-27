@@ -16,7 +16,7 @@ def enter_journaling(username):
 
     # 生成新记录
     new_entry = {
-        "username": username,
+        "patient_username": username,
         "entry": entry,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
