@@ -1,13 +1,11 @@
 <<<<<<< HEAD
-## tenth Commit
+## Tenth Commit
 ----------
 **Chao-Wei: 2024_11_27 21:19**
 1. Add up patient.csv for the future upcoming feature.
 2. the patient.csv would be simlutaneously updated with the user_data.csv.
 3. Add up the admin allocation function for patients.
 
-
-===========
 ## ninth Commit 
 ---------- 
 **Shaoxiong Bai: 2024_11_26 21:19** 
