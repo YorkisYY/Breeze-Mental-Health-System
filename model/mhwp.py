@@ -3,9 +3,12 @@ from os.path import exists
 
 from datetime import datetime, timedelta
 import calendar
-from services.patient_records import view_patient_records
 from services.comment import view_comments
+from services.patient_records import view_patient_records
 from utils.notification import send_email_notification, get_email_by_username
+from services.record import view_records_of_patient
+from services.dashboard import table_of_patient
+
 
 def list_appointments_for_mhw(mhw_username, file_path):
     """List appointments for the currently logged-in MHW"""
@@ -138,21 +141,24 @@ def setup_mhwp_schedule(user):
 def handle_mhwp_menu(user):
     while True:
         print("\nMental Health Worker Options:")
-        print("1. View Patient Records")
-        print("2. Add Counseling Notes")
+        print("1. View Patient Records") # merge this with 2 as the work flow is seeing the record then edit it.
+        # print("2. Add Counseling Notes")
         print("3. Manage Appointments")
         print("4. Set Up Your Availability")
         print("5. View Your Current Schedule")
         print("6. View Comments from Your Patients")
-        print("7. Logout")
+        print("7. Dashboard of all your patients")
+        print("8. Logout")
 
-        mhwp_choice = input("Select an option (1-7): ").strip()
+        mhwp_choice = input("Select an option (1-8): ").strip()
         
         if mhwp_choice == '1':  # View Patient Records
             view_patient_records(user.username)
+            view_records_of_patient()
 
-        elif mhwp_choice == '2':  # Add Counseling Notes
-            print("This feature is coming soon...")
+        # elif mhwp_choice == '2':  # Add Counseling Notes
+        #
+        #     print("This feature is coming soon...")
 
         elif mhwp_choice == '3':  # Manage Appointments
             while True:
@@ -226,9 +232,13 @@ def handle_mhwp_menu(user):
         elif mhwp_choice == '6':  # View comments
             view_comments(user)
 
-        elif mhwp_choice == '7':  # Logout
+        elif mhwp_choice == '7':  # Dashboard of all your patients
+            table_of_patient()
+            print("This feature is coming soon...")
+
+        elif mhwp_choice == '8':  # Logout
             print("Logout successful. Goodbye!")
             break
         
         else:
-            print("Invalid choice, please select an option between 1 and 6.")
+            print("Invalid choice, please select an option between 1 and 8.")
