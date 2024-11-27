@@ -13,15 +13,31 @@ def is_valid_email(email):
 
 # Check if the username is unique for a specific role
 def is_username_unique(username, role):
+    """Check if the username is unique for the given role."""
     if os.path.exists(USER_DATA_PATH):
         df = pd.read_csv(USER_DATA_PATH)
         if not df[(df['username'] == username) & (df['role'] == role)].empty:
             return False
     return True
 
+# Check if the username is unique globally across all roles
+def is_username_unique_global(username):
+    """Check if the username is unique globally."""
+    if os.path.exists(USER_DATA_PATH):
+        df = pd.read_csv(USER_DATA_PATH)
+        if not df[df['username'] == username].empty:
+            return False
+    return True
+
 def register_user():
     # Prompt user to enter username and password
     username = input("Enter username: ").strip()
+
+    # Check if the username is unique globally
+    if not is_username_unique_global(username):
+        print(f"Username '{username}' is already taken. Please choose another username.")
+        return True
+
     password = input("Enter password: ").strip()
 
     # Ensure username and password are not empty
@@ -70,7 +86,7 @@ def register_user():
             print(f"Invalid {role} code. Registration failed.")
             return True
 
-    # Check if the username is unique
+    # Check if the username is unique for the specific role
     if not is_username_unique(username, role):
         print(f"Username '{username}' already exists for role '{role}'.")
         return True
