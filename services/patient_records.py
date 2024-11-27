@@ -14,12 +14,18 @@ def view_patient_records(mhwp_username):
     try:
         # 获取 MHWP 名下的患者
         appointments_df = pd.read_csv(APPOINTMENTS_FILE)
+
+        # 检查是否包含预期的列
+        if "mhwp_username" not in appointments_df.columns or "patient_username" not in appointments_df.columns:
+            print("Error: CSV file is missing required columns.")
+            return
+
+        # 筛选 MHWP 名下的患者
         patients = appointments_df[appointments_df["mhwp_username"] == mhwp_username]["patient_username"].unique()
 
         if not patients:
             print("You currently have no registered patients.")
             return
-
 
         print("\nYour Patients:")
         for idx, patient in enumerate(patients, start=1):
@@ -35,8 +41,11 @@ def view_patient_records(mhwp_username):
         # 跳转到患者记录菜单
         patient_record_menu(patient_username)
 
+    except FileNotFoundError:
+        print(f"File not found: {APPOINTMENTS_FILE}")
     except Exception as e:
         print(f"Error viewing patient records: {e}")
+
 
 
 def patient_record_menu(patient_username):
