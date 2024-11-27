@@ -2,10 +2,11 @@ import os
 import csv
 from tabulate import tabulate
 from os.path import exists
-
 from datetime import datetime, timedelta
 import calendar
-<<<<<<< HEAD
+from services.patient_records import view_patient_records
+from services.comment import view_comments
+from utils.notification import send_email_notification, get_email_by_username
 
 def initialize_schedule_file(file_path):
     """
@@ -31,12 +32,6 @@ def initialize_schedule_file(file_path):
 
     except Exception as e:
         print(f"Error resetting the file: {e}")
-
-=======
-from services.patient_records import view_patient_records
-from services.comment import view_comments
-from utils.notification import send_email_notification, get_email_by_username
->>>>>>> 05147549f0b7bc4e4b42355e50ed84cc0044c1c2
 
 def list_appointments_for_mhw(mhw_username, file_path):
     """List appointments for the currently logged-in MHW"""
@@ -271,24 +266,20 @@ def handle_mhwp_menu(user):
         print("3. Manage Appointments")
         print("4. Set Up Your Availability")
         print("5. View Your Current Schedule")
-<<<<<<< HEAD
         print("6. Modify Your Availability")
         print("7. Reset Schedule (Clear All Data)")
         print("8. Logout")
 
-        mhwp_choice = input("Select an option (1-7): ").strip()
+
+        mhwp_choice = input("Select an option (1-8): ").strip()
 
         if mhwp_choice == '1':  # View Patient Records
-            print("\nThis feature is coming soon...")
-=======
-        print("6. View Comments from Your Patients")
-        print("7. Logout")
 
-        mhwp_choice = input("Select an option (1-7): ").strip()
-        
-        if mhwp_choice == '1':  # View Patient Records
+
+
+
             view_patient_records(user.username)
->>>>>>> 05147549f0b7bc4e4b42355e50ed84cc0044c1c2
+
 
         elif mhwp_choice == '2':  # Add Counseling Notes
             print("\nThis feature is coming soon...")
@@ -362,7 +353,6 @@ def handle_mhwp_menu(user):
         elif mhwp_choice == '5':  # View current schedule
             display_current_schedule(user.username, "data/mhwp_schedule.csv")
 
-<<<<<<< HEAD
         elif mhwp_choice == '6':  # Modify Your Availability
             while True:
                 print("\nModify Your Availability Options:")
@@ -488,20 +478,6 @@ def handle_mhwp_menu(user):
             schedule_file = "data/mhwp_schedule.csv"
             initialize_schedule_file(schedule_file)
         elif mhwp_choice == '8':  # Logout
-=======
-        elif mhwp_choice == '6':  # View comments
-            view_comments(user)
-
-        elif mhwp_choice == '7':  # Logout
->>>>>>> 05147549f0b7bc4e4b42355e50ed84cc0044c1c2
-            print("Logout successful. Goodbye!")
             break
         else:
-            print("Invalid choice, please select an option between 1 and 7.")
-
-
-
-
-
-
-
+            print("Invalid choice. Please select an option between 1 and 8.")
