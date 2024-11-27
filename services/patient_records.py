@@ -99,7 +99,7 @@ def view_patient_journaling(patient_username):
     print("\n2. Patient Journaling:")
     try:
         journal_df = pd.read_csv(JOURNAL_ENTRIES_FILE)
-        patient_journal = journal_df[journal_df["username"] == patient_username]
+        patient_journal = journal_df[journal_df["patient_username"] == patient_username]
         if not patient_journal.empty:
             print(patient_journal[["entry", "timestamp"]].to_string(index=False))
         else:
@@ -125,18 +125,30 @@ def view_mental_health_assessments(patient_username):
 
 
 
-def add_patient_record(patient_username, mhwp_username):
+def add_patient_record(patient_username):
     """
     为患者添加手动评价
     """
+    try:
+        # 从 appointments.csv 获取 mhwp_username
+        appointments_df = pd.read_csv(APPOINTMENTS_FILE)
+        mhwp_record = appointments_df[appointments_df["patient_username"] == patient_username]
+        if mhwp_record.empty:
+            print("Error: No MHWP found for this patient.")
+            return
+        mhwp_username = mhwp_record.iloc[0]["mhwp_username"]  # 提取 mhwp_username
+    except FileNotFoundError:
+        print(f"Error: File {APPOINTMENTS_FILE} not found.")
+        return
+
     print("\nAdd Patient Record:")
-    
+
     # 手动输入 condition
     CONDITIONS = ["Anxiety", "Depression", "Autism", "Stress"]
     print("Select a mental condition to record:")
     for idx, condition in enumerate(CONDITIONS, start=1):
         print(f"{idx}. {condition}")
-    
+
     condition_choice = input("Select a condition by number: ").strip()
     try:
         condition = CONDITIONS[int(condition_choice) - 1]
@@ -159,11 +171,12 @@ def add_patient_record(patient_username, mhwp_username):
     # 保存记录到 patient_notes.csv
     try:
         notes_df = pd.read_csv("data/patient_notes.csv")
-        notes_df = notes_df.append(new_note, ignore_index=True)
+        notes_df = pd.concat([notes_df, pd.DataFrame([new_note])], ignore_index=True)
     except FileNotFoundError:
         notes_df = pd.DataFrame([new_note])
 
     notes_df.to_csv("data/patient_notes.csv", index=False)
     print("Patient note added successfully!")
+
 
 
