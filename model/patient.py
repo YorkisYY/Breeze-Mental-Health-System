@@ -6,22 +6,19 @@ from services.questionnaire import submit_questionnaire,remind_to_complete_quest
 from services.journaling import enter_journaling
 from utils.notification import send_email_notification, get_email_by_username
 import pandas as pd
-def book_appointment(self, date, timeslot, schedule_file, assignments_file, appointment_file):
+def book_appointment(user, date, timeslot, schedule_file, assignments_file, appointment_file):
     """
     Allow a patient to book an appointment with their assigned MHW.
     Updates mhwp_schedule.csv to mark the slot as booked (▲).
     """
-    if self.role != "patient":
-        print("Only patients can book appointments.")
-        return False
 
     try:
         # Retrieve assigned MHW from assignments.csv
         try:
             assignments = pd.read_csv(assignments_file, header=None, names=["patient_username", "mhwp_username"])
-            mhwp_record = assignments[assignments['patient_username'] == self.username]
+            mhwp_record = assignments[assignments['patient_username'] == user.username]
             if mhwp_record.empty:
-                print(f"No assigned MHW found for patient '{self.username}'.")
+                print(f"No assigned MHW found for patient '{user.username}'.")
                 return False
             mhwp_username = mhwp_record.iloc[0]['mhwp_username']
         except FileNotFoundError:
@@ -51,7 +48,7 @@ def book_appointment(self, date, timeslot, schedule_file, assignments_file, appo
         except FileNotFoundError:
             print("Error: mhwp_schedule.csv file not found.")
             return False
-
+        
         # Check for conflicting appointments in appointments.csv
         try:
             appointments = pd.read_csv(appointment_file)
@@ -67,10 +64,10 @@ def book_appointment(self, date, timeslot, schedule_file, assignments_file, appo
         if not overlapping_appointment.empty:
             print(f"The selected time slot '{timeslot}' overlaps with an existing appointment. Please choose another.")
             return False
-
+        
         # Record the new appointment in appointments.csv
         new_appointment = {
-            "patient_username": self.username,
+            "patient_username": user.username,
             "mhwp_username": mhwp_username,
             "date": date,
             "timeslot": timeslot,
@@ -85,7 +82,7 @@ def book_appointment(self, date, timeslot, schedule_file, assignments_file, appo
         # Update mhwp_schedule.csv to mark the slot as booked (▲)
         try:
             schedule.loc[
-                (schedule['mhwp_username'] == mhwp_username) & (schedule['Date'] == date), 
+                (schedule['mhwp_username'] == mhwp_username) & (schedule['Date'] == date),
                 time_slot_column
             ] = "▲"
             schedule.to_csv(schedule_file, index=False)
@@ -101,19 +98,24 @@ def book_appointment(self, date, timeslot, schedule_file, assignments_file, appo
         print(f"Unexpected error: {e}")
         return False
 
-def cancel_appointment(self, date, timeslot, schedule_file, appointment_file):
+
+def cancel_appointment(user, date, timeslot, schedule_file, appointment_file):
     """
     Allow a patient to cancel their appointment.
     Updates mhwp_schedule.csv to mark the slot as available (■).
     """
-    if self.role != "patient":
+    if user.role != "patient":
         print("Only patients can cancel appointments.")
+        return False
+
+    if not user.username:
+        print("Error: username is not set. Please log in or register.")
         return False
 
     try:
         # Load appointments.csv
         appointments = pd.read_csv(appointment_file)
-        appointment_filter = (appointments['patient_username'] == self.username) & \
+        appointment_filter = (appointments['patient_username'] == user.username) & \
                              (appointments['date'] == date) & \
                              (appointments['timeslot'] == timeslot)
 
@@ -286,7 +288,7 @@ def handle_patient_menu(user):
                             timeslot = time_slots[slot_index]
 
                             # 尝试预约
-                            if user.book_appointment(date, timeslot, "data/mhwp_schedule.csv", "data/assignments.csv", "data/appointments.csv"):
+                            if book_appointment(user,date, timeslot, "data/mhwp_schedule.csv", "data/assignments.csv", "data/appointments.csv"):
                                 print("Appointment booked successfully!")
                             else:
                                 print("Failed to book the appointment. Try again.")
@@ -329,7 +331,7 @@ def handle_patient_menu(user):
                             timeslot = selected_appointment['timeslot']
 
                             # 取消预约
-                            if user.cancel_appointment(date, timeslot, "data/mhwp_schedule.csv", "data/appointments.csv"):
+                            if cancel_appointment(user,date, timeslot, "data/mhwp_schedule.csv", "data/appointments.csv"):
                                 print("Appointment cancelled successfully!")
                             else:
                                 print("Failed to cancel the appointment.")
