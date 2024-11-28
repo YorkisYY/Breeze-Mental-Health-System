@@ -266,14 +266,14 @@ def handle_mhwp_menu(user):
     while True:
         print("\nMental Health Worker Options:")
         print("1. View Patient Records") # merge this with 2 as the work flow is seeing the record then edit it.
-        # print("2. Add Counseling Notes")
+        print("2. Add Counseling Notes")
         print("3. Manage Appointments")
         print("4. Set Up Your Availability")
         print("5. View Your Current Schedule")
         print("6. Modify Your Availability")
         print("7. Reset Schedule (Clear All Data)")
 
-        # print("6. View Comments from Your Patients")
+        print("6. View Comments from Your Patients")
         print("8. Dashboard of all your patients")
         print("9. Logout")
 
@@ -284,9 +284,9 @@ def handle_mhwp_menu(user):
             view_patient_records(user.username)
             view_records_of_patient()
 
-        # elif mhwp_choice == '2':  # Add Counseling Notes
+        elif mhwp_choice == '2':  # Add Counseling Notes
         #
-        #     print("This feature is coming soon...")
+             print("This feature is coming soon...")
 
         elif mhwp_choice == '3':  # Manage Appointments
             while True:
