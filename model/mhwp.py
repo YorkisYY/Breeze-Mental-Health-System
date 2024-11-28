@@ -9,7 +9,7 @@ from services.comment import view_comments
 from services.patient_records import view_patient_records
 from utils.notification import send_email_notification, get_email_by_username
 from services.record import view_records_of_patient
-from services.dashboard import table_of_patient
+from services.dashboard import display_dashboard
 
 
 def initialize_schedule_file(file_path):
@@ -272,10 +272,10 @@ def handle_mhwp_menu(user):
         print("5. View Your Current Schedule")
         print("6. Modify Your Availability")
         print("7. Reset Schedule (Clear All Data)")
-        print("8. Logout")
-        print("6. View Comments from Your Patients")
-        print("7. Dashboard of all your patients")
-        print("8. Logout")
+
+        # print("6. View Comments from Your Patients")
+        print("8. Dashboard of all your patients")
+        print("9. Logout")
 
         mhwp_choice = input("Select an option (1-8): ").strip()
 
@@ -481,13 +481,12 @@ def handle_mhwp_menu(user):
         elif mhwp_choice == '7':  # Reset schedule
             schedule_file = "data/mhwp_schedule.csv"
             initialize_schedule_file(schedule_file)
-        elif mhwp_choice == '8':  # Logout
-            break
-        elif mhwp_choice == '7':  # Dashboard of all your patients
-            table_of_patient()
+
+        elif mhwp_choice == '8':  # Dashboard of all your patients
+            display_dashboard(user.username)
             print("This feature is coming soon...")
 
-        elif mhwp_choice == '8':  # Logout
+        elif mhwp_choice == '9':  # Logout
             print("Logout successful. Goodbye!")
             break
 
