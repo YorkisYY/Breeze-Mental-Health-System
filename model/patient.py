@@ -29,6 +29,27 @@ def handle_patient_menu(user):
         patient_choice = input("Select an option (1-13): ")
         
         if patient_choice == '1':
+            try:
+                new_username = input("Enter new username: ").strip()
+                if not new_username:
+                    print("Username cannot be empty.")
+                    continue
+                    
+                import pandas as pd
+                from config import USER_DATA_PATH
+                
+                user_df = pd.read_csv(USER_DATA_PATH)
+                if new_username in user_df[user_df['username'] != user.username]['username'].values:
+                    print("Username already exists. Please choose a different one.")
+                    continue
+                    
+                if user.update_info(new_username=new_username):
+                    print(f"Username successfully updated to {new_username}")
+                else:
+                    print("Failed to update username. Please try again.")
+            except Exception as e:
+                print(f"Error updating username: {str(e)}")
+
             new_username = input("Enter new username: ").strip()
             user.update_info(new_username=new_username)
             

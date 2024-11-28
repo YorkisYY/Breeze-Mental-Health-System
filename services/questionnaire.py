@@ -42,7 +42,6 @@ def generate_feedback(status_list):
 
 def submit_questionnaire(patient_username, appointments_file="data/appointments.csv"):
     """让患者完成问卷并存储结果"""
-    # 获取患者对应的 MHWP
     try:
         appointments = pd.read_csv(appointments_file)
         patient_appointment = appointments[appointments["patient_username"] == patient_username]
@@ -74,11 +73,9 @@ def submit_questionnaire(patient_username, appointments_file="data/appointments.
                     print("Invalid input. Please enter a number.")
         results[category] = calculate_score(responses)
 
-    # 计算心理状态
-    status = [category for category, score in results.items() if score >= 10]  # 简单假设 ≥10 为异常
+    status = [category for category, score in results.items() if score >= 10]
     feedback = generate_feedback(status)
 
-    # 保存问卷结果
     assessment_data = {
         "patient_username": patient_username,
         "mhwp_username": mhwp_username,
@@ -88,14 +85,15 @@ def submit_questionnaire(patient_username, appointments_file="data/appointments.
     }
     try:
         assessments_df = pd.read_csv(MENTAL_ASSESSMENTS_FILE)
-        assessments_df = assessments_df.append(assessment_data, ignore_index=True)
+        # 修改点：替换 append 为 pd.concat
+        assessments_df = pd.concat([assessments_df, pd.DataFrame([assessment_data])], ignore_index=True)
     except FileNotFoundError:
         assessments_df = pd.DataFrame([assessment_data])
 
     assessments_df.to_csv(MENTAL_ASSESSMENTS_FILE, index=False)
     print("\nThank you for completing the questionnaire!")
     print(f"Your feedback:\n{feedback}")
-    
+
 
 def remind_to_complete_questionnaire(patient_username):
     """

@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c2df6c2b-a170-4ba6-81c7-9ffb926642d8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/user.py" afterDir="false" />
-    </list>
+    <list default="true" id="c2df6c2b-a170-4ba6-81c7-9ffb926642d8" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,9 +10,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="2ooecCwf0ZQG2Ni9KRImQGJq4yb" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -26,7 +23,7 @@
     "Python.user.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/USER/Desktop/Breeze Mental Health System",
+    "last_opened_file_path": "C:/Users/USER/Desktop/Python-main",
     "nodejs_package_manager_path": "npm",
     "vue.rearranger.settings.migration": "true"
   }
@@ -78,6 +75,7 @@
       <option name="presentableId" value="Default" />
       <updated>1731540432921</updated>
       <workItem from="1731540434327" duration="226000" />
+      <workItem from="1732703440904" duration="65000" />
     </task>
     <servers />
   </component>
