@@ -274,10 +274,6 @@ def handle_mhwp_menu(user):
         mhwp_choice = input("Select an option (1-8): ").strip()
 
         if mhwp_choice == '1':  # View Patient Records
-
-
-
-
             view_patient_records(user.username)
 
 

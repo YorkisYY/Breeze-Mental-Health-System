@@ -1,13 +1,7 @@
-<<<<<<< HEAD
-#user(patient:a), user mhwp(j) , date(i.e2024/11,24),timeslot(i.e 9:00 -10:00),timeslot2( i.e 10:00~11:00), stauts (the appointment is approveed or not) three status: confirmed, canceled, pending
-#two time slots because patient can book maximum 2 hours   
-#everyone"s mhwp attending record 
-=======
 patient_username,mhwp_username,date,start_time,end_time,status
 patient1,mhwp1,2024-11-20,09:00,10:00,confirmed
 patient2,mhwp1,2024-11-20,10:00,11:00,confirmed
 qqq,qqq2,2024-11-27,12:00,13:00,pending
 qqq,qqq2,2024-11-27,14:00,15:00,pending
 qqq,qqq2,2024-11-27,17:00,18:00,pending
->>>>>>> 05147549f0b7bc4e4b42355e50ed84cc0044c1c2
-bsx,baishaoxiong,2024-11-28,19:00,20:00,confirmed
+bsx,baishaoxiong,2024-11-28,09:00,10:00,confirmed
