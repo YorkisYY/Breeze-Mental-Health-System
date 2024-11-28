@@ -344,9 +344,9 @@ def handle_mhwp_menu(user):
                                                                         )
                                                                         # Update schedule based on action
                                                                         if action == "confirm":
-                                                                                schedule_df.loc[schedule_filter, time_slot_column] = "▲"  # Mark as booked
+                                                                                schedule_df.loc[schedule_filter, time_slot_column] = "●"  # Mark as confirmed
                                                                         elif action == "cancel":
-                                                                                schedule_df.loc[schedule_filter, time_slot_column] = "■"  # Mark as available
+                                                                                schedule_df.loc[schedule_filter, time_slot_column] = "□"  # Mark as available
                                                                         schedule_df.to_csv("data/mhwp_schedule.csv", index=False)
                                                                         print(f"Schedule updated: time slot '{selected_appointment['timeslot']}' updated for {action}.")
                                                                 except FileNotFoundError:
