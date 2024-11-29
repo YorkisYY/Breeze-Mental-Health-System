@@ -9,4 +9,5 @@ if not os.path.exists(DATA_DIR):
 USER_DATA_PATH = os.path.join(DATA_DIR, 'user_data.csv')
 MOOD_DATA_PATH = os.path.join(DATA_DIR, 'mood_data.csv')
 PATIENTS_DATA_PATH = os.path.join(DATA_DIR, 'patients.csv')
+MHWP_DATA_PATH = os.path.join(DATA_DIR, 'mhwp.csv')
 # OTHER_DATA_PATH = os.path.join(DATA_DIR, '#place your csv file name here')
