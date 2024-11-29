@@ -430,6 +430,7 @@ class User:
             print(f"Error in admin update: {str(e)}")
             return False
         
+
     def view_appointments(self, appointment_file):
         """
         Allow an admin to view all appointments for patients and MHWs.

@@ -2,11 +2,15 @@ import os
 import csv
 from tabulate import tabulate
 from os.path import exists
+
 from datetime import datetime, timedelta
 import calendar
-from services.patient_records import view_patient_records
 from services.comment import view_comments
+from services.patient_records import view_patient_records
 from utils.notification import send_email_notification, get_email_by_username
+from services.record import view_records_of_patient
+from services.dashboard import display_dashboard
+
 
 def initialize_schedule_file(file_path):
     """
