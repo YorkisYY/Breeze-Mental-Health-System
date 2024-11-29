@@ -1,8 +1,3 @@
-username,assigned_mhwp,account_status,registration_date,email,emergency_email,Record
-y,mhwp_01,active,2024-11-28,y@gmail.com,yy@gmail.com,
-x,mhwp_02,active,2024-11-28,x@gmail.com,xx@gmail.com,
-z,mhwp_01,active,2024-11-28,z@gmail.com,zz@gmail.com,
-a,mhwp_03,active,2024-11-28,a@gmail.com,aa@gmail.com,
-d,mhwp_01,active,2024-11-28,d@gmail.com,dd@gmail.com,
+username,assigned_mhwp,account_status,registration_date,email,emergency_email,symptoms
+y,,active,2024-11-29,y@gmail.com,yy@gmail.com,Anxiety
 
-bsx,,active,2024-11-28,b@gmail.com,s@gmail.com,

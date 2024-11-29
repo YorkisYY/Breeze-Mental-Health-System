@@ -2,9 +2,10 @@ import pandas as pd
 import hashlib
 from config import USER_DATA_PATH
 from config import PATIENTS_DATA_PATH
+from config import MHWP_DATA_PATH
 from datetime import datetime
 class User:
-    def __init__(self, username, password, role, email=None, emergency_email=None):
+    def __init__(self, username, password, role, email=None, emergency_email=None, symptoms=None, major=None):
         self.username = username
         self.password = self.hash_password(password)
         self.role = role
@@ -12,6 +13,8 @@ class User:
         self.emergency_email = emergency_email
         self.medical_records = []
         self.appointments = []
+        self.symptoms = symptoms
+        self.major = major
     def hash_password(self, password):
         """Hash password using SHA-256."""
         return hashlib.sha256(password.encode()).hexdigest()
@@ -43,12 +46,14 @@ class User:
             # Initialize patient record only if role is 'patient' and record does not exist
             if self.role == "patient" and not self.check_patient_record_exists():
                 self.initialize_patient_record()
+            # Initialize MHWP record only if role is 'mhwp' and record does not exist
+            elif self.role == "mhwp" and not self.check_mhwp_record_exists():
+                self.initialize_mhwp_record()
 
             return True
         except Exception as e:
             print(f"Error saving user data: {str(e)}")
             return False
-
     def load_from_csv(self):
         """Load user data from CSV and update object state."""
         try:
@@ -66,7 +71,7 @@ class User:
                 self.email = user_info.iloc[0]['email']
                 self.emergency_email = user_info.iloc[0]['emergency_email']
                 
-                # If user is a patient, also load patient record
+                # If user is a patient, load patient record
                 if self.role == "patient":
                     try:
                         patient_df = pd.read_csv(PATIENTS_DATA_PATH)
@@ -79,11 +84,26 @@ class User:
                         pass
                     except Exception as e:
                         return False
+                # If user is a MHWP, load MHWP record
+                elif self.role == "mhwp":
+                    try:
+                        mhwp_df = pd.read_csv("data/mhwp.csv")
+                        mhwp_info = mhwp_df[mhwp_df['username'] == self.username]
+                        if not mhwp_info.empty:
+                            self.assigned_patients = mhwp_info.iloc[0]['assigned_patients']
+                            self.account_status = mhwp_info.iloc[0]['account_status']
+                            self.registration_date = mhwp_info.iloc[0]['registration_date']
+                            self.major = mhwp_info.iloc[0]['major']
+                    except FileNotFoundError:
+                        pass
+                    except Exception as e:
+                        return False
                 return True
             return False
         except FileNotFoundError:
             print("User data file not found.")
             return False
+
     def check_if_exists(self):
         """Check if user exists in CSV."""
         try:
@@ -98,6 +118,14 @@ class User:
             return self.username in df['username'].values
         except FileNotFoundError:
             return False
+    def check_mhwp_record_exists(self, mhwp_data_path=MHWP_DATA_PATH):
+        """Check if the MHWP record already exists."""
+        try:
+            df = pd.read_csv(mhwp_data_path)
+            return self.username in df['username'].values
+        except FileNotFoundError:
+            return False
+        
     def update_info(self, new_username=None, new_password=None, new_email=None, new_emergency_email=None):
         """Update user information and synchronize with user_data.csv and patients.csv."""
         try:
@@ -122,7 +150,16 @@ class User:
                     except Exception as e:
                         print(f"Error updating patient record: {str(e)}")
                         return False
-                
+                elif self.role == "mhwp":
+                    try:
+                        mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                        updated_mhwp_df = mhwp_df.copy()
+                        updated_mhwp_df.loc[updated_mhwp_df['username'] == old_username, 'username'] = new_username
+                        updated_mhwp_df.to_csv(MHWP_DATA_PATH, index=False)
+                    except Exception as e:
+                        print(f"Error updating MHWP record: {str(e)}")
+                        return False
+                    
                 updated_user_df.to_csv(USER_DATA_PATH, index=False)
                 self.username = new_username
                 changes_made = True
@@ -147,6 +184,14 @@ class User:
                     except Exception as e:
                         print(f"Error updating patient email: {str(e)}")
                         return False
+                elif self.role == "mhwp":
+                    try:
+                        mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                        mhwp_df.loc[mhwp_df['username'] == self.username, 'email'] = new_email
+                        mhwp_df.to_csv(MHWP_DATA_PATH, index=False)
+                    except Exception as e:
+                        print(f"Error updating MHWP email: {str(e)}")
+                        return False
                 user_df.to_csv(USER_DATA_PATH, index=False)
                 self.email = new_email
                 changes_made = True
@@ -162,6 +207,14 @@ class User:
                     except Exception as e:
                         print(f"Error updating patient emergency email: {str(e)}")
                         return False
+                elif self.role == "mhwp":
+                    try:
+                        mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                        mhwp_df.loc[mhwp_df['username'] == self.username, 'emergency_email'] = new_emergency_email
+                        mhwp_df.to_csv(MHWP_DATA_PATH, index=False)
+                    except Exception as e:
+                        print(f"Error updating MHWP emergency email: {str(e)}")
+                        return False
                 user_df.to_csv(USER_DATA_PATH, index=False)
                 self.emergency_email = new_emergency_email
                 changes_made = True
@@ -171,7 +224,7 @@ class User:
         except Exception as e:
             print(f"Error in update process: {str(e)}")
             return False
-            
+                
     def delete_user(self):
         """Delete user from CSV files."""
         if not self.load_from_csv():
@@ -204,13 +257,21 @@ class User:
                 try:
                     patient_df = pd.read_csv(PATIENTS_DATA_PATH)
                     if self.username in patient_df['username'].values:
-                        # Patients.csv may not have a password field; ensure it is updated only in user_data.csv.
-                        # Update related info in patients.csv if necessary (optional, can extend functionality here).
                         patient_df.to_csv(PATIENTS_DATA_PATH, index=False, na_rep='')
                 except FileNotFoundError:
                     print("Patient data file not found. Skipping patient record update.")
                 except Exception as e:
                     print(f"Error updating patient record: {str(e)}")
+            # If the user is a MHWP, update related fields in mhwp.csv
+            elif self.role == "mhwp":
+                try:
+                    mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                    if self.username in mhwp_df['username'].values:
+                        mhwp_df.to_csv(MHWP_DATA_PATH, index=False, na_rep='')
+                except FileNotFoundError:
+                    print("MHWP data file not found. Skipping MHWP record update.")
+                except Exception as e:
+                    print(f"Error updating MHWP record: {str(e)}")
 
             print("User password updated successfully.")
             return True
@@ -221,6 +282,7 @@ class User:
         except Exception as e:
             print(f"Error updating password: {str(e)}")
             return False
+
 
 
     def delete_from_csv(self):
@@ -257,7 +319,6 @@ class User:
             # Load user_data.csv
             user_df = pd.read_csv(USER_DATA_PATH)
             
-
             if target_username not in user_df['username'].values:
                 print("Target user does not exist.")
                 return False
@@ -267,18 +328,16 @@ class User:
 
             # Update username
             if new_username and new_username != target_username:
-
                 other_users = user_df[user_df['username'] != target_username]
                 if new_username in other_users['username'].values:
                     print("New username is already in use.")
                     return False
-                
 
                 user_df.loc[user_df['username'] == target_username, 'username'] = new_username
                 changes_made = True
                 print(f"Username updated to '{new_username}'.")
 
-
+                # Update role-specific records
                 if user_role == "patient":
                     try:
                         patient_df = pd.read_csv(PATIENTS_DATA_PATH)
@@ -288,6 +347,16 @@ class User:
                             print("Patient record username updated successfully.")
                     except Exception as e:
                         print(f"Error updating patient username: {str(e)}")
+                        return False
+                elif user_role == "mhwp":
+                    try:
+                        mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                        if target_username in mhwp_df['username'].values:
+                            mhwp_df.loc[mhwp_df['username'] == target_username, 'username'] = new_username
+                            mhwp_df.to_csv(MHWP_DATA_PATH, index=False)
+                            print("MHWP record username updated successfully.")
+                    except Exception as e:
+                        print(f"Error updating MHWP username: {str(e)}")
                         return False
 
             current_username = new_username if new_username else target_username
@@ -309,7 +378,6 @@ class User:
                 changes_made = True
                 print(f"Email updated to '{new_email}'.")
 
- 
                 if user_role == "patient":
                     try:
                         patient_df = pd.read_csv(PATIENTS_DATA_PATH)
@@ -318,13 +386,20 @@ class User:
                             patient_df.to_csv(PATIENTS_DATA_PATH, index=False)
                     except Exception as e:
                         print(f"Error updating patient email: {str(e)}")
+                elif user_role == "mhwp":
+                    try:
+                        mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                        if current_username in mhwp_df['username'].values:
+                            mhwp_df.loc[mhwp_df['username'] == current_username, 'email'] = new_email
+                            mhwp_df.to_csv(MHWP_DATA_PATH, index=False)
+                    except Exception as e:
+                        print(f"Error updating MHWP email: {str(e)}")
 
             # Update emergency email
             if new_emergency_email:
                 user_df.loc[user_df['username'] == current_username, 'emergency_email'] = new_emergency_email
                 changes_made = True
                 print(f"Emergency email updated to '{new_emergency_email}'.")
-
 
                 if user_role == "patient":
                     try:
@@ -334,9 +409,16 @@ class User:
                             patient_df.to_csv(PATIENTS_DATA_PATH, index=False)
                     except Exception as e:
                         print(f"Error updating patient emergency email: {str(e)}")
+                elif user_role == "mhwp":
+                    try:
+                        mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                        if current_username in mhwp_df['username'].values:
+                            mhwp_df.loc[mhwp_df['username'] == current_username, 'emergency_email'] = new_emergency_email
+                            mhwp_df.to_csv(MHWP_DATA_PATH, index=False)
+                    except Exception as e:
+                        print(f"Error updating MHWP emergency email: {str(e)}")
 
             if changes_made:
-
                 user_df.to_csv(USER_DATA_PATH, index=False)
                 print("Admin update completed successfully.")
                 return True
@@ -417,7 +499,7 @@ class User:
         print(f"Username: {self.username}, Role: {self.role}")
         
     def admin_delete_user(self, username):
-        """Admin method to delete a user and their associated patient record if applicable."""
+        """Admin method to delete a user and their associated record if applicable."""
         if self.role != "admin":
             print("Only admin users can delete others.")
             return False
@@ -444,6 +526,18 @@ class User:
                     print("Patient data file not found. Skipping patient record deletion.")
                 except Exception as e:
                     print(f"Error deleting patient record: {str(e)}")
+            # Check if the target user is a MHWP and delete from mhwp.csv if necessary
+            elif target_role == "mhwp":
+                try:
+                    mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                    if username in mhwp_df['username'].values:
+                        mhwp_df = mhwp_df[mhwp_df['username'] != username]
+                        mhwp_df.to_csv(MHWP_DATA_PATH, index=False, na_rep='')
+                        print("MHWP record deleted successfully.")
+                except FileNotFoundError:
+                    print("MHWP data file not found. Skipping MHWP record deletion.")
+                except Exception as e:
+                    print(f"Error deleting MHWP record: {str(e)}")
 
             # Delete the user from user_data.csv
             user_df = user_df[user_df['username'] != username]
@@ -469,16 +563,14 @@ class User:
                 print("Patient record already exists.")
                 return False
             
-            # Prepare the DataFrame
             try:
                 df = pd.read_csv(patient_data_path)
             except FileNotFoundError:
                 df = pd.DataFrame(columns=[
                     "username", "assigned_mhwp", "account_status",
-                    "registration_date", "email", "emergency_email", "Record"
+                    "registration_date", "email", "emergency_email", "symptoms"
                 ])
 
-            # Create new patient record WITHOUT password
             new_patient = pd.DataFrame({
                 "username": [self.username],
                 "assigned_mhwp": [""],
@@ -486,7 +578,7 @@ class User:
                 "registration_date": [datetime.now().strftime("%Y-%m-%d")],
                 "email": [self.email if self.email else ""],
                 "emergency_email": [self.emergency_email if self.emergency_email else ""],
-                "Record": [""]
+                "symptoms": [self.symptoms if self.symptoms else ""]
             })
 
             df = pd.concat([df, new_patient], ignore_index=True)
@@ -496,6 +588,43 @@ class User:
 
         except Exception as e:
             print(f"Error creating patient record: {str(e)}")
+            return False
+    def initialize_mhwp_record(self, mhwp_data_path="data/mhwp.csv"):
+        """Initialize MHWP record with complete user information."""
+        if self.role != "mhwp":
+            print("Only MHWPs can have MHWP records.")
+            return False
+
+        try:
+            if self.check_mhwp_record_exists():
+                print("MHWP record already exists.")
+                return False
+            
+            try:
+                df = pd.read_csv(mhwp_data_path)
+            except FileNotFoundError:
+                df = pd.DataFrame(columns=[
+                    "username", "assigned_patients", "account_status",
+                    "registration_date", "email", "emergency_email", "major"
+                ])
+
+            new_mhwp = pd.DataFrame({
+                "username": [self.username],
+                "assigned_patients": [""],
+                "account_status": ["active"],
+                "registration_date": [datetime.now().strftime("%Y-%m-%d")],
+                "email": [self.email if self.email else ""],
+                "emergency_email": [self.emergency_email if self.emergency_email else ""],
+                "major": [self.major if self.major else ""]
+            })
+
+            df = pd.concat([df, new_mhwp], ignore_index=True)
+            df.to_csv(mhwp_data_path, index=False, na_rep='')
+            print("MHWP record initialized successfully.")
+            return True
+
+        except Exception as e:
+            print(f"Error creating MHWP record: {str(e)}")
             return False
         
     def update_patient_mhwp(self, patient_username, mhwp_username, patient_data_path="data/patients.csv"):
@@ -543,4 +672,49 @@ class User:
             
         except Exception as e:
             print(f"Error updating patient status: {str(e)}")
+            return False
+    def update_mhwp_major(self, mhwp_username, major, mhwp_data_path="data/mhwp.csv"):
+        """Admin function to update MHWP's major"""
+        if self.role != "admin":
+            print("Only admin can update MHWP major.")
+            return False
+            
+        try:
+            df = pd.read_csv(mhwp_data_path)
+            if mhwp_username not in df['username'].values:
+                print("MHWP record not found.")
+                return False
+                
+            df.loc[df['username'] == mhwp_username, 'major'] = major
+            df.to_csv(mhwp_data_path, index=False)
+            print(f"Major updated for MHWP {mhwp_username}")
+            return True
+            
+        except Exception as e:
+            print(f"Error updating MHWP major: {str(e)}")
+            return False
+
+    def update_mhwp_status(self, mhwp_username, status, mhwp_data_path="data/mhwp.csv"):
+        """Admin function to update MHWP account status"""
+        if self.role != "admin":
+            print("Only admin can update MHWP status.")
+            return False
+            
+        if status not in ['active', 'inactive']:
+            print("Invalid status. Use 'active' or 'inactive'.")
+            return False
+            
+        try:
+            df = pd.read_csv(mhwp_data_path)
+            if mhwp_username not in df['username'].values:
+                print("MHWP record not found.")
+                return False
+                
+            df.loc[df['username'] == mhwp_username, 'account_status'] = status
+            df.to_csv(mhwp_data_path, index=False)
+            print(f"MHWP account {mhwp_username} status updated to {status}")
+            return True
+            
+        except Exception as e:
+            print(f"Error updating MHWP status: {str(e)}")
             return False
