@@ -1,4 +1,14 @@
 WHAT ARE WE WORKING ON !!!!-----------------------------------------------------
+
+## Eleventh Commit
+----------
+**Chao-Wei: 2024_11_29 2:42**
+1. Add up the mhwp.csv for the future upcoming feature.
+2. the mhwp.csv would be simlutaneously updated with the user_data.csv.
+3. Add up the symptoms attribution for patients and major for the mhwp.
+4. new user registration would be required to choose their sypmtoms or major for the allocation of MHWP.
+5. debugs 
+
 ## Tenth Commit
 ----------
 **Chao-Wei: 2024_11_27 21:19**
