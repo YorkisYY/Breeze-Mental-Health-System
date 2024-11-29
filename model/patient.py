@@ -91,7 +91,7 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
             print(f"Error updating schedule: {e}")
             return False
 
-        print("Appointment booked successfully!")
+        #print("Appointment booked successfully!")
         return True
 
     except Exception as e:
@@ -129,7 +129,7 @@ def cancel_appointment(user, date, timeslot, schedule_file, appointment_file):
         # Cancel the appointment
         appointments.loc[appointment_filter, 'status'] = 'cancelled'
         appointments.to_csv(appointment_file, index=False)
-        print("Appointment cancelled successfully!")
+        #print("Appointment cancelled successfully!")
 
         # Update mhwp_schedule.csv to mark the slot as available (■)
         try:
@@ -229,6 +229,7 @@ def handle_patient_menu(user):
 
         elif patient_choice == '6':  # Book/Cancel appointment
             import pandas as pd
+            from utils.notification import send_email_notification, get_email_by_username
             while True:
                 print("\nBook/Cancel Appointment:")
                 print("1. Book an appointment")
@@ -240,7 +241,7 @@ def handle_patient_menu(user):
                 if appointment_choice == "1":  # Book an appointment
                     date = input("Enter appointment date (YYYY/MM/DD): ").strip()
 
-                    # 获取患者对应的 MHW
+                    # Retrieve the assigned MHW for the patient
                     try:
                         assignments = pd.read_csv("data/assignments.csv", header=None, names=["patient_username", "mhwp_username"])
                         mhwp_record = assignments[assignments['patient_username'] == user.username]
@@ -255,7 +256,7 @@ def handle_patient_menu(user):
                         print(f"Unexpected error: {e}")
                         continue
 
-                    # 打印 MHW 的 schedule
+                    # Display the MHW's schedule
                     try:
                         schedule = pd.read_csv("data/mhwp_schedule.csv")
                         mhwp_schedule = schedule[(schedule['mhwp_username'] == mhwp_username) & (schedule['Date'] == date)]
@@ -276,7 +277,7 @@ def handle_patient_menu(user):
                                 availability = mhwp_schedule.iloc[0][column_name]
                                 print(f"{idx:<11} | {slot:<13} | {availability}")
 
-                        # 选择时间段编号
+                        # Choose a time slot number
                         slot_index = input("\nEnter the slot number to book (0-6): ").strip()
                         try:
                             slot_index = int(slot_index)
@@ -284,12 +285,26 @@ def handle_patient_menu(user):
                                 print("Invalid slot number. Please try again.")
                                 continue
 
-                            # 获取对应的时间段
+                            # Retrieve the corresponding time slot
                             timeslot = time_slots[slot_index]
 
-                            # 尝试预约
-                            if book_appointment(user,date, timeslot, "data/mhwp_schedule.csv", "data/assignments.csv", "data/appointments.csv"):
+                            # Attempt to book the appointment
+                            if book_appointment(user, date, timeslot, "data/mhwp_schedule.csv", "data/assignments.csv", "data/appointments.csv"):
                                 print("Appointment booked successfully!")
+
+                                # Send an email notification to the MHW
+                                mhwp_email = get_email_by_username(mhwp_username)
+                                if mhwp_email:
+                                    subject = "New Appointment Booked"
+                                    message = (
+                                        f"Dear {mhwp_username},\n\n"
+                                        f"An appointment has been booked by {user.username} on {date} during {timeslot}.\n\n"
+                                        "Regards,\nMental Health Support System"
+                                    )
+                                    send_email_notification(mhwp_email, subject, message)
+                                    # print(f"Notification email sent to MHW: {mhwp_username}.")
+                                else:
+                                    print("Error: Could not retrieve MHW's email address.")
                             else:
                                 print("Failed to book the appointment. Try again.")
                         except ValueError:
@@ -303,7 +318,7 @@ def handle_patient_menu(user):
 
                 elif appointment_choice == "2":  # Cancel an appointment
                     try:
-                        # 加载并显示患者的预约
+                        # Load and display the patient's appointments
                         appointments = pd.read_csv("data/appointments.csv")
                         user_appointments = appointments[appointments['patient_username'] == user.username]
 
@@ -311,13 +326,13 @@ def handle_patient_menu(user):
                             print("No appointments found to cancel.")
                             continue
 
-                        # 显示预约列表
+                        # Display appointment list
                         print("\nYour current appointments:")
                         user_appointments = user_appointments.reset_index(drop=True)
                         user_appointments['ID'] = user_appointments.index + 1
                         print(user_appointments[['ID', 'date', 'timeslot', 'status']])
 
-                        # 输入编号取消预约
+                        # Enter the ID to cancel the appointment
                         appointment_id = input("\nEnter the ID of the appointment to cancel: ").strip()
                         try:
                             appointment_id = int(appointment_id) - 1
@@ -325,14 +340,28 @@ def handle_patient_menu(user):
                                 print("Invalid ID. Please try again.")
                                 continue
 
-                            # 获取选中的预约记录
+                            # Retrieve the selected appointment record
                             selected_appointment = user_appointments.iloc[appointment_id]
                             date = selected_appointment['date']
                             timeslot = selected_appointment['timeslot']
 
-                            # 取消预约
-                            if cancel_appointment(user,date, timeslot, "data/mhwp_schedule.csv", "data/appointments.csv"):
+                            # Cancel the appointment
+                            if cancel_appointment(user, date, timeslot, "data/mhwp_schedule.csv", "data/appointments.csv"):
                                 print("Appointment cancelled successfully!")
+
+                                # Send an email notification to the MHW
+                                mhwp_email = get_email_by_username(selected_appointment['mhwp_username'])
+                                if mhwp_email:
+                                    subject = "Appointment Cancelled"
+                                    message = (
+                                        f"Dear {selected_appointment['mhwp_username']},\n\n"
+                                        f"The appointment with {user.username} on {date} during {timeslot} has been cancelled by the patient.\n\n"
+                                        "Regards,\nMental Health Support System"
+                                    )
+                                    send_email_notification(mhwp_email, subject, message)
+                                    # print(f"Notification email sent to MHW: {selected_appointment['mhwp_username']}.")
+                                else:
+                                    print("Error: Could not retrieve MHW's email address.")
                             else:
                                 print("Failed to cancel the appointment.")
                         except ValueError:
@@ -348,6 +377,7 @@ def handle_patient_menu(user):
 
                 else:
                     print("Invalid choice. Please select a valid option.")
+
 
                         
         elif patient_choice == '7':  # Journaling
