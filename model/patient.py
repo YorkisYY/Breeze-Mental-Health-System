@@ -6,6 +6,7 @@ from services.questionnaire import submit_questionnaire,remind_to_complete_quest
 from services.journaling import enter_journaling
 from utils.notification import send_email_notification, get_email_by_username
 import pandas as pd
+from tabulate import tabulate  
 def book_appointment(user, date, timeslot, schedule_file, assignments_file, appointment_file):
     """
     Allow a patient to book an appointment with their assigned MHW.
@@ -158,7 +159,50 @@ def cancel_appointment(user, date, timeslot, schedule_file, appointment_file):
     except Exception as e:
         print(f"Unexpected error: {e}")
         return False
+def display_upcoming_appointments_for_patient(username, file_path):
+        """
+        Display the appointments for the next week for a patient.
+        """
+        if not os.path.exists(file_path):
+                print(f"Error: Appointment file '{file_path}' not found.")
+                return
 
+        try:
+                # Read appointments file
+                appointments_df = pd.read_csv(file_path)
+
+                # Ensure date format matches the file
+                appointments_df['date'] = pd.to_datetime(appointments_df['date'], format="%Y/%m/%d")
+
+                # Get today's date
+                today = pd.to_datetime("today").normalize()
+
+                # Filter for the next 7 days for the patient
+                upcoming_appointments = appointments_df[
+                        (appointments_df['patient_username'] == username) &
+                        (appointments_df['date'] >= today) &
+                        (appointments_df['date'] <= today + pd.Timedelta(days=7))
+                ]
+
+                if upcoming_appointments.empty:
+                        print("\nNo appointments found for the next week.")
+                        return
+
+                # Create a copy to avoid SettingWithCopyWarning
+                upcoming_appointments = upcoming_appointments.copy()
+
+                # Format the date column to remove time and ensure proper display
+                upcoming_appointments.loc[:, 'date'] = upcoming_appointments['date'].dt.strftime("%Y/%m/%d")
+
+                # Sort appointments by date and timeslot
+                upcoming_appointments = upcoming_appointments.sort_values(by=['date', 'timeslot'])
+
+                # Display the upcoming appointments without the index column
+                print(f"\nYour appointments for the next week:")
+                print(tabulate(upcoming_appointments, headers="keys", tablefmt="grid", showindex=False))
+
+        except Exception as e:
+                print(f"Error displaying appointments: {str(e)}")
 def handle_patient_menu(user):
     
     remind_to_complete_questionnaire(user.username)
@@ -171,15 +215,16 @@ def handle_patient_menu(user):
         print("4. Change emergency email")
         print("5. View Medical Records")
         print("6. Book/Cancel Appointment")
-        print("7. Enter a Journaling")
-        print("8. Submit a Mood Questionnaire")
-        print("9. Leave a Comment for Your MHWP")
-        print("10. Explore Meditation Resources")
-        print("11. Delete Account")
-        print("12. Track Mood")
-        print("13. Logout")
+        print("7. Check Appointments")
+        print("8. Enter a Journaling")
+        print("9. Submit a Mood Questionnaire")
+        print("10. Leave a Comment for Your MHWP")
+        print("11. Explore Meditation Resources")
+        print("12. Delete Account")
+        print("13. Track Mood")
+        print("14. Logout")
         
-        patient_choice = input("Select an option (1-13): ")
+        patient_choice = input("Select an option (1-14): ")
         
         if patient_choice == '1':
             try:
@@ -378,15 +423,26 @@ def handle_patient_menu(user):
                 else:
                     print("Invalid choice. Please select a valid option.")
 
-
+        elif patient_choice == '7':  # View upcoming appointments
+                while True:
+                        display_upcoming_appointments_for_patient(user.username, "data/appointments.csv")
                         
-        elif patient_choice == '7':  # Journaling
+                        
+                        print("\nPress '1' to return to the main menu.")
+                        return_choice = input("Enter your choice: ").strip()
+                        
+                        if return_choice == '1':
+                                break 
+                        else:
+                                print("Invalid choice. Please press '1' to return to the main menu.")
+
+        elif patient_choice == '8':  # Journaling
             enter_journaling(user.username)
                 
-        elif patient_choice == '8':  # Questionnaire
+        elif patient_choice == '9':  # Questionnaire
             submit_questionnaire(user.username)      
     
-        elif patient_choice == '9':  # Comment
+        elif patient_choice == '10':  # Comment
             mhwp_username = get_mhwp_for_patient(user.username)
             if mhwp_username:
                 try:
@@ -398,20 +454,20 @@ def handle_patient_menu(user):
             else:
                 print("Unable to find your MHWP. Comment not saved.")
                        
-        elif patient_choice == '10':  # Meditation
+        elif patient_choice == '11':  # Meditation
             handle_search_meditation()  
             
-        elif patient_choice == '11':
+        elif patient_choice == '12':
             confirm = input("Confirm delete account? (yes/no): ")
             if confirm.lower() == "yes":
                 user.delete_from_csv()
                 print("Account deleted successfully.")
                 break
             
-        elif patient_choice == '12':
+        elif patient_choice == '13':
             handle_mood_tracking(user)
             
-        elif patient_choice == '13':
+        elif patient_choice == '14':
             print("Logging out.")
             break
         

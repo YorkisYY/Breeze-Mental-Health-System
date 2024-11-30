@@ -2,7 +2,7 @@ import os
 import csv
 from tabulate import tabulate
 from os.path import exists
-
+import pandas as pd
 from datetime import datetime, timedelta
 import calendar
 from services.comment import view_comments
@@ -124,7 +124,9 @@ def generate_time_slots(start_hour=9, end_hour=16):
 
 
 def display_current_schedule(username, file_path):
-    """Display the current open schedule for the MHW"""
+    """
+    Display the current open schedule for the MHW for the next month.
+    """
     if not os.path.exists(file_path):
         print(f"Error: Schedule file '{file_path}' not found.")
         return
@@ -140,11 +142,56 @@ def display_current_schedule(username, file_path):
                 return
 
             # Print the user's schedule
-            print(f"\nCurrent Open Schedule for {username}:")
+            print(f"\nSchedule for the next month for {username}:")
             print(tabulate(user_data, headers=headers, tablefmt="grid"))
 
     except Exception as e:
         print(f"Error displaying schedule: {str(e)}")
+
+def display_upcoming_appointments(username, file_path):
+    """
+    Display the appointments for the next week for the MHW, sorted by date and time.
+    """
+    if not os.path.exists(file_path):
+        print(f"Error: Appointment file '{file_path}' not found.")
+        return
+
+    try:
+        # Read appointments file
+        appointments_df = pd.read_csv(file_path)
+
+        # Ensure date format matches the file
+        appointments_df['date'] = pd.to_datetime(appointments_df['date'], format="%Y/%m/%d")
+
+        # Get today's date
+        today = pd.to_datetime("today").normalize()
+
+        # Filter for the next 7 days and the current MHW
+        upcoming_appointments = appointments_df[
+            (appointments_df['mhwp_username'] == username) &
+            (appointments_df['date'] >= today) &
+            (appointments_df['date'] <= today + pd.Timedelta(days=7))
+        ]
+
+        if upcoming_appointments.empty:
+            print("\nNo appointments found for the next week.")
+            return
+
+        # Format the date column to remove time and ensure proper display
+        upcoming_appointments['date'] = upcoming_appointments['date'].dt.strftime("%Y/%m/%d")
+
+        # Drop the mhwp_username column
+        upcoming_appointments = upcoming_appointments.drop(columns=['mhwp_username'])
+
+        # Sort appointments by date and timeslot
+        upcoming_appointments = upcoming_appointments.sort_values(by=['date', 'timeslot'])
+
+        # Display the upcoming appointments without the index column
+        print(f"\nAppointments for the next week for {username}:")
+        print(tabulate(upcoming_appointments, headers="keys", tablefmt="grid", showindex=False))
+
+    except Exception as e:
+        print(f"Error displaying appointments: {str(e)}")
 
 
 
@@ -434,8 +481,26 @@ def handle_mhwp_menu(user):
         elif mhwp_choice == '7':  # Set up availability
             setup_mhwp_schedule(user)
 
-        elif mhwp_choice == '8':  # View current schedule
-            display_current_schedule(user.username, "data/mhwp_schedule.csv")
+        elif mhwp_choice == '8':  # Schedule and Appointment Management
+            
+            while True:
+                print("\nSchedule and Appointment Management:")
+                print("1. View schedule for the next month")
+                print("2. View appointments for the next week")
+                print("3. Back to main menu")
+
+                schedule_choice = input("Select an option (1-3): ").strip()
+
+                if schedule_choice == "1":  # View schedule for the next month
+                    display_current_schedule(user.username, "data/mhwp_schedule.csv")
+                elif schedule_choice == "2":  # View appointments for the next week
+                    display_upcoming_appointments(user.username, "data/appointments.csv")
+                elif schedule_choice == "3":  # Back to main menu
+                    print("Returning to main menu...")
+                    break
+                else:
+                    print("Invalid choice. Please select a valid option.")
+
 
         elif mhwp_choice == '9':  # Modify Your Availability
             while True:
