@@ -159,50 +159,62 @@ def cancel_appointment(user, date, timeslot, schedule_file, appointment_file):
     except Exception as e:
         print(f"Unexpected error: {e}")
         return False
-def display_upcoming_appointments_for_patient(username, file_path):
-        """
-        Display the appointments for the next week for a patient.
-        """
-        if not os.path.exists(file_path):
-                print(f"Error: Appointment file '{file_path}' not found.")
-                return
+def display_upcoming_appointments_with_mhwp(patient_username, appointments_file, assignments_file):
+    """
+    Display upcoming appointments for a patient with MHW names included.
+    """
+    try:
+        # Load assignments to get MHW for the patient
+        assignments = pd.read_csv(assignments_file, header=None, names=["patient_username", "mhwp_username"])
+        mhwp_record = assignments[assignments['patient_username'] == patient_username]
+        if mhwp_record.empty:
+            print(f"No assigned MHW found for patient '{patient_username}'.")
+            return
+        mhwp_username = mhwp_record.iloc[0]['mhwp_username']
 
-        try:
-                # Read appointments file
-                appointments_df = pd.read_csv(file_path)
+        # Load appointments for the patient
+        appointments = pd.read_csv(appointments_file)
+        user_appointments = appointments[appointments['patient_username'] == patient_username]
 
-                # Ensure date format matches the file
-                appointments_df['date'] = pd.to_datetime(appointments_df['date'], format="%Y/%m/%d")
+        if user_appointments.empty:
+            print("\nNo appointments found for the next week.")
+            return
 
-                # Get today's date
-                today = pd.to_datetime("today").normalize()
+        # Add MHW username column
+        user_appointments['mhwp_username'] = mhwp_username
 
-                # Filter for the next 7 days for the patient
-                upcoming_appointments = appointments_df[
-                        (appointments_df['patient_username'] == username) &
-                        (appointments_df['date'] >= today) &
-                        (appointments_df['date'] <= today + pd.Timedelta(days=7))
-                ]
+        # Convert dates to datetime and filter for the next week
+        user_appointments['date'] = pd.to_datetime(user_appointments['date'], format="%Y/%m/%d")
+        today = pd.to_datetime("today").normalize()
+        next_week = today + pd.Timedelta(days=7)
+        upcoming_appointments = user_appointments[
+            (user_appointments['date'] >= today) & (user_appointments['date'] <= next_week)
+        ]
 
-                if upcoming_appointments.empty:
-                        print("\nNo appointments found for the next week.")
-                        return
+        if upcoming_appointments.empty:
+            print("\nNo appointments found for the next week.")
+            return
 
-                # Create a copy to avoid SettingWithCopyWarning
-                upcoming_appointments = upcoming_appointments.copy()
+        # Format and sort
+        upcoming_appointments = upcoming_appointments.copy()  # Avoid SettingWithCopyWarning
+        upcoming_appointments['date'] = upcoming_appointments['date'].dt.strftime("%Y/%m/%d")
+        upcoming_appointments = upcoming_appointments.sort_values(by=['date', 'timeslot'])
 
-                # Format the date column to remove time and ensure proper display
-                upcoming_appointments.loc[:, 'date'] = upcoming_appointments['date'].dt.strftime("%Y/%m/%d")
+        # Display the table
+        print("\nYour appointments for the next week:")
+        print(tabulate(
+            upcoming_appointments[['date', 'mhwp_username', 'timeslot', 'status']],
+            headers=['Date', 'MHWP', 'Time Slot', 'Status'],
+            tablefmt="grid",
+            showindex=False
+        ))
 
-                # Sort appointments by date and timeslot
-                upcoming_appointments = upcoming_appointments.sort_values(by=['date', 'timeslot'])
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
 
-                # Display the upcoming appointments without the index column
-                print(f"\nYour appointments for the next week:")
-                print(tabulate(upcoming_appointments, headers="keys", tablefmt="grid", showindex=False))
 
-        except Exception as e:
-                print(f"Error displaying appointments: {str(e)}")
 def handle_patient_menu(user):
     
     remind_to_complete_questionnaire(user.username)
@@ -424,17 +436,22 @@ def handle_patient_menu(user):
                     print("Invalid choice. Please select a valid option.")
 
         elif patient_choice == '7':  # View upcoming appointments
-                while True:
-                        display_upcoming_appointments_for_patient(user.username, "data/appointments.csv")
-                        
-                        
-                        print("\nPress '1' to return to the main menu.")
-                        return_choice = input("Enter your choice: ").strip()
-                        
-                        if return_choice == '1':
-                                break 
-                        else:
-                                print("Invalid choice. Please press '1' to return to the main menu.")
+            while True:
+                display_upcoming_appointments_with_mhwp(
+                    user.username, 
+                    "data/appointments.csv", 
+                    "data/assignments.csv"
+                )
+                
+                # Prompt user to return to main menu
+                print("\nPress '1' to return to the main menu.")
+                return_choice = input("Enter your choice: ").strip()
+                
+                if return_choice == '1':
+                    break  # Return to main menu
+                else:
+                    print("Invalid choice. Please press '1' to return to the main menu.")
+
 
         elif patient_choice == '8':  # Journaling
             enter_journaling(user.username)
