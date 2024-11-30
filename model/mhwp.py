@@ -63,11 +63,11 @@ def list_appointments_for_mhw(mhw_username, file_path):
             # Only print table if records exist
             print("\nAppointments for MHW:", mhw_username)
             print("------------------------------------------------------------------")
-            print("ID | Patient      | Date       | Start  | End    | Status")
+            print("ID | Patient      | Date       | Start - End    | Status")
             print("------------------------------------------------------------------")
             for idx, row in enumerate(appointments, start=1):
                 print(
-                    f"{idx:2d} | {row['patient_username']:<10} | {row['date']} | {row['start_time']} | {row['end_time']} | {row['status']}")
+                    f"{idx:2d} | {row['patient_username']:<10} | {row['date']} | {row['timeslot']} | {row['status']}")
 
     except Exception as e:
         print(f"Error reading appointments: {str(e)}")
@@ -327,6 +327,7 @@ def handle_mhwp_menu(user):
 
 
         elif mhwp_choice == '6':  # Manage Appointments
+            import pandas as pd
             while True:
                 print("\nManage Appointments:")
                 print("1. View all appointments")
@@ -384,7 +385,7 @@ def handle_mhwp_menu(user):
                                         if action == "confirm":
                                             schedule_df.loc[schedule_filter, time_slot_column] = "●"  # Mark as confirmed
                                         elif action == "cancel":
-                                            schedule_df.loc[schedule_filter, time_slot_column] = "□"  # Mark as available
+                                            schedule_df.loc[schedule_filter, time_slot_column] = "■"  # Mark as available
                                         schedule_df.to_csv("data/mhwp_schedule.csv", index=False)
                                         print(f"Schedule updated: time slot '{selected_appointment['timeslot']}' updated for {action}.")
                                     except FileNotFoundError:
