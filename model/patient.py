@@ -49,12 +49,12 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
         except FileNotFoundError:
             print("Error: mhwp_schedule.csv file not found.")
             return False
-        
+
         # Check for conflicting appointments in appointments.csv
         try:
             appointments = pd.read_csv(appointment_file)
         except FileNotFoundError:
-            appointments = pd.DataFrame(columns=['patient_username', 'mhwp_username', 'date', 'timeslot', 'status'])
+            appointments = pd.DataFrame(columns=['id', 'patient_username', 'mhwp_username', 'date', 'timeslot', 'status'])
 
         # Check for overlapping appointments
         overlapping_appointment = appointments[
@@ -65,9 +65,17 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
         if not overlapping_appointment.empty:
             print(f"The selected time slot '{timeslot}' overlaps with an existing appointment. Please choose another.")
             return False
-        
+
+        # Generate a sequential ID for the appointment
+        if not appointments.empty:
+            last_id = appointments['id'].max()  # Get the highest current ID
+            appointment_id = last_id + 1
+        else:
+            appointment_id = 1
+
         # Record the new appointment in appointments.csv
         new_appointment = {
+            "id": appointment_id,  # Add sequential ID
             "patient_username": user.username,
             "mhwp_username": mhwp_username,
             "date": date,
@@ -92,7 +100,7 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
             print(f"Error updating schedule: {e}")
             return False
 
-        #print("Appointment booked successfully!")
+        print(f"Appointment successfully booked with ID: {appointment_id}")
         return True
 
     except Exception as e:
@@ -100,37 +108,33 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
         return False
 
 
-def cancel_appointment(user, date, timeslot, schedule_file, appointment_file):
+
+def cancel_appointment(user, appointment_id, schedule_file, appointment_file):
     """
-    Allow a patient to cancel their appointment.
+    Allow a patient to cancel their appointment by appointment ID.
     Updates mhwp_schedule.csv to mark the slot as available (■).
     """
-    if user.role != "patient":
-        print("Only patients can cancel appointments.")
-        return False
-
-    if not user.username:
-        print("Error: username is not set. Please log in or register.")
-        return False
-
     try:
         # Load appointments.csv
         appointments = pd.read_csv(appointment_file)
-        appointment_filter = (appointments['patient_username'] == user.username) & \
-                             (appointments['date'] == date) & \
-                             (appointments['timeslot'] == timeslot)
+        
+        # Ensure the appointment ID exists and matches the user
+        appointment_filter = (appointments['id'] == appointment_id) & \
+                             (appointments['patient_username'] == user.username)
 
         if not appointment_filter.any():
-            print("No matching appointment found.")
+            print(f"No matching appointment found for appointment ID: {appointment_id}.")
             return False
 
-        # Retrieve MHW username from the appointment
-        mhwp_username = appointments.loc[appointment_filter, 'mhwp_username'].values[0]
+        # Retrieve appointment details
+        appointment_row = appointments.loc[appointment_filter].iloc[0]
+        mhwp_username = appointment_row['mhwp_username']
+        date = appointment_row['date']
+        timeslot = appointment_row['timeslot']
 
         # Cancel the appointment
         appointments.loc[appointment_filter, 'status'] = 'cancelled'
         appointments.to_csv(appointment_file, index=False)
-        #print("Appointment cancelled successfully!")
 
         # Update mhwp_schedule.csv to mark the slot as available (■)
         try:
@@ -151,6 +155,7 @@ def cancel_appointment(user, date, timeslot, schedule_file, appointment_file):
             print(f"Error updating schedule: {e}")
             return False
 
+        print("Appointment cancelled successfully!")
         return True
 
     except FileNotFoundError:
@@ -159,6 +164,9 @@ def cancel_appointment(user, date, timeslot, schedule_file, appointment_file):
     except Exception as e:
         print(f"Unexpected error: {e}")
         return False
+
+    
+
 def display_upcoming_appointments_with_mhwp(patient_username, appointments_file, assignments_file):
     """
     Display upcoming appointments for a patient with MHW names included.
@@ -382,26 +390,25 @@ def handle_patient_menu(user):
 
                         # Display appointment list
                         print("\nYour current appointments:")
-                        user_appointments = user_appointments.reset_index(drop=True)
-                        user_appointments['ID'] = user_appointments.index + 1
-                        print(user_appointments[['ID', 'date', 'timeslot', 'status']])
+                        user_appointments = user_appointments[['id', 'date', 'timeslot', 'status', 'mhwp_username']]
+                        print(tabulate(user_appointments, headers='keys', tablefmt='grid', showindex=False))
 
                         # Enter the ID to cancel the appointment
                         appointment_id = input("\nEnter the ID of the appointment to cancel: ").strip()
                         try:
-                            appointment_id = int(appointment_id) - 1
-                            if appointment_id < 0 or appointment_id >= len(user_appointments):
+                            appointment_id = int(appointment_id)
+                            if appointment_id not in user_appointments['id'].values:
                                 print("Invalid ID. Please try again.")
                                 continue
 
                             # Retrieve the selected appointment record
-                            selected_appointment = user_appointments.iloc[appointment_id]
+                            selected_appointment = user_appointments[user_appointments['id'] == appointment_id].iloc[0]
                             date = selected_appointment['date']
                             timeslot = selected_appointment['timeslot']
 
                             # Cancel the appointment
-                            if cancel_appointment(user, date, timeslot, "data/mhwp_schedule.csv", "data/appointments.csv"):
-                                print("Appointment cancelled successfully!")
+                            if cancel_appointment(user, appointment_id, "data/mhwp_schedule.csv", "data/appointments.csv"):
+                                # print("Appointment cancelled successfully!")
 
                                 # Send an email notification to the MHW
                                 mhwp_email = get_email_by_username(selected_appointment['mhwp_username'])
@@ -413,7 +420,6 @@ def handle_patient_menu(user):
                                         "Regards,\nMental Health Support System"
                                     )
                                     send_email_notification(mhwp_email, subject, message)
-                                    # print(f"Notification email sent to MHW: {selected_appointment['mhwp_username']}.")
                                 else:
                                     print("Error: Could not retrieve MHW's email address.")
                             else:
@@ -424,6 +430,7 @@ def handle_patient_menu(user):
                         print("Error: appointments.csv not found.")
                     except Exception as e:
                         print(f"Unexpected error: {e}")
+
 
                 elif appointment_choice == "3":  # Return to main menu
                     print("Returning to main menu...")
