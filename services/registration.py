@@ -13,19 +13,9 @@ def is_valid_email(email):
 
 # Check if the username is unique for a specific role
 def is_username_unique(username, role):
-    """Check if the username is unique for the given role."""
     if os.path.exists(USER_DATA_PATH):
         df = pd.read_csv(USER_DATA_PATH)
         if not df[(df['username'] == username) & (df['role'] == role)].empty:
-            return False
-    return True
-
-# Check if the username is unique globally across all roles
-def is_username_unique_global(username):
-    """Check if the username is unique globally."""
-    if os.path.exists(USER_DATA_PATH):
-        df = pd.read_csv(USER_DATA_PATH)
-        if not df[df['username'] == username].empty:
             return False
     return True
 
@@ -144,9 +134,9 @@ def register_user():
 
     # Create a new user instance and save it
     if role == "mhwp":
-        new_user = User(username, password, role, email, emergency_email, major=major)
+        new_user = User(username, password, role, email, emergency_email, None, major)
     elif role == "patient":
-        new_user = User(username, password, role, email, emergency_email, symptoms=symptoms)
+        new_user = User(username, password, role, email, emergency_email, symptoms, None)
     else:
         new_user = User(username, password, role, email, emergency_email)
     
