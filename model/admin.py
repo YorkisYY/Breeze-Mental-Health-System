@@ -2,24 +2,27 @@ import os
 import csv
 from tabulate import tabulate
 import random
+from config import USER_DATA_PATH
+from config import PATIENTS_DATA_PATH
+from config import MHWP_DATA_PATH
 
 MATCHING_RULES = {
     "Emotional Management": {"Anxiety", "Depression", "PTSD", "Bipolar Disorder"},
     "Behavioral Therapy": {"OCD", "ADHD", "Eating Disorder", "Substance Abuse"},
     "Severe Disorders": {"Schizophrenia", "Borderline Personality Disorder"},
     "General Wellbeing": {"Other/General Wellbeing"}
-
-def get_patients_with_symptoms(patient_data_path="data/patients.csv"):
+}
+def get_patients_with_symptoms(PATIENTS_DATA_PATH="data/patients.csv"):
     """
     Get a dictionary of patients with their symptoms from patients.csv.
     """
     patients = {}
-    if not os.path.exists(patient_data_path):
-        print(f"Error: Patient data file '{patient_data_path}' not found.")
+    if not os.path.exists(PATIENTS_DATA_PATH):
+        print(f"Error: Patient data file '{PATIENTS_DATA_PATH}' not found.")
         return patients
 
     try:
-        with open(patient_data_path, "r", encoding="utf-8") as file:
+        with open(PATIENTS_DATA_PATH, "r", encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for row in reader:
                 patients[row["username"]] = row["symptoms"]
@@ -607,4 +610,3 @@ def handle_admin_menu(user):
 
         else:
             print("Invalid choice, please try again.")
-}
