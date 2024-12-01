@@ -125,28 +125,62 @@ def generate_time_slots(start_hour=9, end_hour=16):
 
 def display_current_schedule(username, file_path):
     """
-    Display the current open schedule for the MHW for the next month.
+    Display the current open schedule for the MHW for the next month with pagination.
     """
     if not os.path.exists(file_path):
         print(f"Error: Schedule file '{file_path}' not found.")
         return
 
     try:
+        # Read schedule data
         with open(file_path, "r", encoding="utf-8") as file:
             reader = csv.reader(file)
             headers = next(reader)  # Get headers
             user_data = [row for row in reader if row[0] == username]
 
-            if not user_data:
-                print("\nNo available schedule found for your account. Please set up your availability.")
-                return
+        if not user_data:
+            print("\nNo available schedule found for your account. Please set up your availability.")
+            return
 
-            # Print the user's schedule
-            print(f"\nSchedule for the next month for {username}:")
-            print(tabulate(user_data, headers=headers, tablefmt="grid"))
+        # Pagination logic
+        page_size = 10
+        current_page = 0
+        total_pages = (len(user_data) + page_size - 1) // page_size  # Calculate total pages
+
+        while True:
+            start_index = current_page * page_size
+            end_index = start_index + page_size
+            page_data = user_data[start_index:end_index]
+
+            print(f"\nSchedule for the next month for {username} (Page {current_page + 1} of {total_pages}):")
+            print(tabulate(page_data, headers=headers, tablefmt="grid"))
+
+            # Pagination controls
+            print("\nOptions:")
+            print("1. Next page")
+            print("2. Previous page")
+            print("3. Return to main menu")
+
+            choice = input("Select an option (1/2/3): ").strip()
+            if choice == "1":
+                if current_page < total_pages - 1:
+                    current_page += 1
+                else:
+                    print("This is the last page.")
+            elif choice == "2":
+                if current_page > 0:
+                    current_page -= 1
+                else:
+                    print("This is the first page.")
+            elif choice == "3":
+                print("Returning to main menu...")
+                break
+            else:
+                print("Invalid choice. Please select a valid option.")
 
     except Exception as e:
         print(f"Error displaying schedule: {str(e)}")
+
 
 def display_upcoming_appointments(username, file_path):
     """
@@ -456,10 +490,10 @@ def handle_mhwp_menu(user):
                                                 f"Dear {selected_appointment['patient_username']},\n\n"
                                                 f"Your appointment with {user.username} on {selected_appointment['date']} "
                                                 f"at {selected_appointment['timeslot']} has been cancelled.\n\n"
-                                                "Regards,\nMental Health Support System"
+                                                "Regards,\nBreeze Mental Health Support System"
                                             )
                                         send_email_notification(patient_email, subject, message)
-                                        # print(f"Notification email sent to {selected_appointment['patient_username']}.")
+                                        
                                     else:
                                         print("Error: Could not retrieve patient's email address.")
                                 else:
@@ -493,7 +527,7 @@ def handle_mhwp_menu(user):
 
                 if schedule_choice == "1":  # View schedule for the next month
                     display_current_schedule(user.username, "data/mhwp_schedule.csv")
-                elif schedule_choice == "2":  # View appointments for the next week
+                elif schedule_choice == "2":  # View detailed appointments for the next week
                     display_upcoming_appointments(user.username, "data/appointments.csv")
                 elif schedule_choice == "3":  # Back to main menu
                     print("Returning to main menu...")
