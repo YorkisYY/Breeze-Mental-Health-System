@@ -154,7 +154,14 @@ def display_current_schedule(username, file_path):
 
             print(f"\nSchedule for the next month for {username} (Page {current_page + 1} of {total_pages}):")
             print(tabulate(page_data, headers=headers, tablefmt="grid"))
-
+           
+            # Legend for symbols
+            print("\nLegend:")
+            print("■ - Available")
+            print("□ - Unavailable")
+            print("▲ - Booked")
+            print("● - Confirmed Appointment")
+            
             # Pagination controls
             print("\nOptions:")
             print("1. Next page")
