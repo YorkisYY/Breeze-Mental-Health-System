@@ -623,8 +623,8 @@ class User:
             # Mapping of files and fields to update
             updates = {
                 'user_data.csv': ['username'],
-                'patients.csv': ['username', 'assigned_mhwp'] if role == 'mhwp' else None,
-                'mhwp.csv': ['username', 'assigned_patients'] if role == 'mhwp' else None,
+                'patients.csv': ['assigned_mhwp'] if role == 'mhwp' else['username'] if role == 'patient'else None, 
+                'mhwp.csv': ['username'] if role == 'mhwp' else ['assigned_patients'] if role == 'patient' else None,
                 'mood_data.csv': ['username'] if role == 'patient' else None,  
                 'appointments.csv': ['patient_username', 'mhwp_username'],
                 'assignments.csv': ['patient_username', 'mhwp_username'],

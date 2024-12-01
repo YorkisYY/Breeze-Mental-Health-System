@@ -353,10 +353,10 @@ def setup_mhwp_schedule(user):
 def handle_mhwp_menu(user):
     while True:
         print("\nMental Health Worker Options:")
-        print("1. Update Personal Info")
+        print("1. Update Personal Info (Username)")
         print("2. Change Password")
-        print("3. Change email")
-        print("4. Change emergency email")
+        print("3. Change Email")
+        print("4. Change Emergency Email")
         print("5. View Patient Records")
         print("6. Manage Appointments")
         print("7. Set Up Your Availability")
@@ -367,52 +367,67 @@ def handle_mhwp_menu(user):
 
         mhwp_choice = input("Select an option (1-11): ").strip()
 
-        if mhwp_choice == '1':
+        if mhwp_choice == '1':  # Update username
             try:
                 new_username = input("Enter new username: ").strip()
                 if not new_username:
                     print("Username cannot be empty.")
                     continue
-                    
+
                 import pandas as pd
                 from config import USER_DATA_PATH
                 
+                
                 user_df = pd.read_csv(USER_DATA_PATH)
-                if new_username in user_df[user_df['username'] != user.username]['username'].values:
+                if new_username in user_df['username'].values:
                     print("Username already exists. Please choose a different one.")
                     continue
-                    
+
+               
                 if user.update_info(new_username=new_username):
                     print(f"Username successfully updated to {new_username}")
                 else:
                     print("Failed to update username. Please try again.")
             except Exception as e:
                 print(f"Error updating username: {str(e)}")
-            
-        elif mhwp_choice == '2':
+        
+        elif mhwp_choice == '2':  # Change password
             new_password = input("Enter new password: ").strip()
+            user.update_password(new_password)
+
             if user.update_info(new_password=new_password):
                 print("Password updated successfully!")
             else:
                 print("Failed to update password. Try again.")
-            
-        elif mhwp_choice == '3':
+
+        elif mhwp_choice == '3':  # Change email
             new_email = input("Enter new email: ").strip()
+            if not new_email:  
+                print("Email cannot be empty. Please try again.")
+                continue
+
             if user.update_info(new_email=new_email):
                 print("Email updated successfully!")
             else:
                 print("Failed to update email. Try again.")
                 
-        elif mhwp_choice == '4':
+        elif mhwp_choice == '4':  # Change emergency email
             new_emergency_email = input("Enter new emergency email: ").strip()
+            if not new_emergency_email:  
+                print("Emergency email cannot be empty. Please try again.")
+                continue
+
             if user.update_info(new_emergency_email=new_emergency_email):
                 print("Emergency email updated successfully!")
             else:
                 print("Failed to update emergency email. Try again.")
 
         elif mhwp_choice == '5':  # View Patient Records
-            view_patient_records(user.username)
-
+            try:
+                print("\nViewing patient records...")
+                view_patient_records(user.username)  
+            except Exception as e:
+                print(f"Error viewing patient records: {str(e)}")
 
         elif mhwp_choice == '6':  # Manage Appointments
             import pandas as pd
