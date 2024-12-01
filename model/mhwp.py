@@ -546,41 +546,61 @@ def handle_mhwp_menu(user):
         elif mhwp_choice == '9':  # Modify Your Availability
             while True:
                 print("\nModify Your Availability Options:")
-                print("1. Take a Leave (Delete specific dates)")
+                print("1. Take a Leave (Adjust availability for specific dates)")
                 print("2. Change Time Slots for Specific Dates")
                 print("3. Back to main menu")
 
                 modify_choice = input("Select an option (1-3): ").strip()
 
                 if modify_choice == '1':  # Take a Leave
+                    import pandas as pd
                     leave_dates = input("\nEnter the dates you want to take leave for (YYYY/MM/DD), separated by commas: ").strip()
                     leave_dates = [date.strip() for date in leave_dates.split(",")]
 
-                    # Process leave dates
+                    # File path for schedule data
                     file_path = "data/mhwp_schedule.csv"
 
                     try:
-                        with open(file_path, "r", encoding="utf-8") as file:
-                            reader = csv.reader(file)
-                            headers = next(reader)  # Read headers
-                            all_schedules = list(reader)
+                        schedule_df = pd.read_csv(file_path)
 
-                        # Keep all other users' schedules
-                        other_users = [row for row in all_schedules if row[0] != user.username]
-                        # Filter out leave dates for the current user
-                        updated_user_schedule = [row for row in all_schedules if row[0] == user.username and row[1] not in leave_dates]
+                        # Filter schedules for the current user
+                        user_schedule = schedule_df[schedule_df['mhwp_username'] == user.username]
 
-                        # Combine updated user schedule with other users
-                        updated_schedules = other_users + updated_user_schedule
+                        if user_schedule.empty:
+                            print(f"No schedule found for user '{user.username}'.")
+                            continue
 
-                        # Save the updated schedule back to the file
-                        with open(file_path, "w", newline='', encoding="utf-8") as file:
-                            writer = csv.writer(file)
-                            writer.writerow(headers)  # Write headers
-                            writer.writerows(updated_schedules)  # Write updated data
-                        print("\nUpdated Schedule (Remaining Dates):")
-                        print(tabulate(updated_user_schedule, headers=headers, tablefmt="grid"))
-                        print("\nYour leave request has been saved successfully!")
+                        # Check for booked or confirmed time slots on leave dates
+                        conflicts = []
+                        for date in leave_dates:
+                            if date in user_schedule['Date'].values:
+                                day_schedule = user_schedule[user_schedule['Date'] == date]
+                                for col in day_schedule.columns[3:]:  # Time slot columns
+                                    if day_schedule.iloc[0][col] in ["●", "▲"]:  # Check for booked or confirmed
+                                        conflicts.append(date)
+                                        break
+
+                        if conflicts:
+                            print("\nYou have booked or confirmed time slots on the following dates:")
+                            for conflict in conflicts:
+                                print(f" - {conflict}")
+                            print("Please cancel all bookings on these dates before taking leave.")
+                            continue
+
+                        # Modify availability for the selected dates
+                        for date in leave_dates:
+                            if date in user_schedule['Date'].values:
+                                schedule_df.loc[
+                                    (schedule_df['mhwp_username'] == user.username) & (schedule_df['Date'] == date),
+                                    schedule_df.columns[3:]  # Adjust all time slots
+                                ] = "□"  # Mark all time slots as unavailable
+
+                        # Save the updated schedule
+                        schedule_df.to_csv(file_path, index=False)
+                        print("\nYour availability has been updated. All available slots for the selected dates are now unavailable.")
+
+                    except FileNotFoundError:
+                        print(f"Error: File '{file_path}' not found.")
                     except Exception as e:
                         print(f"Error processing leave request: {str(e)}")
 
