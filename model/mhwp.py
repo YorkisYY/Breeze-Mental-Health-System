@@ -63,7 +63,7 @@ def list_appointments_for_mhw(mhw_username, file_path):
             # Only print table if records exist
             print("\nAppointments for MHW:", mhw_username)
             print("------------------------------------------------------------------")
-            print("ID | Patient      | Date       | Start - End    | Status")
+            print("No. | Patient      | Date       | Start - End    | Status")
             print("------------------------------------------------------------------")
             for idx, row in enumerate(appointments, start=1):
                 print(
@@ -394,7 +394,7 @@ def handle_mhwp_menu(user):
                     if not appointments:
                         continue  # Return to appointment management menu
 
-                    appointment_id = input("Enter the ID of the appointment to manage: ").strip()
+                    appointment_id = input("Enter the No. of the appointment to manage: ").strip()
                     try:
                         appointment_id = int(appointment_id) - 1
                         if 0 <= appointment_id < len(appointments):
@@ -459,7 +459,7 @@ def handle_mhwp_menu(user):
                                                 "Regards,\nMental Health Support System"
                                             )
                                         send_email_notification(patient_email, subject, message)
-                                        print(f"Notification email sent to {selected_appointment['patient_username']}.")
+                                        # print(f"Notification email sent to {selected_appointment['patient_username']}.")
                                     else:
                                         print("Error: Could not retrieve patient's email address.")
                                 else:
