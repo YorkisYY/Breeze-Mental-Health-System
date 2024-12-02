@@ -42,24 +42,25 @@ def display_mhwp_schedule_for_patient(user, schedule_file, assignments_file):
         # Remove the mhwp_username column for display
         mhwp_schedule = mhwp_schedule.drop(columns=["mhwp_username"])
 
-        # Replace symbols with "Available" or "Unavailable"
+        # Replace symbols with "Available" or "Unavailable" only for display purposes
         availability_columns = [
             "09:00-10:00 (0)", "10:00-11:00 (1)", "11:00-12:00 (2)",
             "12:00-13:00 (3)", "13:00-14:00 (4)", "14:00-15:00 (5)", "15:00-16:00 (6)"
         ]
+        display_schedule = mhwp_schedule.copy()
         for col in availability_columns:
-            if col in mhwp_schedule.columns:
-                mhwp_schedule[col] = mhwp_schedule[col].apply(lambda x: "Available" if x == "■" else "Unavailable")
+            if col in display_schedule.columns:
+                display_schedule[col] = display_schedule[col].replace({"■": "Available", "□": "Unavailable", "●": "Unavailable", "▲": "Unavailable"})
 
         # Paginate schedule (10 rows per page)
         page_size = 10
-        total_pages = (len(mhwp_schedule) + page_size - 1) // page_size
+        total_pages = (len(display_schedule) + page_size - 1) // page_size
         current_page = 1
 
         while True:
             start_idx = (current_page - 1) * page_size
             end_idx = start_idx + page_size
-            page_data = mhwp_schedule.iloc[start_idx:end_idx]
+            page_data = display_schedule.iloc[start_idx:end_idx]
 
             print(f"\nSchedule (Page {current_page}/{total_pages}):")
             print(tabulate(page_data, headers="keys", tablefmt="grid", showindex=False))
@@ -100,8 +101,6 @@ def display_mhwp_schedule_for_patient(user, schedule_file, assignments_file):
         print(f"Unexpected error: {e}")
 
 
-
-
 def display_available_time_slots(schedule_row):
     """
     Display available time slots for a given day in the schedule.
@@ -116,20 +115,26 @@ def display_available_time_slots(schedule_row):
 
         for idx, slot in enumerate(time_slots):
             column_name = f"{slot} ({idx})"
-            if schedule_row[column_name] == "■":
-                available_slots.append((idx, slot))
+            if column_name in schedule_row and schedule_row[column_name] == "■":
+                available_slots.append((len(available_slots) + 1, slot))  # Use 1-based index for display
 
         if not available_slots:
             print("No available time slots.")
             return None
 
-        for idx, slot in available_slots:
-            print(f"{idx + 1}. {slot}")
+        # Display all available slots with user-friendly numbers
+        for user_idx, slot in available_slots:
+            print(f"{user_idx}. {slot}")
+
         return available_slots
 
+    except KeyError as e:
+        print(f"Error processing schedule row: Missing column {e}")
+        return None
     except Exception as e:
         print(f"Error displaying available time slots: {e}")
         return None
+
 
 
 def select_time_slot_and_book(user, date, mhwp_username, available_slots, schedule_file, assignments_file, appointment_file):
@@ -137,31 +142,36 @@ def select_time_slot_and_book(user, date, mhwp_username, available_slots, schedu
     Allow the user to select a time slot and book the appointment.
     """
     try:
-        slot_idx = input("Enter the slot number to book: ").strip()
-        slot_idx = int(slot_idx) - 1
-        if 0 <= slot_idx < len(available_slots):
-            timeslot = available_slots[slot_idx][1]
-            if book_appointment(user, date, timeslot, schedule_file, assignments_file, appointment_file):
-                print("Appointment booked successfully!")
+        slot_input = input("Enter the slot number to book: ").strip()
+        try:
+            user_selected_idx = int(slot_input)  # User-facing index (1-based)
+            selected_slot = next((slot for user_idx, slot in available_slots if user_idx == user_selected_idx), None)
 
-                # Notify the MHW
-                mhwp_email = get_email_by_username(mhwp_username)
-                if mhwp_email:
-                    subject = "New Appointment Booked"
-                    message = (
-                        f"Dear {mhwp_username},\n\n"
-                        f"An appointment has been booked by {user.username} on {date} during {timeslot}.\n\n"
-                        "Regards,\nBreeze Mental Health Support System"
-                    )
-                    send_email_notification(mhwp_email, subject, message)
+            if selected_slot:
+                timeslot = selected_slot  # Retrieve the actual time slot
+                if book_appointment(user, date, timeslot, schedule_file, assignments_file, appointment_file):
+                    print("Appointment booked successfully!")
+
+                    # Notify the MHW
+                    mhwp_email = get_email_by_username(mhwp_username)
+                    if mhwp_email:
+                        subject = "New Appointment Booked"
+                        message = (
+                            f"Dear {mhwp_username},\n\n"
+                            f"An appointment has been booked by {user.username} on {date} during {timeslot}.\n\n"
+                            "Regards,\nBreeze Mental Health Support System"
+                        )
+                        send_email_notification(mhwp_email, subject, message)
+                    else:
+                        print("Error: Could not retrieve MHW's email address.")
                 else:
-                    print("Error: Could not retrieve MHW's email address.")
+                    print("Failed to book the appointment.")
             else:
-                print("Failed to book the appointment.")
-        else:
-            print("Invalid slot number. Please try again.")
-    except ValueError:
-        print("Invalid input. Please enter a valid slot number.")
+                print("Invalid slot number. Please try again.")
+        except ValueError:
+            print("Invalid input. Please enter a valid slot number.")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
 
 
 
@@ -170,12 +180,11 @@ def book_appointment_with_schedule(user, schedule_file, assignments_file, appoin
     Main function to book an appointment through schedule navigation.
     """
     try:
-        # Call display_mhwp_schedule_for_patient with all required arguments
         selected_date = display_mhwp_schedule_for_patient(user, schedule_file, assignments_file)
         if selected_date is None:
             return  # User chose to return to the main menu
 
-        # Load the assigned MHW for the patient
+        # Retrieve the assigned MHW for the patient
         assignments = pd.read_csv(assignments_file, header=None, names=["patient_username", "mhwp_username"])
         mhwp_record = assignments[assignments['patient_username'] == user.username]
         if mhwp_record.empty:
@@ -546,7 +555,7 @@ def handle_patient_menu(user):
 
         elif patient_choice == '6':  # Book/Cancel appointment
             import pandas as pd
-            from utils.notification import send_email_notification, get_email_by_username
+            
             while True:
                 print("\nBook/Cancel Appointment:")
                 print("1. Book an appointment")
@@ -562,7 +571,10 @@ def handle_patient_menu(user):
 
                 elif appointment_choice == "2":  # Cancel an appointment
                     cancel_appointment_with_display(user, "data/mhwp_schedule.csv", "data/appointments.csv")
-
+                
+                elif appointment_choice == "3":  # Return to main menu
+                    print("Returning to main menu...")
+                    break
         elif patient_choice == '7':  # View upcoming appointments
             while True:
                 display_upcoming_appointments_with_mhwp(
