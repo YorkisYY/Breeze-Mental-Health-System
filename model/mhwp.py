@@ -191,7 +191,7 @@ def display_current_schedule(username, file_path):
 
 def display_upcoming_appointments(username, file_path):
     """
-    Display the appointments for the next week for the MHW, sorted by date and time.
+    Display the confirmed and pending appointments for the next week for the MHW, sorted by date and time.
     """
     if not os.path.exists(file_path):
         print(f"Error: Appointment file '{file_path}' not found.")
@@ -211,15 +211,16 @@ def display_upcoming_appointments(username, file_path):
         upcoming_appointments = appointments_df[
             (appointments_df['mhwp_username'] == username) &
             (appointments_df['date'] >= today) &
-            (appointments_df['date'] <= today + pd.Timedelta(days=7))
-        ]
+            (appointments_df['date'] <= today + pd.Timedelta(days=7)) &
+            (appointments_df['status'].isin(['confirmed', 'pending']))
+        ].copy()  # Use `.copy()` to avoid SettingWithCopyWarning
 
         if upcoming_appointments.empty:
-            print("\nNo appointments found for the next week.")
+            print("\nNo confirmed or pending appointments found for the next week.")
             return
 
-        # Format the date column to remove time and ensure proper display
-        upcoming_appointments['date'] = upcoming_appointments['date'].dt.strftime("%Y/%m/%d")
+        # Format the date column to remove time and ensure proper display as string
+        upcoming_appointments['date'] = upcoming_appointments['date'].dt.strftime("%Y/%m/%d").astype(str)
 
         # Drop the mhwp_username column
         upcoming_appointments = upcoming_appointments.drop(columns=['mhwp_username'])
@@ -228,11 +229,13 @@ def display_upcoming_appointments(username, file_path):
         upcoming_appointments = upcoming_appointments.sort_values(by=['date', 'timeslot'])
 
         # Display the upcoming appointments without the index column
-        print(f"\nAppointments for the next week for {username}:")
+        print(f"\nConfirmed and Pending Appointments for the next week for {username}:")
         print(tabulate(upcoming_appointments, headers="keys", tablefmt="grid", showindex=False))
 
     except Exception as e:
         print(f"Error displaying appointments: {str(e)}")
+
+
 
 
 
@@ -457,6 +460,14 @@ def handle_mhwp_menu(user):
                             selected_appointment = appointments[appointment_id]
                             action = "confirm" if manage_choice == "2" else "cancel"
 
+                            # Enforce status constraints
+                            if action == "confirm" and selected_appointment['status'] != "pending":
+                                print("Only pending appointments can be confirmed. Please try again.")
+                                continue
+                            elif action == "cancel" and selected_appointment['status'] not in ["pending", "confirmed"]:
+                                print("Only pending or confirmed appointments can be cancelled. Please try again.")
+                                continue
+
                             # Update appointment status in appointments.csv
                             try:
                                 appointments_df = pd.read_csv("data/appointments.csv")
@@ -515,7 +526,6 @@ def handle_mhwp_menu(user):
                                                 "Regards,\nBreeze Mental Health Support System"
                                             )
                                         send_email_notification(patient_email, subject, message)
-                                        
                                     else:
                                         print("Error: Could not retrieve patient's email address.")
                                 else:
