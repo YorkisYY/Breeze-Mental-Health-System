@@ -127,27 +127,44 @@ class User:
             return False
         
     def update_info(self, new_username=None, new_password=None, new_email=None, new_emergency_email=None):
-        """Update user information and synchronize with user_data.csv and patients.csv."""
+        """Update user information and synchronize with all related files."""
         try:
+            # Load user data and verify user exists
+            if not self.load_from_csv():
+                print("User does not exist.")
+                return False
+
+            # Load user_data.csv
             user_df = pd.read_csv(USER_DATA_PATH)
             old_username = self.username
             changes_made = False
             messages = []
 
-            # Update username
+            # Convert all columns to string type
+            for col in user_df.columns:
+                user_df[col] = user_df[col].astype(str)
+
+            # Update username if provided
             if new_username and new_username != old_username:
                 if new_username in user_df['username'].values:
-                    messages.append("New username is already in use.")
-                else:
-                    user_df.loc[user_df['username'] == old_username, 'username'] = new_username
-                    if not self.update_username_in_files(old_username, new_username, self.role):
-                        messages.append("Error updating username in related files.")
-                        return False
-                    self.username = new_username
-                    changes_made = True
-                    messages.append(f"Username successfully updated to: {new_username}")
+                    messages.append("Username has been used. Please choose a different one.")
+                    return False
+                
+                # Update username in user_data.csv
+                user_df.loc[user_df['username'] == old_username, 'username'] = new_username
+                
+                # Update username in other files
+                if not self.update_username_in_files(old_username, new_username, self.role):
+                    messages.append("Error updating username in related files.")
+                    return False
+                
+                self.username = new_username
+                changes_made = True
+                messages.append(f"Username successfully updated to: {new_username}")
+                # Save changes immediately after username update
+                user_df.to_csv(USER_DATA_PATH, index=False, na_rep='')
 
-            # Update password
+            # Update password if provided
             if new_password:
                 hashed_new_password = self.hash_password(new_password)
                 if hashed_new_password == self.password:
@@ -156,30 +173,75 @@ class User:
                     user_df.loc[user_df['username'] == self.username, 'password'] = hashed_new_password
                     self.password = hashed_new_password
                     changes_made = True
+                    user_df.to_csv(USER_DATA_PATH, index=False, na_rep='')
                     messages.append("Password updated successfully.")
 
-            # Update email
+            # Update email if provided
             if new_email:
+                # Update in user_data.csv
                 user_df.loc[user_df['username'] == self.username, 'email'] = new_email
+                user_df.to_csv(USER_DATA_PATH, index=False, na_rep='')
+                
+                # Update in role-specific files
+                if self.role == "patient":
+                    try:
+                        patient_df = pd.read_csv(PATIENTS_DATA_PATH)
+                        patient_df['email'] = patient_df['email'].astype(str)
+                        if self.username in patient_df['username'].values:
+                            patient_df.loc[patient_df['username'] == self.username, 'email'] = new_email
+                            patient_df.to_csv(PATIENTS_DATA_PATH, index=False, na_rep='')
+                    except FileNotFoundError:
+                        print("Patient data file not found.")
+                elif self.role == "mhwp":
+                    try:
+                        mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                        mhwp_df['email'] = mhwp_df['email'].astype(str)
+                        if self.username in mhwp_df['username'].values:
+                            mhwp_df.loc[mhwp_df['username'] == self.username, 'email'] = new_email
+                            mhwp_df.to_csv(MHWP_DATA_PATH, index=False, na_rep='')
+                    except FileNotFoundError:
+                        print("MHWP data file not found.")
+                
                 self.email = new_email
                 changes_made = True
                 messages.append(f"Email updated to: {new_email}")
 
-            # Update emergency email
+            # Update emergency email if provided
             if new_emergency_email:
+                # Update in user_data.csv
                 user_df.loc[user_df['username'] == self.username, 'emergency_email'] = new_emergency_email
+                user_df.to_csv(USER_DATA_PATH, index=False, na_rep='')
+                
+                # Update in role-specific files
+                if self.role == "patient":
+                    try:
+                        patient_df = pd.read_csv(PATIENTS_DATA_PATH)
+                        patient_df['emergency_email'] = patient_df['emergency_email'].astype(str)
+                        if self.username in patient_df['username'].values:
+                            patient_df.loc[patient_df['username'] == self.username, 'emergency_email'] = new_emergency_email
+                            patient_df.to_csv(PATIENTS_DATA_PATH, index=False, na_rep='')
+                    except FileNotFoundError:
+                        print("Patient data file not found.")
+                elif self.role == "mhwp":
+                    try:
+                        mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                        mhwp_df['emergency_email'] = mhwp_df['emergency_email'].astype(str)
+                        if self.username in mhwp_df['username'].values:
+                            mhwp_df.loc[mhwp_df['username'] == self.username, 'emergency_email'] = new_emergency_email
+                            mhwp_df.to_csv(MHWP_DATA_PATH, index=False, na_rep='')
+                    except FileNotFoundError:
+                        print("MHWP data file not found.")
+                
                 self.emergency_email = new_emergency_email
                 changes_made = True
                 messages.append(f"Emergency email updated to: {new_emergency_email}")
 
-            # Save changes if any
             if changes_made:
-                user_df.to_csv(USER_DATA_PATH, index=False)
                 messages.append("All changes saved successfully.")
             else:
                 messages.append("No changes were made.")
 
-            # Print all messages at once
+            # Print all messages
             for msg in messages:
                 print(msg)
             return True
@@ -187,7 +249,6 @@ class User:
         except Exception as e:
             print(f"Error in update process: {str(e)}")
             return False
-
                 
     def delete_user(self):
         """Delete user from CSV files."""
@@ -274,129 +335,180 @@ class User:
             print(f"Error deleting user: {str(e)}")
             
     def admin_update_user(self, target_username, new_username=None, new_password=None, new_email=None, new_emergency_email=None):
-        """Admin method to update other users' information."""
+        """Admin method to update other user's information."""
         if self.role != "admin":
             print("Only admin users can update others.")
             return False
 
         try:
-            # Load user_data.csv
+            # Load user data
             user_df = pd.read_csv(USER_DATA_PATH)
             
+            # Check if target user exists
             if target_username not in user_df['username'].values:
                 print("Target user does not exist.")
                 return False
-            
-            changes_made = False
-            user_role = user_df.loc[user_df['username'] == target_username, 'role'].iloc[0]
 
-            # Update username
+            # Get user's role before making any changes
+            user_role = user_df.loc[user_df['username'] == target_username, 'role'].iloc[0]
+            current_username = target_username
+            changes_made = False
+
+            # Ensure all columns are treated as strings
+            for col in user_df.columns:
+                user_df[col] = user_df[col].astype(str)
+
+            # Update username if provided
             if new_username and new_username != target_username:
                 if new_username in user_df[user_df['username'] != target_username]['username'].values:
                     print("New username is already in use.")
                     return False
-
+                
+                # First update username in user_data.csv
+                user_df.loc[user_df['username'] == target_username, 'username'] = new_username
+                user_df.to_csv(USER_DATA_PATH, index=False, na_rep='')
+                
+                # Then update in other files
                 if not self.update_username_in_files(target_username, new_username, user_role):
+                    print("Error updating username in related files.")
                     return False
                 
+                current_username = new_username
                 changes_made = True
                 print(f"Username updated to '{new_username}'.")
-                # Update role-specific records
+
+            # Update password if provided
+            if new_password:
+                hashed_new_password = self.hash_password(new_password)
+                user_df.loc[user_df['username'] == current_username, 'password'] = hashed_new_password
+                user_df.to_csv(USER_DATA_PATH, index=False, na_rep='')
+                changes_made = True
+                print("Password updated successfully.")
+
+            # Update email if provided
+            if new_email:
+                # Update in user_data.csv
+                user_df.loc[user_df['username'] == current_username, 'email'] = new_email
+                user_df.to_csv(USER_DATA_PATH, index=False, na_rep='')
+                
+                # Update in role-specific files
                 if user_role == "patient":
                     try:
                         patient_df = pd.read_csv(PATIENTS_DATA_PATH)
-                        if target_username in patient_df['username'].values:
-                            patient_df.loc[patient_df['username'] == target_username, 'username'] = new_username
-                            patient_df.to_csv(PATIENTS_DATA_PATH, index=False)
-                            print("Patient record username updated successfully.")
-                    except Exception as e:
-                        print(f"Error updating patient username: {str(e)}")
-                        return False
+                        patient_df['email'] = patient_df['email'].astype(str)
+                        if current_username in patient_df['username'].values:
+                            patient_df.loc[patient_df['username'] == current_username, 'email'] = new_email
+                            patient_df.to_csv(PATIENTS_DATA_PATH, index=False, na_rep='')
+                    except FileNotFoundError:
+                        print("Patient data file not found.")
                 elif user_role == "mhwp":
                     try:
                         mhwp_df = pd.read_csv(MHWP_DATA_PATH)
-                        if target_username in mhwp_df['username'].values:
-                            mhwp_df.loc[mhwp_df['username'] == target_username, 'username'] = new_username
-                            mhwp_df.to_csv(MHWP_DATA_PATH, index=False)
-                            print("MHWP record username updated successfully.")
-                    except Exception as e:
-                        print(f"Error updating MHWP username: {str(e)}")
-                        return False
-
-            current_username = new_username if new_username else target_username
-
-            # Update password
-            if new_password:
-                hashed_new_password = self.hash_password(new_password)
-                current_password = user_df.loc[user_df['username'] == current_username, 'password'].iloc[0]
-                if hashed_new_password == current_password:
-                    print("New password is the same as the current one.")
-                else:
-                    user_df.loc[user_df['username'] == current_username, 'password'] = hashed_new_password
-                    changes_made = True
-                    print("Password updated successfully.")
-
-            # Update email
-            if new_email:
-                user_df.loc[user_df['username'] == current_username, 'email'] = new_email
+                        mhwp_df['email'] = mhwp_df['email'].astype(str)
+                        if current_username in mhwp_df['username'].values:
+                            mhwp_df.loc[mhwp_df['username'] == current_username, 'email'] = new_email
+                            mhwp_df.to_csv(MHWP_DATA_PATH, index=False, na_rep='')
+                    except FileNotFoundError:
+                        print("MHWP data file not found.")
+                
                 changes_made = True
                 print(f"Email updated to '{new_email}'.")
 
+            # Update emergency email if provided
+            if new_emergency_email:
+                # Update in user_data.csv
+                user_df.loc[user_df['username'] == current_username, 'emergency_email'] = new_emergency_email
+                user_df.to_csv(USER_DATA_PATH, index=False, na_rep='')
+                
+                # Update in role-specific files
                 if user_role == "patient":
                     try:
                         patient_df = pd.read_csv(PATIENTS_DATA_PATH)
+                        patient_df['emergency_email'] = patient_df['emergency_email'].astype(str)
                         if current_username in patient_df['username'].values:
-                            patient_df.loc[patient_df['username'] == current_username, 'email'] = new_email
-                            patient_df.to_csv(PATIENTS_DATA_PATH, index=False)
-                    except Exception as e:
-                        print(f"Error updating patient email: {str(e)}")
+                            patient_df.loc[patient_df['username'] == current_username, 'emergency_email'] = new_emergency_email
+                            patient_df.to_csv(PATIENTS_DATA_PATH, index=False, na_rep='')
+                    except FileNotFoundError:
+                        print("Patient data file not found.")
                 elif user_role == "mhwp":
                     try:
                         mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                        mhwp_df['emergency_email'] = mhwp_df['emergency_email'].astype(str)
                         if current_username in mhwp_df['username'].values:
-                            mhwp_df.loc[mhwp_df['username'] == current_username, 'email'] = new_email
-                            mhwp_df.to_csv(MHWP_DATA_PATH, index=False)
-                    except Exception as e:
-                        print(f"Error updating MHWP email: {str(e)}")
-
-            # Update emergency email
-            if new_emergency_email:
-                user_df.loc[user_df['username'] == current_username, 'emergency_email'] = new_emergency_email
+                            mhwp_df.loc[mhwp_df['username'] == current_username, 'emergency_email'] = new_emergency_email
+                            mhwp_df.to_csv(MHWP_DATA_PATH, index=False, na_rep='')
+                    except FileNotFoundError:
+                        print("MHWP data file not found.")
+                
                 changes_made = True
                 print(f"Emergency email updated to '{new_emergency_email}'.")
 
-                if user_role == "patient":
-                    try:
-                        patient_df = pd.read_csv(PATIENTS_DATA_PATH)
-                        if current_username in patient_df['username'].values:
-                            patient_df.loc[patient_df['username'] == current_username, 'emergency_email'] = new_emergency_email
-                            patient_df.to_csv(PATIENTS_DATA_PATH, index=False)
-                    except Exception as e:
-                        print(f"Error updating patient emergency email: {str(e)}")
-                elif user_role == "mhwp":
-                    try:
-                        mhwp_df = pd.read_csv(MHWP_DATA_PATH)
-                        if current_username in mhwp_df['username'].values:
-                            mhwp_df.loc[mhwp_df['username'] == current_username, 'emergency_email'] = new_emergency_email
-                            mhwp_df.to_csv(MHWP_DATA_PATH, index=False)
-                    except Exception as e:
-                        print(f"Error updating MHWP emergency email: {str(e)}")
-
+            # Final save and return
             if changes_made:
-                user_df.to_csv(USER_DATA_PATH, index=False)
-                print("Admin update completed successfully.")
+                user_df.to_csv(USER_DATA_PATH, index=False, na_rep='')
                 return True
-
-            print("No changes were made.")
-            return True
+            else:
+                print("No changes were made.")
+                return True
 
         except Exception as e:
             print(f"Error in admin update: {str(e)}")
             return False
-    def display_info(self):
-        """Display user information."""
-        print(f"Username: {self.username}, Role: {self.role}")
-        
+    def update_email_in_files(self, username, new_email, role):
+        try:
+            updates = {
+                'user_data.csv': ['email'],
+                'patients.csv': ['email'] if role == 'patient' else None,
+                'mhwp.csv': ['email'] if role == 'mhwp' else None,
+            }
+
+            for file, columns in updates.items():
+                if columns:
+                    try:
+                        file_path = f"data/{file}"
+                        df = pd.read_csv(file_path)
+                        
+                        for column in columns:
+                            if column in df.columns:
+                                df[column] = df[column].astype(str)
+                                df.loc[df['username'] == str(username), column] = str(new_email)
+                                
+                        df.to_csv(file_path, index=False)
+                    except FileNotFoundError:
+                        continue
+                        
+            return True
+        except Exception as e:
+            print(f"Error updating email in files: {str(e)}")
+            return False
+
+    def update_emergency_email_in_files(self, username, new_emergency_email, role):
+        try:
+            updates = {
+                'user_data.csv': ['emergency_email'],
+                'patients.csv': ['emergency_email'] if role == 'patient' else None,
+                'mhwp.csv': ['emergency_email'] if role == 'mhwp' else None,
+            }
+
+            for file, columns in updates.items():
+                if columns:
+                    try:
+                        file_path = f"data/{file}"
+                        df = pd.read_csv(file_path)
+                        
+                        for column in columns:
+                            if column in df.columns:
+                                df[column] = df[column].astype(str)
+                                df.loc[df['username'] == str(username), column] = str(new_emergency_email)
+                                
+                        df.to_csv(file_path, index=False)
+                    except FileNotFoundError:
+                        continue
+                        
+            return True
+        except Exception as e:
+            print(f"Error updating emergency email in files: {str(e)}")
+            return False
     def admin_delete_user(self, username):
         """Admin method to delete a user and their associated record if applicable."""
         if self.role != "admin":
@@ -618,9 +730,7 @@ class User:
             print(f"Error updating MHWP status: {str(e)}")
             return False
     def update_username_in_files(self, old_username, new_username, role):
-        """Update username in all relevant files."""
         try:
-            # Mapping of files and fields to update
             updates = {
                 'user_data.csv': ['username'],
                 'patients.csv': ['assigned_mhwp'] if role == 'mhwp' else['username'] if role == 'patient'else None, 
@@ -635,34 +745,21 @@ class User:
                 'mhwp_schedule.csv': ['mhwp_username'] if role == 'mhwp' else None
             }
 
-            log = [] 
-
-            # Iterate over each file and update relevant fields
             for file, columns in updates.items():
                 if columns:
                     try:
                         file_path = f"data/{file}"
                         df = pd.read_csv(file_path)
-
-                        # Update each relevant column
+                        
                         for column in columns:
                             if column in df.columns:
-                                df.loc[df[column] == old_username, column] = new_username
-                                log.append(f"Updated {column} in {file}")
-                            else:
-                                log.append(f"Column {column} not found in {file}")
-
-                        # Save updated DataFrame
+                                df[column] = df[column].astype(str)
+                                df.loc[df[column] == str(old_username), column] = str(new_username)
+                                
                         df.to_csv(file_path, index=False)
                     except FileNotFoundError:
-                        log.append(f"File {file} not found. Skipping.")
-                    except Exception as e:
-                        log.append(f"Error updating {file}: {str(e)}")
-            
-            # Print the update log for debugging
-            for entry in log:
-                print(entry)
-
+                        continue
+                        
             return True
         except Exception as e:
             print(f"Error updating files: {str(e)}")

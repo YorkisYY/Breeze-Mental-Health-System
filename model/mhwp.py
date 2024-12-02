@@ -353,7 +353,7 @@ def setup_mhwp_schedule(user):
 def handle_mhwp_menu(user):
     while True:
         print("\nMental Health Worker Options:")
-        print("1. Update Personal Info (Username)")
+        print("1. Update Personal Info")
         print("2. Change Password")
         print("3. Change Email")
         print("4. Change Emergency Email")
@@ -385,7 +385,7 @@ def handle_mhwp_menu(user):
 
                
                 if user.update_info(new_username=new_username):
-                    print(f"Username successfully updated to {new_username}")
+                    continue
                 else:
                     print("Failed to update username. Please try again.")
             except Exception as e:

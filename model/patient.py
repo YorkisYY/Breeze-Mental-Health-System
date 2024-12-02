@@ -517,7 +517,7 @@ def handle_patient_menu(user):
                     continue
 
                 if user.update_info(new_username=new_username):
-                    print(f"Username successfully updated to {new_username}")
+                    continue
                 else:
                     print("Failed to update username. Please try again.")
             except Exception as e:
@@ -537,7 +537,7 @@ def handle_patient_menu(user):
         elif patient_choice == '4':  # new option for emergency email
             new_emergency_email = input("Enter new emergency email: ").strip()
             if user.update_info(new_emergency_email=new_emergency_email):
-                print("Emergency email updated successfully!")
+                continue
             else:
                 print("Failed to update emergency email. Try again.")
                 
