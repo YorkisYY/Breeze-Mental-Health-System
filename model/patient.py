@@ -223,7 +223,6 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
     Allow a patient to book an appointment with their assigned MHW.
     Updates mhwp_schedule.csv to mark the slot as booked (▲).
     """
-
     try:
         # Retrieve assigned MHW from assignments.csv
         try:
@@ -241,7 +240,7 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
         try:
             schedule = pd.read_csv(schedule_file)
             mhwp_schedule = schedule[(schedule['mhwp_username'] == mhwp_username) & (schedule['Date'] == date)]
-
+            
             if mhwp_schedule.empty:
                 print(f"No schedule found for MHW '{mhwp_username}' on {date}.")
                 return False
@@ -254,7 +253,7 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
             time_slot_column = time_slot_column[0]
 
             # Check if the time slot is available (■)
-            if not (mhwp_schedule[time_slot_column] == "■").any():
+            if not mhwp_schedule.iloc[0][time_slot_column] == "■":
                 print(f"The selected time slot '{timeslot}' is not available. Please choose another.")
                 return False
         except FileNotFoundError:
@@ -265,13 +264,15 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
         try:
             appointments = pd.read_csv(appointment_file)
         except FileNotFoundError:
-            appointments = pd.DataFrame(columns=['id', 'patient_username', 'mhwp_username', 'date', 'timeslot', 'status'])
+            appointments = pd.DataFrame(columns=["id", "patient_username", "mhwp_username", "date", "timeslot", "status"])
 
         # Check for overlapping appointments
         overlapping_appointment = appointments[
             (appointments['mhwp_username'] == mhwp_username) &
             (appointments['date'] == date) &
-            (appointments['timeslot'] == timeslot)
+            (appointments['timeslot'] == timeslot) &
+            (appointments['status'].isin(["pending", "confirmed"]))
+
         ]
         if not overlapping_appointment.empty:
             print(f"The selected time slot '{timeslot}' overlaps with an existing appointment. Please choose another.")
@@ -284,9 +285,9 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
         else:
             appointment_id = 1
 
-        # Record the new appointment in appointments.csv
+        # Create a new appointment record
         new_appointment = {
-            "id": appointment_id,  # Add sequential ID
+            "id": appointment_id,
             "patient_username": user.username,
             "mhwp_username": mhwp_username,
             "date": date,
@@ -294,10 +295,14 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
             "status": "pending"
         }
         appointment_df = pd.DataFrame([new_appointment])
+
+        # Append to the appointments file
         try:
-            appointment_df.to_csv(appointment_file, mode='a', header=not pd.read_csv(appointment_file).shape[0], index=False)
-        except FileNotFoundError:
-            appointment_df.to_csv(appointment_file, mode='w', header=True, index=False)
+            appointment_df.to_csv(appointment_file, mode='a', header=not os.path.exists(appointment_file), index=False)
+            print(f"Appointment successfully recorded for {user.username}.")
+        except Exception as e:
+            print(f"Error writing to appointments.csv: {e}")
+            return False
 
         # Update mhwp_schedule.csv to mark the slot as booked (▲)
         try:
@@ -311,12 +316,13 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
             print(f"Error updating schedule: {e}")
             return False
 
-       
         return True
 
     except Exception as e:
         print(f"Unexpected error: {e}")
         return False
+
+
 
 def cancel_appointment_with_display(user, schedule_file, appointment_file):
     """
@@ -449,18 +455,22 @@ def display_upcoming_appointments_with_mhwp(patient_username, appointments_file,
         user_appointments = appointments[appointments['patient_username'] == patient_username]
 
         if user_appointments.empty:
-            print("\nNo appointments found for the next week.")
+            print("\nNo appointments found.")
             return
 
         # Add MHW username column
         user_appointments['mhwp_username'] = mhwp_username
 
         # Convert dates to datetime and filter for the next week
-        user_appointments['date'] = pd.to_datetime(user_appointments['date'], format="%Y/%m/%d")
+        user_appointments['date'] = pd.to_datetime(user_appointments['date'], format="%Y/%m/%d", errors='coerce')
         today = pd.to_datetime("today").normalize()
         next_week = today + pd.Timedelta(days=7)
+
+        # Filter for the next week and relevant statuses
         upcoming_appointments = user_appointments[
-            (user_appointments['date'] >= today) & (user_appointments['date'] <= next_week)
+            (user_appointments['date'] >= today) & 
+            (user_appointments['date'] <= next_week) & 
+            (user_appointments['status'].isin(['pending', 'confirmed']))
         ]
 
         if upcoming_appointments.empty:
@@ -485,6 +495,7 @@ def display_upcoming_appointments_with_mhwp(patient_username, appointments_file,
         print(f"Error: {e}")
     except Exception as e:
         print(f"Unexpected error: {e}")
+
 
 
 
