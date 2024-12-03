@@ -1,5 +1,5 @@
 import pandas as pd
-
+from services.comment import view_comments
 APPOINTMENTS_FILE = "data/appointments.csv"
 MOOD_DATA_FILE = "data/mood_data.csv"
 JOURNAL_ENTRIES_FILE = "data/patient_journaling.csv"
@@ -39,7 +39,7 @@ def view_patient_records(mhwp_username):
             return
 
         # 跳转到患者记录菜单
-        patient_record_menu(patient_username)
+        patient_record_menu(patient_username, mhwp_username)
 
     except FileNotFoundError:
         print(f"File not found: {APPOINTMENTS_FILE}")
@@ -48,7 +48,7 @@ def view_patient_records(mhwp_username):
 
 
 
-def patient_record_menu(patient_username):
+def patient_record_menu(patient_username, mhwp_username):
     """
     展示患者记录选项菜单。
     """
@@ -57,8 +57,9 @@ def patient_record_menu(patient_username):
         print("1. View Mood Tracker")
         print("2. View Patient Journaling")
         print("3. View Mental Health Assessments")
-        print("4. Add Record to Patient")
-        print("5. Return to Main Menu")
+        print("4. View Patient Comment")
+        print("5. Add Record to Patient")
+        print("6. Return to Main Menu")
 
         choice = input("Select an option (1-5): ").strip()
         if choice == "1":
@@ -68,8 +69,10 @@ def patient_record_menu(patient_username):
         elif choice == "3":
             view_mental_health_assessments(patient_username)
         elif choice == "4":
-            add_patient_record(patient_username)
+            view_comments(mhwp_username)
         elif choice == "5":
+            add_patient_record(patient_username)
+        elif choice == "6":
             print("Returning to main menu.")
             break
         else:

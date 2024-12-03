@@ -5,7 +5,6 @@ from os.path import exists
 import pandas as pd
 from datetime import datetime, timedelta
 import calendar
-from services.comment import view_comments
 from services.patient_records import view_patient_records
 from utils.notification import send_email_notification, get_email_by_username
 from services.record import view_records_of_patient
@@ -569,7 +568,7 @@ def handle_mhwp_menu(user):
                 elif manage_choice in ["2", "3"]:  # Confirm or cancel an appointment
                     manage_appointment_action(user, manage_choice, "data/appointments.csv", "data/mhwp_schedule.csv")
 
-                elif manage_choice == "4":  # Back to MHW Options
+                elif manage_choice == "4":  # Back to MMHW Options
                     print("Returning to main menu...")
                     break
 
