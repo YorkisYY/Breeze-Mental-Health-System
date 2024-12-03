@@ -5,7 +5,6 @@ from datetime import datetime
 APPOINTMENTS_FILE = "data/appointments.csv"
 MOOD_DATA_FILE = "data/mood_data.csv"
 JOURNAL_ENTRIES_FILE = "data/patient_journaling.csv"
-JOURNAL_ENTRIES_FILE = "data/patient_journaling.csv"
 MENTAL_ASSESSMENTS_FILE = "data/mental_assessments.csv"
 PATIENT_NOTES_FILE = "data/patient_notes.csv"
 
@@ -272,71 +271,3 @@ def view_notes(mhwp_username):
         print("No records file found. Please initialize it first.")
     except Exception as e:
         print(f"Error viewing records: {e}")
-
-
-def view_my_records(patient_username):
-    """
-    Allow a patient to view their medical records, including date, condition, and notes, in a paginated format.
-    """
-    try:
-        # Load patient notes file
-        notes_df = pd.read_csv(PATIENT_NOTES_FILE)
-    except FileNotFoundError:
-        # If file does not exist, create an empty DataFrame and save it
-        notes_df = pd.DataFrame(columns=["patient_username", "mhwp_username", "date", "condition", "notes", "id"])
-        notes_df.to_csv(PATIENT_NOTES_FILE, index=False)
-        print("No medical records found. File has been initialized.")
-        return
-
-    # Filter records for the current patient
-    patient_records = notes_df[notes_df["patient_username"] == patient_username]
-
-    if patient_records.empty:
-        print("No medical records found for you.")
-        return
-
-    # Select relevant columns and sort by date (latest first)
-    filtered_records = patient_records[["date", "condition", "notes"]].sort_values(by="date", ascending=False)
-
-    # Pagination logic
-    records_per_page = 5
-    total_records = len(filtered_records)
-    total_pages = (total_records + records_per_page - 1) // records_per_page  # Round up division
-    current_page = 1
-
-    while True:
-        # Display current page records
-        start_idx = (current_page - 1) * records_per_page
-        end_idx = start_idx + records_per_page
-        page_records = filtered_records.iloc[start_idx:end_idx]
-
-        print(f"\nPage {current_page}/{total_pages}")
-        print(page_records.to_string(index=False))  # Display without the DataFrame index
-
-        # Pagination navigation
-        if total_pages > 1:
-            print("\nOptions:")
-            if current_page > 1:
-                print("1. Previous Page")
-            if current_page < total_pages:
-                print("2. Next Page")
-            print("3. Quit Viewing")
-
-            choice = input("Select an option: ").strip().lower()
-            if choice == "1" and current_page > 1:
-                current_page -= 1
-            elif choice == "2" and current_page < total_pages:
-                current_page += 1
-            elif choice == "3":
-                print("Exiting medical records view.")
-                break
-            else:
-                print("Invalid choice, please try again.")
-        else:
-            print("\nNo more pages to navigate.")
-            break
-        
-        
-        
-
-

@@ -139,7 +139,7 @@ def display_patient_summary(summary_data):
 
 
 
-mhwp_username = 'mhwp_01'
+# mhwp_username = 'mhwp_01'
 # result = generate_summary(mhwp_username)
 # display_patient_summary_tabulate(result)
 # display_patient_summary(result)
@@ -365,7 +365,6 @@ def display_dashboard(mhwp_username):
     except Exception as e:
         print(f"Error displaying dashboard: {e}")
 
-#display_dashboard(mhwp_username)
 
 
 #
