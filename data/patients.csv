@@ -1,11 +1,7 @@
 username,assigned_mhwp,account_status,registration_date,email,emergency_email,symptoms
-<<<<<<< Updated upstream
-y,,active,2024-11-29,y@gmail.com,yy@gmail.com,Anxiety
-q,,active,2024-11-30,q@163.com,1@12.com,
-=======
 y,nan,active,2024-11-29,y@gmail.com,yy@gmail.com,Anxiety
 q,nan,active,2024-11-30,q@163.com,1@12.com,
 nn,ll,active,2024-12-02,nn@gmail.com,nnn@gmail.com,Anxiety
 d,nan,active,2024-12-02,dd@gmail.com,ddd@gmail.com,Substance Abuse
 i,nan,active,2024-12-03,i@gmail.com,i@gmail.com,PTSD
->>>>>>> Stashed changes
+
