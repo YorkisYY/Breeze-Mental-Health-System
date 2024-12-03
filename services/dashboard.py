@@ -365,7 +365,7 @@ def display_dashboard(mhwp_username):
     except Exception as e:
         print(f"Error displaying dashboard: {e}")
 
-display_dashboard(mhwp_username)
+#display_dashboard(mhwp_username)
 
 
 #
