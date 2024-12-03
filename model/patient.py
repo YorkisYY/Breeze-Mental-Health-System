@@ -1,7 +1,7 @@
 import os
 from services.mood_tracking import MoodEntry
 from services.meditation import handle_search_meditation
-from services.comment import add_comment,get_mhwp_for_patient
+from services.comment import comment,add_comment,get_available_appointments
 from services.questionnaire import submit_questionnaire,remind_to_complete_questionnaire
 from services.journaling import enter_journaling
 from utils.notification import send_email_notification, get_email_by_username
@@ -647,16 +647,7 @@ def handle_patient_menu(user):
 
 
                 elif records_choice == '3':
-                    mhwp_username = get_mhwp_for_patient(user.username)
-                    if mhwp_username:
-                        try:
-                            rating = float(input("Enter a rating for your MHWP (0-5): ").strip())
-                            comment = input("Enter your comment for your MHWP: ").strip()
-                            add_comment(user.username, mhwp_username, rating, comment)
-                        except ValueError:
-                            print("Invalid input. Rating must be a number.")
-                    else:
-                        print("Unable to find your MHWP. Comment not saved.")
+                    comment(user.username)
 
 
                 elif records_choice == '4':
