@@ -5,7 +5,7 @@ from model.user_account_management.user import User
 from model.admin import handle_admin_menu
 from model.mhwp import handle_mhwp_menu
 from model.patient import handle_patient_menu
-
+from config import *
 
 def login_user():
    """Authenticate and login user.
@@ -45,6 +45,20 @@ def verify_staff(role):
 def handle_login():
     user = login_user()
     if user:
+        # Check user status from respective CSV files based on role
+        if user.role == "mhwp":
+            df = pd.read_csv(MHWP_DATA_PATH) # read mhwp data from config
+            status = df[df['username'] == user.username]['account_status'].values[0]
+            if status == 'inactive':
+                print("Your account is disabled. Please contact admin to reactivate.")
+                return False
+        elif user.role == "patient":
+            df = pd.read_csv(PATIENTS_DATA_PATH) # read patients data from config
+            status = df[df['username'] == user.username]['account_status'].values[0]
+            if status == 'inactive':
+                print("Your account is disabled. Please contact admin to reactivate.")
+                return False
+
         print(f"You are logged in as {user.role}.")
         match user.role:
             case "admin":
@@ -58,5 +72,4 @@ def handle_login():
             case "patient":
                 handle_patient_menu(user)
     return True
-
     
