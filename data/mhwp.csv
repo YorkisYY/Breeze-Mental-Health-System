@@ -1,3 +1,9 @@
 username,assigned_patients,account_status,registration_date,email,emergency_email,major
+<<<<<<< Updated upstream
 l,,active,2024-11-29,l@gmail.com,ll@gmail.com,Emotional Management
 lina,n,active,2024-12-01,yyy@gmail.com,yyyy@gmail.com,Emotional Management
+=======
+,nn,active,2024-12-01,yyy@gmail.com,yyyy@gmail.com,Emotional Management
+ll,nn,active,2024-12-02,l@gmail.com,ll@gmail.com,Emotional Management
+bb,,active,2024-12-02,bb@gmail.com,bbb@gmail.com,Severe Disorders
+>>>>>>> Stashed changes
