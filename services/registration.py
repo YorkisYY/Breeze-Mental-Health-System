@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import re
-from model.user import User
+from model.user_account_management import User
 from config import USER_DATA_PATH
 from datetime import datetime
 
