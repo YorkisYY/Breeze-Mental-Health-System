@@ -2,7 +2,163 @@ import os
 import csv
 from tabulate import tabulate
 import random
+from config import USER_DATA_PATH
+from config import PATIENTS_DATA_PATH
+from config import MHWP_DATA_PATH
 
+MATCHING_RULES = {
+    "Emotional Management": {"Anxiety", "Depression", "PTSD", "Bipolar Disorder"},
+    "Behavioral Therapy": {"OCD", "ADHD", "Eating Disorder", "Substance Abuse"},
+    "Severe Disorders": {"Schizophrenia", "Borderline Personality Disorder"},
+    "General Wellbeing": {"Other/General Wellbeing"}
+}
+def get_patients_with_symptoms(PATIENTS_DATA_PATH="data/patients.csv"):
+    """
+    Get a dictionary of patients with their symptoms from patients.csv.
+    """
+    patients = {}
+    if not os.path.exists(PATIENTS_DATA_PATH):
+        print(f"Error: Patient data file '{PATIENTS_DATA_PATH}' not found.")
+        return patients
+
+    try:
+        with open(PATIENTS_DATA_PATH, "r", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                patients[row["username"]] = row["symptoms"]
+    except Exception as e:
+        print(f"Error reading patient data: {str(e)}")
+    return patients
+
+def get_mhwps_with_major(mhwp_data_path="data/mhwp.csv"):
+    """
+    Get a dictionary of MHWPs with their major from mhwp.csv.
+    """
+    mhwps = {}
+    if not os.path.exists(mhwp_data_path):
+        print(f"Error: MHWP data file '{mhwp_data_path}' not found.")
+        return mhwps
+
+    try:
+        with open(mhwp_data_path, "r", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                mhwps[row["username"]] = row["major"]
+    except Exception as e:
+        print(f"Error reading MHWP data: {str(e)}")
+    return mhwps
+
+def update_mhwp_csv_with_assignments(assignments_path="data/assignments.csv", mhwp_data_path="data/mhwp.csv"):
+    """
+    Update the `assigned_patients` column in mhwp.csv based on the assignments.
+    """
+    # Load current assignments
+    current_assignments = get_current_assignments(assignments_path)
+
+    # Load MHWP data
+    mhwps = []
+    if not os.path.exists(mhwp_data_path):
+        print(f"Error: MHWP data file '{mhwp_data_path}' not found.")
+        return
+
+    try:
+        with open(mhwp_data_path, "r", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            mhwps = [row for row in reader]
+    except Exception as e:
+        print(f"Error reading MHWP data: {str(e)}")
+        return
+
+    # Update `assigned_patients` for each MHWP
+    for mhwp in mhwps:
+        mhwp_username = mhwp["username"]
+        if mhwp_username in current_assignments:
+            mhwp["assigned_patients"] = ",".join(current_assignments[mhwp_username])
+        else:
+            mhwp["assigned_patients"] = ""
+
+    # Save updated MHWP data
+    try:
+        with open(mhwp_data_path, "w", newline='', encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=mhwps[0].keys())
+            writer.writeheader()
+            writer.writerows(mhwps)
+        print("Updated `assigned_patients` in MHWP data.")
+    except Exception as e:
+        print(f"Error writing to MHWP data: {str(e)}")
+
+def update_patients_csv_with_assignments(assignments_path="data/assignments.csv", patient_data_path="data/patients.csv"):
+    """
+    Update the `assigned_mhwp` column in patients.csv based on the assignments.
+    """
+    # Load current assignments
+    current_assignments = get_current_assignments(assignments_path)
+
+    # Reverse the assignments to map patient -> MHWP
+    patient_to_mhwp = {patient: mhwp for mhwp, patients in current_assignments.items() for patient in patients}
+
+    # Load patient data
+    patients = []
+    if not os.path.exists(patient_data_path):
+        print(f"Error: Patient data file '{patient_data_path}' not found.")
+        return
+
+    try:
+        with open(patient_data_path, "r", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            patients = [row for row in reader]
+    except Exception as e:
+        print(f"Error reading patient data: {str(e)}")
+        return
+
+    # Update `assigned_mhwp` for each patient
+    for patient in patients:
+        patient_username = patient["username"]
+        if patient_username in patient_to_mhwp:
+            patient["assigned_mhwp"] = patient_to_mhwp[patient_username]
+        else:
+            patient["assigned_mhwp"] = ""
+
+    # Save updated patient data
+    try:
+        with open(patient_data_path, "w", newline='', encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=patients[0].keys())
+            writer.writeheader()
+            writer.writerows(patients)
+        print("Updated `assigned_mhwp` in patient data.")
+    except Exception as e:
+        print(f"Error writing to patient data: {str(e)}")
+
+def initialize_mhwp_schedule(schedule_path="data/mhwp_schedule.csv"):
+    """
+    Clear all data in the mhwp_schedule.csv file and keep only the column headers.
+    """
+    try:
+        with open(schedule_path, "w", newline='', encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow([
+                "mhwp_username", "Date", "Day",
+                "09:00-10:00 (0)", "10:00-11:00 (1)", "11:00-12:00 (2)",
+                "12:00-13:00 (3)", "13:00-14:00 (4)", "14:00-15:00 (5)",
+                "15:00-16:00 (6)"
+            ])
+        print("\nMHWP schedule file has been initialized. All data cleared except headers.")
+    except Exception as e:
+        print(f"Error initializing MHWP schedule data: {str(e)}")
+
+
+
+def initialize_user_data(user_data_path="data/user_data.csv"):
+    """
+    Clear all data in the user_data.csv file and keep only the column headers.
+    """
+    try:
+        with open(user_data_path, "w", newline='', encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow(["username", "password", "email", "emergency_email", "role"])  # Write headers only
+        print("\nUser data file has been initialized. All data cleared except headers.")
+    except Exception as e:
+        print(f"Error initializing user data: {str(e)}")
 
 def initialize_assignments(assignments_path="data/assignments.csv"):
     """
@@ -17,24 +173,41 @@ def initialize_assignments(assignments_path="data/assignments.csv"):
         print(f"Error initializing assignments: {str(e)}")
 
 
-def get_users_by_role(role, user_data_path="data/user_data.csv"):
+def get_patients(patient_data_path="data/patients.csv"):
     """
-    Get a list of usernames by role from user_data.csv.
+    Get a list of patient usernames from patients.csv.
     """
-    users = []
-    if not os.path.exists(user_data_path):
-        print(f"Error: User data file '{user_data_path}' not found.")
-        return users
+    patients = []
+    if not os.path.exists(patient_data_path):
+        print(f"Error: Patient data file '{patient_data_path}' not found.")
+        return patients
 
     try:
-        with open(user_data_path, "r", encoding="utf-8") as file:
+        with open(patient_data_path, "r", encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for row in reader:
-                if row["role"] == role:
-                    users.append(row["username"])
+                patients.append(row["username"])
     except Exception as e:
-        print(f"Error reading user data: {str(e)}")
-    return users
+        print(f"Error reading patient data: {str(e)}")
+    return patients
+
+def get_mhwps(mhwp_data_path="data/mhwp.csv"):
+    """
+    Get a list of MHWP usernames from mhwp.csv.
+    """
+    mhwps = []
+    if not os.path.exists(mhwp_data_path):
+        print(f"Error: MHWP data file '{mhwp_data_path}' not found.")
+        return mhwps
+
+    try:
+        with open(mhwp_data_path, "r", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                mhwps.append(row["username"])
+    except Exception as e:
+        print(f"Error reading MHWP data: {str(e)}")
+    return mhwps
 
 
 def get_mhwps_with_schedule(schedule_path="data/mhwp_schedule.csv"):
@@ -93,44 +266,65 @@ def save_assignments(assignments, assignments_path="data/assignments.csv"):
     print(tabulate(table_data, headers=["Patient Username", "MHWP Username"], tablefmt="grid"))
 
 
-def balanced_assign_patients_and_mhwps(user_data_path="data/user_data.csv",
+def balanced_assign_patients_and_mhwps(patient_data_path="data/patients.csv",
+                                       mhwp_data_path="data/mhwp.csv",
                                        assignments_path="data/assignments.csv",
                                        schedule_path="data/mhwp_schedule.csv"):
     """
-    Assign patients to MHWPs in a balanced way, prioritizing unassigned MHWPs.
+    Assign patients to MHWPs in a balanced way, prioritizing unassigned MHWPs and matching symptoms to majors.
     """
-    all_patients = set(get_users_by_role("patient", user_data_path))
+    # Load necessary data
     eligible_mhwps = get_mhwps_with_schedule(schedule_path)
-
+    patients_with_symptoms = get_patients_with_symptoms(patient_data_path)
+    mhwps_with_major = get_mhwps_with_major(mhwp_data_path)
     current_assignments = get_current_assignments(assignments_path)
-    assigned_patients = {patient for patients in current_assignments.values() for patient in patients}
-    unassigned_patients = list(all_patients - assigned_patients)
-    unassigned_mhwps = list(eligible_mhwps - set(current_assignments.keys()))
 
+    # Initialize assignments dictionary
     assignments = {mhwp: patients.copy() for mhwp, patients in current_assignments.items()}
-    for mhwp in unassigned_mhwps:
-        assignments[mhwp] = []
+    assigned_mhwp_tracker = {mhwp: False for mhwp in eligible_mhwps}
 
-    # Randomly assign u7nassigned patients to unassigned MHWPs
-    for patient in unassigned_patients:
-        if unassigned_mhwps:
-            mhwp = unassigned_mhwps.pop()
-            assignments[mhwp].append(patient)
+    # Assign patients to MHWPs based on symptoms and major
+    for patient, symptom in patients_with_symptoms.items():
+        # Find eligible MHWPs based on major and symptom
+        eligible_mhwps_for_patient = [
+            mhwp for mhwp, major in mhwps_with_major.items()
+            if mhwp in eligible_mhwps and symptom in MATCHING_RULES.get(major, set())
+        ]
+
+        if eligible_mhwps_for_patient:
+            # Separate MHWPs into those who haven't been assigned and those who have
+            unassigned_mhwps = [mhwp for mhwp in eligible_mhwps_for_patient if not assigned_mhwp_tracker[mhwp]]
+
+            if unassigned_mhwps:
+                # Assign to one of the unassigned MHWPs
+                selected_mhwp = random.choice(unassigned_mhwps)
+                assigned_mhwp_tracker[selected_mhwp] = True
+            else:
+                # All MHWPs have been assigned at least once, assign randomly
+                selected_mhwp = random.choice(eligible_mhwps_for_patient)
+
+            # Add patient to the selected MHWP
+            assignments.setdefault(selected_mhwp, []).append(patient)
+            print(f"Assigned: Patient '{patient}' -> MHWP '{selected_mhwp}' (Major: {mhwps_with_major[selected_mhwp]})")
         else:
-            # Assign to MHWP with the least patients
-            mhwp_with_least_patients = min(assignments, key=lambda x: len(assignments[x]))
-            assignments[mhwp_with_least_patients].append(patient)
+            print(f"No eligible MHWP found for patient '{patient}' with symptom '{symptom}'.")
 
+    # Save updated assignments
     save_assignments(assignments, assignments_path)
+    # Update `mhwp.csv` 'patients.csv' with assigned patients and assigned mhwp
+    update_mhwp_csv_with_assignments(assignments_path=assignments_path, mhwp_data_path=mhwp_data_path)
+    update_patients_csv_with_assignments(assignments_path=assignments_path, patient_data_path=patient_data_path)
 
 
-def modify_assignments(assignments_path="data/assignments.csv", user_data_path="data/user_data.csv"):
+def modify_assignments(assignments_path="data/assignments.csv",
+                       patient_data_path="data/patients.csv",
+                       mhwp_data_path="data/mhwp.csv",
+                       schedule_path="data/mhwp_schedule.csv"):
     """
     Modify the existing assignments in the assignments file or assign unassigned users.
     """
     current_assignments = get_current_assignments(assignments_path)
-    print("\nCurrent Assignments:")
-    display_assignments(assignments_path, user_data_path)
+    display_assignments(assignments_path)
 
     print("\nModify Assignments Options:")
     print("1. Modify an existing assignment")
@@ -138,101 +332,138 @@ def modify_assignments(assignments_path="data/assignments.csv", user_data_path="
 
     choice = input("\nEnter your choice (1-2): ").strip()
 
-    if choice == '1':  # modify the existing assignment
+    if choice == '1':  # Modify an existing assignment
         patient_to_modify = input("\nEnter the patient username to modify assignment: ").strip()
-        # check if patients are in current_assignment or not
-        if patient_to_modify not in {p for ps in current_assignments.values() for p in ps}:
-            print(f"Patient '{patient_to_modify}' not found in current assignments.")
+        # Read patient data to find symptoms
+        patients_with_symptoms = get_patients_with_symptoms(patient_data_path)
+        if patient_to_modify not in patients_with_symptoms:
+            print(f"Patient '{patient_to_modify}' not found in the records.")
             return
-        # new mhwp
-        new_mhwp = input(f"Enter the new MHWP username for {patient_to_modify}: ").strip()
-        # check new_mhwp
-        all_mhwps = set(current_assignments.keys())
-        if new_mhwp not in all_mhwps:
-            print(f"MHWP '{new_mhwp}' not found in current assignments.")
+
+        symptom = patients_with_symptoms[patient_to_modify]
+        print(f"Patient '{patient_to_modify}' has the symptom: {symptom}")
+
+        # Find eligible MHWPs based on matching rules
+        eligible_mhwps = [
+            mhwp for mhwp, major in get_mhwps_with_major(mhwp_data_path).items()
+            if symptom in MATCHING_RULES.get(major, set())
+        ]
+
+        if not eligible_mhwps:
+            print(f"No eligible MHWPs found for symptom '{symptom}'.")
             return
-        # delete past assignment of patients
+
+        print("\nEligible MHWPs:")
+        for mhwp in eligible_mhwps:
+            print(f"- {mhwp}")
+
+        # Let the user select a new MHWP
+        new_mhwp = input("\nEnter the new MHWP username for this patient: ").strip()
+        if new_mhwp not in eligible_mhwps:
+            print(f"'{new_mhwp}' is not a valid choice. Please choose from the eligible MHWPs.")
+            return
+
+        # Update assignments
         for mhwp, patients in current_assignments.items():
             if patient_to_modify in patients:
                 patients.remove(patient_to_modify)
                 break
-        # add patient to new_mhw
-        current_assignments[new_mhwp].append(patient_to_modify)
-        current_assignments = {mhwp: list(set(patients)) for mhwp, patients in current_assignments.items()}
-        save_assignments(current_assignments, assignments_path)
-        print("\nUpdated Assignments:")
-        display_assignments(assignments_path, user_data_path)
 
-    elif choice == '2':  #reassign for unassigned patients and mhwps
+        current_assignments.setdefault(new_mhwp, []).append(patient_to_modify)
+
+        # Save updated assignments
+        save_assignments(current_assignments, assignments_path)
+
+        # Update MHWP and patient CSVs
+        update_mhwp_csv_with_assignments(assignments_path, mhwp_data_path)
+        update_patients_csv_with_assignments(assignments_path, patient_data_path)
+
+        print(f"\nPatient '{patient_to_modify}' has been reassigned to MHWP '{new_mhwp}'.")
+
+    elif choice == '2':  # Reassign for unassigned patients and MHWPs
         print("\n--- Assigning unassigned patients and MHWPs ---")
 
-        all_patients = set(get_users_by_role("patient", user_data_path))
-        all_mhwps = set(get_users_by_role("mhwp", user_data_path))
-
+        # Load necessary data
         current_assignments = get_current_assignments(assignments_path)
+        all_patients = set(get_patients(patient_data_path))
         assigned_patients = {patient for patients in current_assignments.values() for patient in patients}
-        assigned_mhwps = set(current_assignments.keys())
+        unassigned_patients = list(all_patients - assigned_patients)
 
-        unassigned_patients = all_patients - assigned_patients
-        unassigned_mhwps = all_mhwps - assigned_mhwps
+        all_mhwps = set(get_mhwps(mhwp_data_path))
+        mhwps_with_schedule = get_mhwps_with_schedule(schedule_path)
+        unassigned_mhwps = set(all_mhwps - set(current_assignments.keys()))
 
-        # check if unassigned mhwps have available schedule or not
-        mhwps_with_schedule = get_mhwps_with_schedule("data/mhwp_schedule.csv")
-        mhwps_without_schedule = set(unassigned_mhwps) - mhwps_with_schedule
+        patients_with_symptoms = get_patients_with_symptoms(patient_data_path)
+        mhwps_with_major = get_mhwps_with_major(mhwp_data_path)
 
-        # no new_patient and unassigned mhwps who dont have available schedule
-        if not unassigned_patients and mhwps_without_schedule:
-            print("\nUnassigned MHWPs don't set available schedule:")
-            mhwp_table = [{"MHWP Username": mhwp, "Status": "No Schedule"} for mhwp in mhwps_without_schedule]
+        # No unassigned patients and MHWPs without schedules
+        if not unassigned_patients and set(unassigned_mhwps) - mhwps_with_schedule:
+            print("\n--- Unassigned MHWPs with no available schedule ---")
+            mhwp_table = [{"MHWP Username": mhwp, "Status": "No Schedule"} for mhwp in
+                          (set(unassigned_mhwps)  - mhwps_with_schedule)]
             print(tabulate(mhwp_table, headers="keys", tablefmt="grid"))
 
-        # no new_patient and unassigned mhwps whp have available schedule
-        elif not unassigned_patients and mhwps_with_schedule:
-            unassigned_and_available_mhwps = mhwps_with_schedule - set(current_assignments.keys())
-            if unassigned_and_available_mhwps:
-                print("\nAll patients have been assigned. The following MHWPs are available but unassigned:")
-                mhwp_table = [{"MHWP Username": mhwp} for mhwp in unassigned_and_available_mhwps]
-                print(tabulate(mhwp_table, headers="keys", tablefmt="grid"))
-            else:
-                print("\nAll patients have been assigned, and no MHWPs are unassigned with an available schedule.")
+        #  No unassigned patients and MHWPs with available schedules
+        elif not unassigned_patients and set(unassigned_mhwps) & mhwps_with_schedule:
+            print("\n--- Unassigned MHWPs with available schedule ---")
+            unassigned_and_available_mhwps = set(unassigned_mhwps)  & mhwps_with_schedule
+            mhwp_table = [{"MHWP Username": mhwp} for mhwp in unassigned_and_available_mhwps]
+            print(tabulate(mhwp_table, headers="keys", tablefmt="grid"))
 
-        # new patient and unassigned mhwps who have available schedule
+        # Unassigned patients and unassigned MHWPs with available schedules
         elif unassigned_patients and unassigned_mhwps & mhwps_with_schedule:
-            print("\nAssigning new patients to available MHWPs...")
-
-            available_unassigned_mhwps = list(unassigned_mhwps & mhwps_with_schedule)
-            print(f"Available Unassigned MHWPs: {available_unassigned_mhwps}")
-
+            print("\n--- Assigning unassigned patients to available MHWPs ---")
             for patient in list(unassigned_patients):
-                if available_unassigned_mhwps:
-                    mhwp = available_unassigned_mhwps.pop()
-                    current_assignments.setdefault(mhwp, []).append(patient)
+                symptom = patients_with_symptoms.get(patient)
+                if not symptom:
+                    print(f"No symptom found for patient '{patient}'. Skipping.")
+                    continue
+
+                eligible_mhwps = [
+                    mhwp for mhwp in (unassigned_mhwps & mhwps_with_schedule)
+                    if symptom in MATCHING_RULES.get(mhwps_with_major.get(mhwp, ""), set())
+                ]
+
+                if eligible_mhwps:
+                    selected_mhwp = random.choice(eligible_mhwps)
+                    current_assignments.setdefault(selected_mhwp, []).append(patient)
                     unassigned_patients.remove(patient)
-                    print(f"Assigned: {patient} -> {mhwp}")
-
-        # new patient and assigned mhwps who have available schedule
-        elif unassigned_patients and mhwps_with_schedule.issubset(set(current_assignments.keys())):
-            print("\nAll MHWPs with available schedules are assigned patients.")
-
-            # ensure mhwps who have available schedule are in current_assignement
-            for mhwp in mhwps_with_schedule:
-                if mhwp not in current_assignments:
-                    current_assignments[mhwp] = []
-
-            # assign new patients to mhwps who have min patients
-            for patient in list(unassigned_patients):
-                if current_assignments:
-                    mhwp_with_least_patients = min(
-                        current_assignments,
-                        key=lambda mhwp: len(current_assignments[mhwp])
-                    )
-                    print(f"Assigning patient {patient} to MHWP {mhwp_with_least_patients}...")
-                    current_assignments[mhwp_with_least_patients].append(patient)
-                    unassigned_patients.remove(patient)
+                    print(f"Assigned: Patient '{patient}' -> MHWP '{selected_mhwp}'")
                 else:
-                    print(f"No MHWP available to assign patient {patient}. Skipping.")
+                    print(f"No eligible MHWP found for patient '{patient}' with symptom '{symptom}'. Skipping.")
 
-            save_assignments(current_assignments, assignments_path)
+        #  Unassigned patients and all MHWPs with schedules already assigned
+        elif unassigned_patients and mhwps_with_schedule.issubset(set(current_assignments.keys())):
+            print("\n--- Assigning patients to MHWPs who already have assignments ---")
+            for patient in list(unassigned_patients):
+                symptom = patients_with_symptoms.get(patient)
+                if not symptom:
+                    print(f"No symptom found for patient '{patient}'. Skipping.")
+                    continue
+
+                eligible_mhwps = [
+                    mhwp for mhwp in mhwps_with_major
+                    if symptom in MATCHING_RULES.get(mhwps_with_major.get(mhwp, ""), set())
+                ]
+
+                if eligible_mhwps:
+                    mhwp_with_least_patients = min(
+                        eligible_mhwps,
+                        key=lambda mhwp: len(current_assignments.get(mhwp, []))
+                    )
+                    current_assignments.setdefault(mhwp_with_least_patients, []).append(patient)
+                    unassigned_patients.remove(patient)
+                    print(f"Assigned: Patient '{patient}' -> MHWP '{mhwp_with_least_patients}'")
+                else:
+                    print(f"No eligible MHWP found for patient '{patient}' with symptom '{symptom}'. Skipping.")
+
+        # Save the results and update related files
+        save_assignments(current_assignments, assignments_path)
+        update_mhwp_csv_with_assignments(assignments_path=assignments_path, mhwp_data_path=mhwp_data_path)
+        update_patients_csv_with_assignments(assignments_path=assignments_path, patient_data_path=patient_data_path)
+
+        print("\n--- Assignments Updated ---")
+
 
 
     else:
@@ -240,12 +471,14 @@ def modify_assignments(assignments_path="data/assignments.csv", user_data_path="
         return
 
 
-def display_unassigned_users(user_data_path="data/user_data.csv", assignments_path="data/assignments.csv"):
+def display_unassigned_users(patient_data_path="data/patients.csv",
+                             mhwp_data_path="data/mhwp.csv",
+                             assignments_path="data/assignments.csv"):
     """
     Display unassigned patients and MHWPs in a table format.
     """
-    all_patients = set(get_users_by_role("patient", user_data_path))
-    all_mhwps = set(get_users_by_role("mhwp", user_data_path))
+    all_patients = set(get_patients(patient_data_path))
+    all_mhwps = set(get_mhwps(mhwp_data_path))
 
     current_assignments = get_current_assignments(assignments_path)
     assigned_patients = {patient for patients in current_assignments.values() for patient in patients}
@@ -293,7 +526,9 @@ def handle_admin_menu(user):
         print("6. Modify Assignments")
         print("7. Initialize Assignments")  # Reset assignments
         print("8. Display Unassigned Patients and MHWPs")
-        print("9. Logout")
+        print("9. Initialize User Data")
+        print("10. Logout")
+        print("11. Initialize MHWP Schedule Data")
 
         admin_choice = input("Select an option (1-9): ").strip()
 
@@ -326,7 +561,8 @@ def handle_admin_menu(user):
         elif admin_choice == '5':  # Assign patients to MHWPs
             print("\n--- Assigning Patients to MHWPs ---")
             balanced_assign_patients_and_mhwps(
-                user_data_path="data/user_data.csv",
+                patient_data_path="data/patients.csv",
+                mhwp_data_path="data/mhwp.csv",
                 assignments_path="data/assignments.csv",
                 schedule_path="data/mhwp_schedule.csv"
             )
@@ -336,8 +572,10 @@ def handle_admin_menu(user):
         elif admin_choice == '6':  # Modify Assignments
             print("\n--- Modify Assignments ---")
             modify_assignments(
-                assignments_path="data/assignments.csv",
-                user_data_path="data/user_data.csv"
+              assignments_path="data/assignments.csv",
+              patient_data_path="data/patients.csv",
+              mhwp_data_path="data/mhwp.csv",
+              schedule_path="data/mhwp_schedule.csv"
             )
 
         elif admin_choice == '7':  # Initialize Assignments
@@ -348,13 +586,27 @@ def handle_admin_menu(user):
         elif admin_choice == '8':  # Display unassigned users
             print("\n--- Unassigned Patients and MHWPs ---")
             display_unassigned_users(
-                user_data_path="data/user_data.csv",
+                patient_data_path="data/patients.csv",
+                mhwp_data_path="data/mhwp.csv",
                 assignments_path="data/assignments.csv"
             )
+        elif admin_choice == '9':  # Initialize User Data
+            print("\n--- Initializing User Data ---")
+            initialize_user_data("data/user_data.csv")
+            print("User data has been reset.")
 
-        elif admin_choice == '9':  # Logout
+        elif admin_choice == '10':  # Logout
             print("Logging out of admin session.")
             break
+
+
+        elif admin_choice == '11':  # Initialize MHWP Schedule Data
+
+            print("\n--- Initializing MHWP Schedule Data ---")
+
+            initialize_mhwp_schedule("data/mhwp_schedule.csv")
+
+            print("MHWP schedule data has been reset.")
 
         else:
             print("Invalid choice, please try again.")
