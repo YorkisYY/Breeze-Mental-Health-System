@@ -63,7 +63,8 @@ def patient_record_menu(patient_username, mhwp_username):
         print("3. View Mental Health Assessments")
         print("4. View Patient Comment")
         print("5. Add Record to Patient")
-        print("6. Return to Main Menu")
+        print("6. View Patient Medical Records")
+        print("7. Return to Main Menu")
 
         choice = input("Select an option (1-5): ").strip()
         if choice == "1":
@@ -77,6 +78,8 @@ def patient_record_menu(patient_username, mhwp_username):
         elif choice == "5":
             add_record(patient_username)
         elif choice == "6":
+            view_notes(mhwp_username)
+        elif choice == "7":
             print("Returning to main menu.")
             break
         else:
@@ -196,9 +199,11 @@ def add_record(patient_username):
 
             # 使用 Option 找到对应的 DataFrame 行
             selected_appointment = available_appointments.iloc[option_map[option]]
-            appointment_id = selected_appointment["id"]
+            appointment_id = int(selected_appointment["id"])
             mhwp_username = selected_appointment["mhwp_username"]
             appointment_date = selected_appointment["date"]
+
+            appointment_date = pd.to_datetime(selected_appointment["date"], format="%Y/%m/%d").strftime("%Y-%m-%d")
 
             # 检查是否已添加记录
             try:
@@ -231,10 +236,11 @@ def add_record(patient_username):
                 "date": appointment_date,
                 "condition": condition,
                 "notes": notes,
-                "id":appointment_id,
+                "id": appointment_id,
             }
             notes_df = pd.concat([notes_df, pd.DataFrame([record_data])], ignore_index=True)
 
+            
             # 保存记录
             notes_df.to_csv(PATIENT_NOTES_FILE, index=False)
             print("Record added successfully!")
