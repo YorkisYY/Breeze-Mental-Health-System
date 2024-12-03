@@ -600,13 +600,16 @@ def handle_admin_menu(user):
             break
 
 
-        elif admin_choice == '11':  # Initialize MHWP Schedule Data
+        elif admin_choice == '11':  # Initialize/clean MHWP Schedule Data
 
             print("\n--- Initializing MHWP Schedule Data ---")
-
-            initialize_mhwp_schedule("data/mhwp_schedule.csv")
-
-            print("MHWP schedule data has been reset.")
+            confirmation = input("This will clear all existing MHWP schedule data. Are you sure? (yes/no): ").strip().lower()
+            
+            if confirmation == 'yes':
+                initialize_mhwp_schedule("data/mhwp_schedule.csv")
+                print("MHWP schedule data has been reset.")
+            else:
+                print("Operation cancelled. MHWP schedule data remains unchanged.")
 
         else:
             print("Invalid choice, please try again.")

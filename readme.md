@@ -1,4 +1,9 @@
 WHAT ARE WE WORKING ON !!!!-----------------------------------------------------
+## 12-th Commit
+----------
+**Arthur: 2024_12_03 11:19**
+1. add confirmation for the admin before cleaning up the mhwp schedule data.
+
 
 ## Eleventh Commit
 ----------
