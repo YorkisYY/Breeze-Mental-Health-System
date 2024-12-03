@@ -1,6 +1,6 @@
 import pandas as pd
 from config import USER_DATA_PATH, PATIENTS_DATA_PATH, MHWP_DATA_PATH
-from model.user_update import UserUpdate
+from .user_update import UserUpdate
 
 class AdminManage:
     def admin_update_user(self, target_username, new_username=None, new_password=None, new_email=None, new_emergency_email=None):

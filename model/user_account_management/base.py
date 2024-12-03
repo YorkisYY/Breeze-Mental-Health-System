@@ -8,7 +8,6 @@ class UserBase:
         self.role = role
         self.email = email
         self.emergency_email = emergency_email
-        self.medical_records = []
         self.appointments = []
         self.symptoms = symptoms
         self.major = major
