@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 MENTAL_ASSESSMENTS_FILE = "data/mental_assessments.csv"
 
-# 心理问卷问题及评分标准
+# Mental health questionnaire questions and scoring standards
 QUESTIONS = {
     "Depression": [
         "In the past two weeks, have you felt down, depressed, or hopeless?",
@@ -29,11 +29,11 @@ STATUS_FEEDBACK = {
 }
 
 def calculate_score(responses):
-    """根据回答计算分数，1-5 分对应低到高强度"""
+    """Calculate the score based on responses, where 1-5 corresponds to low to high intensity."""
     return sum(int(response) for response in responses)
 
 def generate_feedback(status_list):
-    """生成正向反馈"""
+    """Generate positive feedback."""
     feedback = []
     for status in status_list:
         if status in STATUS_FEEDBACK:
@@ -41,7 +41,7 @@ def generate_feedback(status_list):
     return "\n".join(feedback)
 
 def submit_questionnaire(patient_username, appointments_file="data/appointments.csv"):
-    """让患者完成问卷并存储结果"""
+    """Allow the patient to complete the questionnaire and store the results."""
     try:
         appointments = pd.read_csv(appointments_file)
         patient_appointment = appointments[appointments["patient_username"] == patient_username]
@@ -85,7 +85,7 @@ def submit_questionnaire(patient_username, appointments_file="data/appointments.
     }
     try:
         assessments_df = pd.read_csv(MENTAL_ASSESSMENTS_FILE)
-        # 修改点：替换 append 为 pd.concat
+        # Change: Replace append with pd.concat
         assessments_df = pd.concat([assessments_df, pd.DataFrame([assessment_data])], ignore_index=True)
     except FileNotFoundError:
         assessments_df = pd.DataFrame([assessment_data])
@@ -97,38 +97,39 @@ def submit_questionnaire(patient_username, appointments_file="data/appointments.
 
 def remind_to_complete_questionnaire(patient_username):
     """
-    提醒患者完成心理问卷。如果超过两周未完成，则提醒并引导完成问卷。
+    Remind the patient to complete the mental health questionnaire. If more than two weeks have passed, remind and guide them to complete it.
     """
     try:
-        # 读取问卷记录
+        # Read the questionnaire records
         assessments_df = pd.read_csv(MENTAL_ASSESSMENTS_FILE)
     except FileNotFoundError:
-        # 如果问卷文件不存在，创建空文件并直接提醒
+        # If the questionnaire file does not exist, create an empty file and directly remind
         assessments_df = pd.DataFrame(columns=["patient_username", "mhwp_username", "date", "score", "status"])
         assessments_df.to_csv(MENTAL_ASSESSMENTS_FILE, index=False)
 
-    # 筛选当前患者的记录
+    # Filter records for the current patient
     patient_records = assessments_df[assessments_df["patient_username"] == patient_username]
 
     if patient_records.empty:
-        # 如果没有记录，直接提醒
+        # If no records exist, directly remind
         print("You have not completed any questionnaires yet.")
         complete_now = input("Would you like to complete the questionnaire now? (yes/no): ").strip().lower()
         if complete_now == "yes":
             submit_questionnaire(patient_username)
         return
 
-    # 获取最后一次完成问卷的日期
+    # Get the date of the last completed questionnaire
     last_date_str = patient_records.iloc[-1]["date"]
     last_date = datetime.strptime(last_date_str, "%Y-%m-%d")
     days_since_last = (datetime.now() - last_date).days
 
     if days_since_last >= 14:
-        # 如果超过两周，提醒并引导完成问卷
+        # If more than two weeks, remind and guide to complete the questionnaire
         print(f"It has been {days_since_last} days since you last completed a questionnaire.")
         complete_now = input("Would you like to complete the questionnaire now? (yes/no): ").strip().lower()
         if complete_now == "yes":
             submit_questionnaire(patient_username)
     else:
-        # 如果在两周内，跳过提醒
+        # If within two weeks, skip the reminder
         print(f"You completed a questionnaire {days_since_last} days ago. No need to complete another now.")
+

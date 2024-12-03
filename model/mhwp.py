@@ -9,7 +9,6 @@ from config import USER_DATA_PATH
 from services.comment import view_comments
 from services.patient_records import view_patient_records
 from utils.notification import send_email_notification, get_email_by_username
-from services.record import view_records_of_patient
 from services.dashboard import display_dashboard
 
 

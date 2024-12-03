@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def load_resources_from_file(file_path="data/meditation_resources.csv"):
-    """加载 CSV 文件并返回 DataFrame"""
+    """Load a CSV file and return a DataFrame"""
     try:
         return pd.read_csv(file_path)
     except FileNotFoundError:
@@ -11,7 +11,7 @@ def load_resources_from_file(file_path="data/meditation_resources.csv"):
         return None
 
 def search_resources_from_file(df, keyword):
-    """根据关键字在 DataFrame 中搜索资源"""
+    """Search resources in a DataFrame based on a keyword"""
     matches = df[df["Keyword"].str.contains(keyword, case=False)]
     if not matches.empty:
         return matches
@@ -19,7 +19,7 @@ def search_resources_from_file(df, keyword):
         return None
 
 def levenshtein_distance(s1, s2):
-    """计算两个字符串的 Levenshtein 距离"""
+    """Calculate the Levenshtein distance between two strings"""
     if len(s1) < len(s2):
         return levenshtein_distance(s2, s1)
 
@@ -40,7 +40,7 @@ def levenshtein_distance(s1, s2):
 
 
 def similarity_ratio(s1, s2):
-    """计算两个字符串的相似度"""
+    """Calculate the similarity ratio between two strings"""
     max_len = max(len(s1), len(s2))
     if max_len == 0:
         return 1.0
@@ -48,7 +48,7 @@ def similarity_ratio(s1, s2):
 
 
 def custom_fuzzy_search(keyword, keywords_list, threshold=0.6):
-    """模糊搜索，匹配多个关键字中的任意一个"""
+    """Fuzzy search to match any keyword in a list"""
     matches = []
     for keywords in keywords_list:
         for k in keywords:
@@ -57,7 +57,7 @@ def custom_fuzzy_search(keyword, keywords_list, threshold=0.6):
                 break
     return matches
 
-# 定义类别和子选项
+# Define categories and sub-options
 CATEGORIES = {
     "1": {
         "name": "Sleep Health",
@@ -107,20 +107,20 @@ CATEGORIES = {
 }
 
 def load_resources_from_file(file_path="data/meditation_resources.csv"):
-    """加载 CSV 文件并返回 DataFrame"""
+    """Load a CSV file and return a DataFrame"""
     try:
-        print(f"Attempting to load file: {file_path}")  # 添加调试信息
+        print(f"Attempting to load file: {file_path}")  # Add debug information
         return pd.read_csv(file_path)
     except FileNotFoundError:
-        print(f"Error: {file_path} not found.")  # 文件不存在
+        print(f"Error: {file_path} not found.")  # File not found
         return None
     except Exception as e:
-        print(f"Error loading file: {e}")  # 其他未知错误
+        print(f"Error loading file: {e}")  # Other unknown errors
         return None
 
 
 def handle_search_meditation():
-    """处理搜索冥想资源的逻辑"""
+    """Handle the logic for searching meditation resources"""
     file_path = "data/meditation_resources.csv"
     df = load_resources_from_file(file_path)
 
@@ -146,7 +146,7 @@ def handle_search_meditation():
             print("Invalid choice, please try again.")
 
 def handle_needs_based_search(df):
-    """通过需求问答找到资源"""
+    """Find resources based on user needs"""
     print("\nWhat do you need?")
     for category_key, category in CATEGORIES.items():
         print(f"{category_key}. {category['name']}")
@@ -161,10 +161,10 @@ def handle_needs_based_search(df):
 
         if sub_option in category["options"]:
             selected_option = category["options"][sub_option]
-            selected_option = selected_option.strip().lower()  # 标准化用户输入
+            selected_option = selected_option.strip().lower()  # Standardize user input
 
-            # 修正为匹配 Subtitle 列
-            df["Subtitle"] = df["Subtitle"].str.strip().str.lower()  # 标准化数据
+            # Match Subtitle column
+            df["Subtitle"] = df["Subtitle"].str.strip().str.lower()  # Standardize data
             matches = df[df["Subtitle"].str.contains(selected_option, case=False)]
             if not matches.empty:
                 print("\nHere are your resources:")
@@ -179,8 +179,8 @@ def handle_needs_based_search(df):
 
 
 def handle_keyword_search(df):
-    """直接通过关键字搜索资源，支持模糊匹配"""
-    # 标准化数据并展开关键词
+    """Search resources directly using a keyword with fuzzy matching"""
+    # Standardize data and expand keywords
     df["Keyword"] = df["Keyword"].str.split(",").apply(lambda x: [k.strip().lower() for k in x])
     df["Subtitle"] = df["Subtitle"].str.strip().str.lower()
     df_exploded = df.explode('Keyword').reset_index(drop=True)
@@ -192,7 +192,7 @@ def handle_keyword_search(df):
             print("Returning to the previous menu.")
             break
 
-        # 精确匹配
+        # Exact match
         exact_matches = df_exploded[(df_exploded["Keyword"] == keyword) | (df_exploded["Subtitle"] == keyword)]
         if not exact_matches.empty:
             print("\nExact match found:")
@@ -200,15 +200,16 @@ def handle_keyword_search(df):
                 print(f"- {row['Title']} - {row['Subtitle']}: {row['URL']}")
             continue
 
-        # 模糊匹配
+        # Fuzzy match
         df_exploded["Keyword_Similarity"] = df_exploded["Keyword"].apply(lambda k: similarity_ratio(keyword, k))
         df_exploded["Subtitle_Similarity"] = df_exploded["Subtitle"].apply(lambda s: similarity_ratio(keyword, s))
         fuzzy_matches = df_exploded[(df_exploded["Keyword_Similarity"] >= 0.6) | (df_exploded["Subtitle_Similarity"] >= 0.6)]
         if not fuzzy_matches.empty:
             print("\nHere are the closest matches:")
-            # 去重，避免重复显示相同的资源
+            # Remove duplicates to avoid displaying the same resource multiple times
             fuzzy_matches = fuzzy_matches.drop_duplicates(subset=['Title', 'Subtitle', 'URL'])
             for _, row in fuzzy_matches.iterrows():
                 print(f"- {row['Title']} - {row['Subtitle']}: {row['URL']}")
         else:
             print(f"No resources found for '{keyword}'. Try another keyword.")
+

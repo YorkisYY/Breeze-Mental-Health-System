@@ -1,9 +1,10 @@
 import os
 from services.mood_tracking import MoodEntry
 from services.meditation import handle_search_meditation
-from services.comment import comment,add_comment,get_available_appointments
+from services.comment import comment
 from services.questionnaire import submit_questionnaire,remind_to_complete_questionnaire
 from services.journaling import enter_journaling
+from services.patient_records import view_my_records
 from utils.notification import send_email_notification, get_email_by_username
 import pandas as pd
 from tabulate import tabulate  
@@ -601,7 +602,7 @@ def handle_patient_menu(user):
                 wellbeing_choice = input("Select an option (1-6): ").strip()
 
                 if wellbeing_choice == '1':
-                    print("Medical records feature coming soon...")
+                    view_my_records(user.username)
                 elif wellbeing_choice == '2':
                     submit_questionnaire(user.username)      
                 elif wellbeing_choice == '3':
