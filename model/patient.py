@@ -1,4 +1,5 @@
 import os
+from user_account_management.user import User
 from services.mood_tracking import MoodEntry
 from services.meditation import handle_search_meditation
 from services.comment import add_comment,get_mhwp_for_patient
@@ -7,6 +8,7 @@ from services.journaling import enter_journaling
 from utils.notification import send_email_notification, get_email_by_username
 import pandas as pd
 from tabulate import tabulate  
+from config import USER_DATA_PATH
 def display_mhwp_schedule_for_patient(user, schedule_file, assignments_file):
     """
     Display the current schedule for the assigned MHW for the next month.
@@ -507,15 +509,10 @@ def handle_patient_menu(user):
                 if not new_username:
                     print("Username cannot be empty.")
                     continue
-
-                import pandas as pd
-                from config import USER_DATA_PATH
-
                 user_df = pd.read_csv(USER_DATA_PATH)
                 if new_username in user_df[user_df['username'] != user.username]['username'].values:
                     print("Username already exists. Please choose a different one.")
                     continue
-
                 if user.update_info(new_username=new_username):
                     continue
                 else:
@@ -537,7 +534,7 @@ def handle_patient_menu(user):
         elif patient_choice == '4':  # new option for emergency email
             new_emergency_email = input("Enter new emergency email: ").strip()
             if user.update_info(new_emergency_email=new_emergency_email):
-                continue
+                print("Emergency_email updated successfully!")
             else:
                 print("Failed to update emergency email. Try again.")
                 
