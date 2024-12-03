@@ -13,31 +13,6 @@ from services.record import view_records_of_patient
 from services.dashboard import display_dashboard
 
 
-def initialize_schedule_file(file_path):
-    """
-    Clear all data from the mhwp_schedule.csv file except the column headers.
-    :param file_path: Path to the schedule file.
-    """
-    if not os.path.exists(file_path):
-        print(f"Error: File '{file_path}' does not exist.")
-        return
-
-    try:
-        # Define the column headers
-        headers = ["mhwp_username", "Date", "Day", "09:00-10:00 (0)", "10:00-11:00 (1)",
-                   "11:00-12:00 (2)", "12:00-13:00 (3)", "13:00-14:00 (4)",
-                   "14:00-15:00 (5)", "15:00-16:00 (6)"]
-
-        # Overwrite the file with only the headers
-        with open(file_path, "w", newline='', encoding="utf-8") as file:
-            writer = csv.writer(file)
-            writer.writerow(headers)  # Write headers only
-
-        print(f"\nThe schedule file '{file_path}' has been successfully reset. All data has been cleared.")
-
-    except Exception as e:
-        print(f"Error resetting the file: {e}")
-
 def list_appointments_for_mhw(mhw_username, file_path):
     """List appointments for the currently logged-in MHW"""
     appointments = []
@@ -523,7 +498,7 @@ def handle_mhwp_menu(user):
         print("7. Set Up Your Availability")
         print("8. View Your Current Schedule")
         print("9. Modify Your Availability")
-        print("10. Reset Schedule (Clear All Data)")
+        print("10.Delete Account")
         print("11. Logout")
 
         mhwp_choice = input("Select an option (1-11): ").strip()
@@ -887,10 +862,12 @@ def handle_mhwp_menu(user):
                 else:
                     print("Invalid choice. Please select 1, 2, or 3.")
 
-        elif mhwp_choice == '10':  # Reset schedule
-            schedule_file = "data/mhwp_schedule.csv"
-            initialize_schedule_file(schedule_file)
-
+        elif mhwp_choice == '10':
+            confirm = input("Confirm delete account? (yes/no): ").strip()
+            if confirm.lower() == "yes":
+                user.delete_from_csv()
+                print("Account deleted successfully.")
+                return
         elif mhwp_choice == '11':  # Logout
             break
 

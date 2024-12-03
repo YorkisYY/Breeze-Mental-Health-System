@@ -9,6 +9,8 @@ import pandas as pd
 from tabulate import tabulate  
 from os.path import exists
 import csv
+import pandas as pd
+from config import USER_DATA_PATH
 
 def display_mhwp_schedule_for_patient(user, schedule_file, assignments_file):
     """
@@ -542,10 +544,6 @@ def handle_patient_menu(user):
                         if not new_username:
                             print("Username cannot be empty.")
                             continue
-
-                        import pandas as pd
-                        from config import USER_DATA_PATH
-
                         user_df = pd.read_csv(USER_DATA_PATH)
                         if new_username in user_df[user_df['username'] != user.username]['username'].values:
                             print("Username already exists. Please choose a different one.")
@@ -581,7 +579,7 @@ def handle_patient_menu(user):
                     if confirm.lower() == "yes":
                         user.delete_from_csv()
                         print("Account deleted successfully.")
-                        break
+                        return
                 elif account_choice == '6':
                     break  
                 else:

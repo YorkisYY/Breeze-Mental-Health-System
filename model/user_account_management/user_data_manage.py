@@ -89,7 +89,7 @@ class UserDataManage:
             print("User data file not found.")
             return False
     def delete_from_csv(self):
-        """Delete user from user_data.csv and patients.csv if applicable."""
+        """Delete user from user_data.csv and corresponding role-specific file if applicable."""
         try:
             user_df = pd.read_csv(USER_DATA_PATH)
             user_df = user_df[user_df['username'] != self.username]
@@ -105,6 +105,17 @@ class UserDataManage:
                     print("Patient data file not found. Skipping patient record deletion.")
                 except Exception as e:
                     print(f"Error deleting patient record: {str(e)}")
+                    
+            elif self.role == "mhwp":
+                try:
+                    mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                    mhwp_df = mhwp_df[mhwp_df['username'] != self.username]
+                    mhwp_df.to_csv(MHWP_DATA_PATH, index=False, na_rep='')
+                    print("MHWP record deleted successfully.")
+                except FileNotFoundError:
+                    print("MHWP data file not found. Skipping MHWP record deletion.")
+                except Exception as e:
+                    print(f"Error deleting MHWP record: {str(e)}")
 
             print("User deleted successfully.")
         except FileNotFoundError:
