@@ -5,36 +5,13 @@ from os.path import exists
 import pandas as pd
 from datetime import datetime, timedelta
 import calendar
+from config import USER_DATA_PATH
+from services.comment import view_comments
 from services.patient_records import view_patient_records
 from utils.notification import send_email_notification, get_email_by_username
 from services.record import view_records_of_patient
 from services.dashboard import display_dashboard
 
-
-def initialize_schedule_file(file_path):
-    """
-    Clear all data from the mhwp_schedule.csv file except the column headers.
-    :param file_path: Path to the schedule file.
-    """
-    if not os.path.exists(file_path):
-        print(f"Error: File '{file_path}' does not exist.")
-        return
-
-    try:
-        # Define the column headers
-        headers = ["mhwp_username", "Date", "Day", "09:00-10:00 (0)", "10:00-11:00 (1)",
-                   "11:00-12:00 (2)", "12:00-13:00 (3)", "13:00-14:00 (4)",
-                   "14:00-15:00 (5)", "15:00-16:00 (6)"]
-
-        # Overwrite the file with only the headers
-        with open(file_path, "w", newline='', encoding="utf-8") as file:
-            writer = csv.writer(file)
-            writer.writerow(headers)  # Write headers only
-
-        print(f"\nThe schedule file '{file_path}' has been successfully reset. All data has been cleared.")
-
-    except Exception as e:
-        print(f"Error resetting the file: {e}")
 
 def list_appointments_for_mhw(mhw_username, file_path):
     """List appointments for the currently logged-in MHW"""
@@ -76,9 +53,9 @@ def list_appointments_for_mhw(mhw_username, file_path):
 
 def generate_day_from_date(date_str):
     """
-    根据日期生成对应的星期几。
-    :param date_str: 日期字符串，格式为 "YYYY/MM/DD"
-    :return: 对应的星期几（如 "Monday"）
+    Generate the day of the week based on the date.
+    :param date_str: date string in the format of YYYY/MM/DD
+    :return: The corresponding day of the week (e.g. "Monday")
     """
     try:
         return datetime.strptime(date_str, "%Y/%m/%d").strftime("%A")
@@ -295,16 +272,39 @@ def modify_mhwp_schedule(user, option, dates=None, time_slot_indices=None):
 def setup_mhwp_schedule(user):
     """Set up availability schedule for the Mental Health Worker with slots."""
     print("\nSetup Your Availability")
-
     output_file = "data/mhwp_schedule.csv"
     if os.path.exists(output_file):
-        with open(output_file, "r", encoding="utf-8") as file:
-            reader = csv.reader(file)
-            headers = next(reader)  # Read headers
-            if any(row[0] == user.username for row in reader):
-                print("\nYou have already set up your availability.")
-                print("Returning to the Mental Health Worker Options menu...\n")
-                return
+        try:
+            with open(output_file, "r", encoding="utf-8") as file:
+                reader = csv.reader(file)
+                try:
+                    headers = next(reader)
+                except StopIteration:
+                    print("\nError: The schedule file is empty or has no headers.")
+                    return
+                expected_columns = [
+                    "mhwp_username", "Date", "Day",
+                    "09:00-10:00 (0)", "10:00-11:00 (1)", "11:00-12:00 (2)",
+                    "12:00-13:00 (3)", "13:00-14:00 (4)", "14:00-15:00 (5)", "15:00-16:00 (6)"
+                ]
+                if headers != expected_columns:
+                    print("\nError: The schedule file has incorrect headers.")
+                    return
+
+                for row in reader:
+                    if not row:
+                        continue
+                    if row[0] == user.username:
+                        print("\nYou have already set up your availability.")
+                        print("Returning to the Mental Health Worker Options menu...\n")
+                        return
+
+        except FileNotFoundError:
+            print(f"\nError: File '{output_file}' not found.")
+            return
+        except Exception as e:
+            print(f"\nError reading the file: {e}")
+            return
 
     print("\nDay Index Reference:")
     print("Monday (0), Tuesday (1), Wednesday (2), Thursday (3), Friday (4), Saturday (5), Sunday (6)")
@@ -338,19 +338,35 @@ def setup_mhwp_schedule(user):
 
     updated_data = []
     if os.path.exists(output_file):
-        with open(output_file, "r", encoding="utf-8") as file:
-            reader = csv.reader(file)
-            next(reader)  # Skip headers
-            updated_data = [row for row in reader if row[0] != user.username]
+        try:
+            with open(output_file, "r", encoding="utf-8") as file:
+                reader = csv.reader(file)
+                try:
+                    current_headers = next(reader)
+                except StopIteration:
+                    print("\nError: The schedule file is empty. Writing new data...")
+                    current_headers = headers
+
+                if current_headers != headers:
+                    print("\nError: The file has incorrect headers.")
+                    return
+
+                updated_data = [
+                    row for row in reader if row and row[0] != user.username
+                ]
+        except Exception as e:
+            print(f"\nError reading the file: {e}")
+            return
 
     updated_data.extend(rows)
-
-    with open(output_file, "w", newline='', encoding="utf-8") as file:
-        writer = csv.writer(file)
-        writer.writerow(headers)
-        writer.writerows(updated_data)
-
-    print(f"\nYour schedule has been successfully saved to {output_file}.")
+    try:
+        with open(output_file, "w", newline='', encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow(headers)
+            writer.writerows(updated_data)
+        print(f"\nYour schedule has been successfully saved to {output_file}.")
+    except Exception as e:
+        print(f"\nError writing to the file: {e}")
 
 def manage_appointment_action(user, manage_choice, appointments_file, schedule_file):
     """
@@ -482,7 +498,7 @@ def handle_mhwp_menu(user):
         print("7. Set Up Your Availability")
         print("8. View Your Current Schedule")
         print("9. Modify Your Availability")
-        print("10. Reset Schedule (Clear All Data)")
+        print("10.Delete Account")
         print("11. Logout")
 
         mhwp_choice = input("Select an option (1-11): ").strip()
@@ -494,10 +510,6 @@ def handle_mhwp_menu(user):
                     print("Username cannot be empty.")
                     continue
 
-                import pandas as pd
-                from config import USER_DATA_PATH
-                
-                
                 user_df = pd.read_csv(USER_DATA_PATH)
                 if new_username in user_df['username'].values:
                     print("Username already exists. Please choose a different one.")
@@ -658,88 +670,204 @@ def handle_mhwp_menu(user):
                     except Exception as e:
                         print(f"Error processing leave request: {str(e)}")
 
+
+
+
+
                 elif modify_choice == '2':  # Change Time Slots
-                    modify_dates = input("\nEnter the dates you want to modify (YYYY/MM/DD), separated by commas: ").strip()
-                    if not modify_dates:  # Check if user enters nothing
-                        print("\nNo dates entered. Returning to menu...")
-                        continue
-                    modify_dates = [date.strip() for date in modify_dates.split(",")]
+
                     file_path = "data/mhwp_schedule.csv"
+
                     try:
+
                         with open(file_path, "r", encoding="utf-8") as file:
+
                             reader = csv.reader(file)
+
                             headers = next(reader)  # Read headers
+
                             all_schedules = list(reader)
 
                         # Generate time slots and ensure headers match time slots
-                        time_slots = generate_time_slots()  # Generates ['09:00-10:00 (0)', ..., '15:00-16:00 (6)']
+
+                        time_slots = ["09:00-10:00 (0)", "10:00-11:00 (1)", "11:00-12:00 (2)",
+
+                                      "12:00-13:00 (3)", "13:00-14:00 (4)", "14:00-15:00 (5)", "15:00-16:00 (6)"]
+
                         expected_headers = ["mhwp_username", "Date", "Day"] + time_slots
 
                         # Expand headers if necessary
+
                         if len(headers) < len(expected_headers):
                             headers = expected_headers
 
-                        # Extract current user's schedule and keep others unchanged
-                        other_users = [row for row in all_schedules if row[0] != user.username]
-                        updated_user_schedule = [row for row in all_schedules if row[0] == user.username]
+                        # Extract current user's schedule
+
+                        current_user_schedule = [row for row in all_schedules if row[0] == user.username]
+
+                        # Display current schedule
+
+                        print("\nCurrent Schedule:")
+
+                        print(tabulate(current_user_schedule, headers=headers, tablefmt="grid"))
+
+                        # Prompt user to enter dates
+
+                        modify_dates = input(
+                            "\nEnter the dates you want to modify (YYYY/MM/DD), separated by commas: ").strip()
+
+                        if not modify_dates:  # Check if user enters nothing
+
+                            print("\nNo dates entered. Returning to menu...")
+
+                            continue
+
+                        modify_dates = [date.strip() for date in modify_dates.split(",")]
+
+                        updated_user_schedule = current_user_schedule
+
                         num_slots = len(time_slots)
+
                         for date in modify_dates:
+
                             matching_row = next((row for row in updated_user_schedule if row[1] == date), None)
+
                             if not matching_row:
-                                print(f"No schedule found for the date: {date}")
+                                print(f"\nNo schedule found for the date: {date}")
+
                                 continue
 
                             # Extract the day name
+
                             day_name = matching_row[2] if len(matching_row) > 2 else "Unknown"
 
                             # Ensure row has enough columns for all time slots
+
                             while len(matching_row) < len(expected_headers):
                                 matching_row.append("□")
 
                             # Display current time slots in horizontal table
+
                             row_data = matching_row[3:]  # Start from time slots
+
                             print(f"\nCurrent Time Slots for {date} ({day_name}):")
-                            print(tabulate([["Date"] + time_slots, [date] + row_data], headers="firstrow", tablefmt="grid"))
 
-                            # Let the user modify specific time slots
+                            print(tabulate([["Date"] + time_slots, [date] + row_data], headers="firstrow",
+                                           tablefmt="grid"))
+
+                            # Select the current available slot to move
+
                             while True:
-                                selected_indices = input(f"\nEnter the indices of time slots to mark as available for {date} (e.g., 0,1): ").strip()
-                                if not selected_indices:  # If input is empty
-                                    print("No indices entered. Please try again.")
-                                    continue
-                                try:
-                                    selected_indices = [int(idx) for idx in selected_indices.split(",") if idx.isdigit() and 0 <= int(idx) < num_slots]
-                                    break  # Exit loop if input is valid
-                                except ValueError:
-                                    print("Invalid input. Please enter indices as integers separated by commas (e.g., 0,1).")
 
-                            # Update the time slots for the matching row
-                            for idx in range(num_slots):
-                                matching_row[idx + 3] = "■" if idx in selected_indices else "□"
+                                try:
+
+                                    current_index = int(input(
+                                        f"\nEnter the index of the currently available slot you want to move (e.g., 0-6): ").strip())
+
+                                    if 0 <= current_index < num_slots:
+
+                                        if row_data[current_index] == "■":
+
+                                            break  # Valid selection, exit loop
+
+                                        elif row_data[current_index] in ["▲", "●"]:
+
+                                            print(
+                                                f"\nThe current slot {time_slots[current_index]} cannot be modified due to the appointment.")
+
+                                        else:
+
+                                            print("Invalid selection. Please choose a valid available slot (■).")
+
+                                    else:
+
+                                        print("Invalid index. Please enter a valid slot index.")
+
+                                except ValueError:
+
+                                    print("Invalid input. Please enter a valid index as an integer.")
+
+                            # Select the target slot to change to
+
+                            while True:
+
+                                try:
+
+                                    target_index = int(input(
+                                        f"\nEnter the index of the target slot to make available (e.g., 0-6): ").strip())
+
+                                    if 0 <= target_index < num_slots:
+
+                                        if row_data[target_index] == "□":
+
+                                            break  # Valid target slot, exit loop
+
+                                        elif row_data[target_index] in ["▲", "●"]:
+
+                                            print(
+                                                f"\nThe target slot {time_slots[target_index]} cannot be modified due to the appointment.")
+
+                                        else:
+
+                                            print("Invalid selection. Please choose an unavailable slot (□).")
+
+                                    else:
+
+                                        print("Invalid index. Please enter a valid slot index.")
+
+                                except ValueError:
+
+                                    print("Invalid input. Please enter a valid index as an integer.")
+
+                            # Perform the swap
+
+                            row_data[current_index], row_data[target_index] = "□", "■"
+
+                            matching_row[3:] = row_data
 
                         # Combine updated user schedule with other users
+
+                        other_users = [row for row in all_schedules if row[0] != user.username]
+
                         updated_schedules = other_users + updated_user_schedule
 
                         # Save the updated schedule back to the file
+
                         with open(file_path, "w", newline='', encoding="utf-8") as file:
+
                             writer = csv.writer(file)
+
                             writer.writerow(headers)  # Write headers
+
                             writer.writerows(updated_schedules)  # Write updated data
+
                         print("\nYour updated time slots have been saved successfully!")
+
+                        # Display the updated schedule
+
                         print("\nUpdated Schedule (After Modifications):")
-                        print(tabulate(updated_user_schedule, headers=headers, tablefmt="grid"))
+
+                        updated_user_schedule_display = [row for row in updated_schedules if row[0] == user.username]
+
+                        print(tabulate(updated_user_schedule_display, headers=headers, tablefmt="grid"))
+
+
                     except Exception as e:
+
                         print(f"Error modifying time slots: {str(e)}")
+
 
                 elif modify_choice == '3':  # Back to main menu
                     break
                 else:
                     print("Invalid choice. Please select 1, 2, or 3.")
 
-        elif mhwp_choice == '10':  # Reset schedule
-            schedule_file = "data/mhwp_schedule.csv"
-            initialize_schedule_file(schedule_file)
-
+        elif mhwp_choice == '10':
+            confirm = input("Confirm delete account? (yes/no): ").strip()
+            if confirm.lower() == "yes":
+                user.delete_from_csv()
+                print("Account deleted successfully.")
+                return
         elif mhwp_choice == '11':  # Logout
             break
 

@@ -7,12 +7,18 @@ from services.journaling import enter_journaling
 from utils.notification import send_email_notification, get_email_by_username
 import pandas as pd
 from tabulate import tabulate  
+from os.path import exists
+import csv
+import pandas as pd
+from config import USER_DATA_PATH
+
 def display_mhwp_schedule_for_patient(user, schedule_file, assignments_file):
     """
     Display the current schedule for the assigned MHW for the next month.
     Allows the patient to select a date by its real-time ID.
     """
     try:
+        print("\nNote: You can notify the Admin to change your MHWP before booking an appointment.")
         # Retrieve the assigned MHW for the patient
         assignments = pd.read_csv(assignments_file, header=None, names=["patient_username", "mhwp_username"])
         mhwp_record = assignments[assignments['patient_username'] == user.username]
@@ -441,60 +447,67 @@ def display_upcoming_appointments_with_mhwp(patient_username, appointments_file,
     """
     Display upcoming appointments for a patient with MHW names included.
     """
+    # Check if files exist
+    if not exists(assignments_file):
+        print(f"Error: Assignment file '{assignments_file}' not found.")
+        return
+
+    if not exists(appointments_file):
+        print(f"Error: Appointments file '{appointments_file}' not found.")
+        return
+
     try:
-        # Load assignments to get MHW for the patient
-        assignments = pd.read_csv(assignments_file, header=None, names=["patient_username", "mhwp_username"])
-        mhwp_record = assignments[assignments['patient_username'] == patient_username]
-        if mhwp_record.empty:
-            print(f"No assigned MHW found for patient '{patient_username}'.")
-            return
-        mhwp_username = mhwp_record.iloc[0]['mhwp_username']
+        # Load assignments and retrieve MHW for the patient
+        with open(assignments_file, 'r', encoding='utf-8') as assignments_csv:
+            assignments = csv.DictReader(assignments_csv)
+            mhwp_username = None
+            for row in assignments:
+                if row['patient_username'] == patient_username:
+                    mhwp_username = row['mhwp_username']
+                    break
 
-        # Load appointments for the patient
-        appointments = pd.read_csv(appointments_file)
-        user_appointments = appointments[appointments['patient_username'] == patient_username]
+            if not mhwp_username:
+                print(f"No assigned MHW found for patient '{patient_username}'.")
+                return
 
-        if user_appointments.empty:
-            print("\nNo appointments found.")
-            return
+        # Load appointments
+        with open(appointments_file, 'r', encoding='utf-8') as appointments_csv:
+            reader = csv.DictReader(appointments_csv)
 
-        # Add MHW username column
-        user_appointments['mhwp_username'] = mhwp_username
+            # Filter upcoming appointments for the patient
+            today = pd.Timestamp.today().normalize()
+            next_week = today + pd.Timedelta(days=7)
 
-        # Convert dates to datetime and filter for the next week
-        user_appointments['date'] = pd.to_datetime(user_appointments['date'], format="%Y/%m/%d", errors='coerce')
-        today = pd.to_datetime("today").normalize()
-        next_week = today + pd.Timedelta(days=7)
+            appointments = []
+            for row in reader:
+                if (row['patient_username'] == patient_username and
+                        row['status'] in ['pending', 'confirmed']):
+                    appointment_date = pd.to_datetime(row['date'], format='%Y/%m/%d', errors='coerce')
+                    if today <= appointment_date <= next_week:
+                        appointments.append(row)
 
-        # Filter for the next week and relevant statuses
-        upcoming_appointments = user_appointments[
-            (user_appointments['date'] >= today) & 
-            (user_appointments['date'] <= next_week) & 
-            (user_appointments['status'].isin(['pending', 'confirmed']))
-        ]
+            # Check if any appointments were found
+            if not appointments:
+                print("\nNo upcoming appointments found for the next week.")
+                return
 
-        if upcoming_appointments.empty:
-            print("\nNo appointments found for the next week.")
-            return
+            # Sort appointments by date and timeslot
+            appointments.sort(key=lambda x: (x['date'], x['timeslot']))
 
-        # Format and sort
-        upcoming_appointments = upcoming_appointments.copy()  # Avoid SettingWithCopyWarning
-        upcoming_appointments['date'] = upcoming_appointments['date'].dt.strftime("%Y/%m/%d")
-        upcoming_appointments = upcoming_appointments.sort_values(by=['date', 'timeslot'])
+            # Display appointments
+            print(f"\nUpcoming Appointments for Patient '{patient_username}':")
+            print("-------------------------------------------------------------")
+            print("No. | Date       | Time Slot     | MHW         | Status")
+            print("-------------------------------------------------------------")
+            for idx, row in enumerate(appointments, start=1):
+                print(
+                    f"{idx:2d} | {row['date']} | {row['timeslot']:<13} | {row['mhwp_username']:<10} | {row['status']}")
+            print("-------------------------------------------------------------")
 
-        # Display the table
-        print("\nYour appointments for the next week:")
-        print(tabulate(
-            upcoming_appointments[['date', 'mhwp_username', 'timeslot', 'status']],
-            headers=['Date', 'MHWP', 'Time Slot', 'Status'],
-            tablefmt="grid",
-            showindex=False
-        ))
-
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        print(f"Unexpected error: {str(e)}")
+
+
 
 
 
@@ -531,10 +544,6 @@ def handle_patient_menu(user):
                         if not new_username:
                             print("Username cannot be empty.")
                             continue
-
-                        import pandas as pd
-                        from config import USER_DATA_PATH
-
                         user_df = pd.read_csv(USER_DATA_PATH)
                         if new_username in user_df[user_df['username'] != user.username]['username'].values:
                             print("Username already exists. Please choose a different one.")
@@ -570,7 +579,7 @@ def handle_patient_menu(user):
                     if confirm.lower() == "yes":
                         user.delete_from_csv()
                         print("Account deleted successfully.")
-                        break
+                        return
                 elif account_choice == '6':
                     break  
                 else:

@@ -1,7 +1,7 @@
 # handles all login related function and user interface 
 
 import pandas as pd
-from model.user import User  
+from model.user_account_management.user import User  
 from model.admin import handle_admin_menu
 from model.mhwp import handle_mhwp_menu
 from model.patient import handle_patient_menu
