@@ -223,7 +223,6 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
     Allow a patient to book an appointment with their assigned MHW.
     Updates mhwp_schedule.csv to mark the slot as booked (▲).
     """
-
     try:
         # Retrieve assigned MHW from assignments.csv
         try:
@@ -241,7 +240,7 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
         try:
             schedule = pd.read_csv(schedule_file)
             mhwp_schedule = schedule[(schedule['mhwp_username'] == mhwp_username) & (schedule['Date'] == date)]
-
+            
             if mhwp_schedule.empty:
                 print(f"No schedule found for MHW '{mhwp_username}' on {date}.")
                 return False
@@ -261,32 +260,9 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
             print("Error: mhwp_schedule.csv file not found.")
             return False
 
-        # Check for conflicting appointments in appointments.csv
-        try:
-            appointments = pd.read_csv(appointment_file)
-        except FileNotFoundError:
-            appointments = pd.DataFrame(columns=['id', 'patient_username', 'mhwp_username', 'date', 'timeslot', 'status'])
-
-        # Check for overlapping appointments
-        overlapping_appointment = appointments[
-            (appointments['mhwp_username'] == mhwp_username) &
-            (appointments['date'] == date) &
-            (appointments['timeslot'] == timeslot)
-        ]
-        if not overlapping_appointment.empty:
-            print(f"The selected time slot '{timeslot}' overlaps with an existing appointment. Please choose another.")
-            return False
-
-        # Generate a sequential ID for the appointment
-        if not appointments.empty:
-            last_id = appointments['id'].max()  # Get the highest current ID
-            appointment_id = last_id + 1
-        else:
-            appointment_id = 1
-
-        # Record the new appointment in appointments.csv
+        # Append the new appointment to appointments.csv
         new_appointment = {
-            "id": appointment_id,  # Add sequential ID
+            "id": None,  # Placeholder for sequential ID, if needed
             "patient_username": user.username,
             "mhwp_username": mhwp_username,
             "date": date,
@@ -295,9 +271,12 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
         }
         appointment_df = pd.DataFrame([new_appointment])
         try:
-            appointment_df.to_csv(appointment_file, mode='a', header=not pd.read_csv(appointment_file).shape[0], index=False)
-        except FileNotFoundError:
-            appointment_df.to_csv(appointment_file, mode='w', header=True, index=False)
+            # Append to existing file without reading the content
+            appointment_df.to_csv(appointment_file, mode='a', header=False, index=False)
+            print(f"Appointment successfully recorded for {user.username}.")
+        except Exception as e:
+            print(f"Error writing to appointments.csv: {e}")
+            return False
 
         # Update mhwp_schedule.csv to mark the slot as booked (▲)
         try:
@@ -311,12 +290,12 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
             print(f"Error updating schedule: {e}")
             return False
 
-       
         return True
 
     except Exception as e:
         print(f"Unexpected error: {e}")
         return False
+
 
 def cancel_appointment_with_display(user, schedule_file, appointment_file):
     """
