@@ -10,4 +10,3 @@ id,patient_username,mhwp_username,date,timeslot,status
 9,bsx,baishao,2024/12/06,09:00-10:00,cancelled
 10,bsx,baishao,2024/12/06,12:00-13:00,cancelled
 11,bsx,baishao,2024/12/01,12:00-13:00,confirmed
-12,qqq1,qqq3,2024/12/09,14:00-15:00,pending

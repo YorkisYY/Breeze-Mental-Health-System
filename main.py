@@ -4,6 +4,7 @@ import os
 from utils.display_banner import display_banner
 from services import *
 from model import *
+from config import *
 
 # # Create data directory if it doesn't exist
 # DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')

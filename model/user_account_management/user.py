@@ -2,12 +2,12 @@ import pandas as pd
 import hashlib
 from datetime import datetime
 from config import USER_DATA_PATH, PATIENTS_DATA_PATH, MHWP_DATA_PATH
-from model.base import UserBase
-from model.user_data_manage import UserDataManage
-from model.user_update import UserUpdate
-from model.admin_manage import AdminManage
-from model.patient_manage import PatientManage
-from model.mhwp_manage import MhwpManage
+from .base import UserBase
+from .user_data_manage import UserDataManage
+from .user_update import UserUpdate
+from .admin_manage import AdminManage
+from .patient_manage import PatientManage
+from .mhwp_manage import MhwpManage
 
 class User(UserBase, UserDataManage, UserUpdate, PatientManage, MhwpManage, AdminManage):
     """

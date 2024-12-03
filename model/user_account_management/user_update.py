@@ -1,9 +1,6 @@
 import os
-import csv
 from tabulate import tabulate
-import random
 import pandas as pd
-import hashlib
 from .base import UserBase
 from config import USER_DATA_PATH
 from config import PATIENTS_DATA_PATH
