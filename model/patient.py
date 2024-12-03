@@ -487,149 +487,191 @@ def display_upcoming_appointments_with_mhwp(patient_username, appointments_file,
         print(f"Unexpected error: {e}")
 
 
+
+
+
 def handle_patient_menu(user):
-    
     remind_to_complete_questionnaire(user.username)
-    
+
     while True:
         print("\nPatient Options:")
-        print("1. Update Personal Info")
-        print("2. Change Password")
-        print("3. Change email")
-        print("4. Change emergency email")
-        print("5. View Medical Records")
-        print("6. Book/Cancel Appointment")
-        print("7. Check Appointments")
-        print("8. Enter a Journaling")
-        print("9. Submit a Mood Questionnaire")
-        print("10. Leave a Comment for Your MHWP")
-        print("11. Explore Meditation Resources")
-        print("12. Delete Account")
-        print("13. Track Mood")
-        print("14. Logout")
-        
-        patient_choice = input("Select an option (1-14): ")
-        
-        if patient_choice == '1':
-            try:
-                new_username = input("Enter new username: ").strip()
-                if not new_username:
-                    print("Username cannot be empty.")
-                    continue
+        print("1. Account Management")
+        print("2. Health & Wellbeing")
+        print("3. Appointments & Records")
+        print("4. Logout")
 
-                import pandas as pd
-                from config import USER_DATA_PATH
+        main_choice = input("Select an option (1-4): ").strip()
 
-                user_df = pd.read_csv(USER_DATA_PATH)
-                if new_username in user_df[user_df['username'] != user.username]['username'].values:
-                    print("Username already exists. Please choose a different one.")
-                    continue
+        if main_choice == '1':  # Account Management
+            while True:
+                print("\nAccount Management:")
+                print("1. Update Personal Info")
+                print("2. Change Password")
+                print("3. Change Email")
+                print("4. Change Emergency Email")
+                print("5. Delete Account")
+                print("6. Back to Main Menu")
 
-                if user.update_info(new_username=new_username):
-                    continue
+                account_choice = input("Select an option (1-6): ").strip()
+
+                if account_choice == '1':
+                    try:
+                        new_username = input("Enter new username: ").strip()
+                        if not new_username:
+                            print("Username cannot be empty.")
+                            continue
+
+                        import pandas as pd
+                        from config import USER_DATA_PATH
+
+                        user_df = pd.read_csv(USER_DATA_PATH)
+                        if new_username in user_df[user_df['username'] != user.username]['username'].values:
+                            print("Username already exists. Please choose a different one.")
+                            continue
+
+                        if user.update_info(new_username=new_username):
+                            continue
+                        else:
+                            print("Failed to update username. Please try again.")
+                    except Exception as e:
+                        print(f"Error updating username: {str(e)}")
+
+                elif account_choice == '2':
+                    new_password = input("Enter new password: ").strip()
+                    user.update_password(new_password)
+
+                elif account_choice == '3':
+                    new_email = input("Enter new email: ").strip()
+                    if user.update_info(new_email=new_email):  
+                        print("Email updated successfully!")
+                    else:
+                        print("Failed to update email. Try again.")
+
+                elif account_choice == '4':
+                    new_emergency_email = input("Enter new emergency email: ").strip()
+                    if user.update_info(new_emergency_email=new_emergency_email):
+                        continue
+                    else:
+                        print("Failed to update emergency email. Try again.")
+
+                elif account_choice == '5':
+                    confirm = input("Confirm delete account? (yes/no): ").strip()
+                    if confirm.lower() == "yes":
+                        user.delete_from_csv()
+                        print("Account deleted successfully.")
+                        break
+                elif account_choice == '6':
+                    break  
                 else:
-                    print("Failed to update username. Please try again.")
-            except Exception as e:
-                print(f"Error updating username: {str(e)}")
+                    print("Invalid choice, please try again.")
                     
-        elif patient_choice == '2':
-            new_password = input("Enter new password: ").strip()
-            user.update_password(new_password)
-            
-        elif patient_choice == '3':  # new funcs to change email
-            new_email = input("Enter new email: ").strip()
-            if user.update_info(new_email=new_email):  
-                print("Email updated successfully!")
-            else:
-                print("Failed to update email. Try again.")
                 
-        elif patient_choice == '4':  # new option for emergency email
-            new_emergency_email = input("Enter new emergency email: ").strip()
-            if user.update_info(new_emergency_email=new_emergency_email):
-                continue
-            else:
-                print("Failed to update emergency email. Try again.")
-                
-        elif patient_choice == '5':
-            print("Medical records feature coming soon...")
 
-        elif patient_choice == '6':  # Book/Cancel appointment
-            import pandas as pd
-            
+
+        elif main_choice == '2':  # Health & Wellbeing
             while True:
-                print("\nBook/Cancel Appointment:")
-                print("1. Book an appointment")
-                print("2. Cancel an appointment")
-                print("3. Return to main menu")
+                print("\nHealth & Wellbeing:")
+                print("1. View Medical Records")
+                print("2. Submit a Mood Questionnaire")
+                print("3. Track Mood")
+                print("4. Enter a Journaling")
+                print("5. Explore Meditation Resources")
+                print("6. Back to Main Menu")
 
-                appointment_choice = input("Select an option (1/2/3): ").strip()
+                wellbeing_choice = input("Select an option (1-6): ").strip()
 
-                if appointment_choice == "1":  # Book an appointment
-                
-                    book_appointment_with_schedule(user, "data/mhwp_schedule.csv", "data/assignments.csv", "data/appointments.csv")
+                if wellbeing_choice == '1':
+                    print("Medical records feature coming soon...")
+                elif wellbeing_choice == '2':
+                    submit_questionnaire(user.username)      
+                elif wellbeing_choice == '3':
+                    handle_mood_tracking(user)
+                elif wellbeing_choice == '4':
+                    enter_journaling(user.username)  
+                elif wellbeing_choice == '5':
+                    handle_search_meditation()  
+                elif wellbeing_choice == '6':
+                    break  
+                else:
+                    print("Invalid choice, please try again.")
 
-
-                elif appointment_choice == "2":  # Cancel an appointment
-                    cancel_appointment_with_display(user, "data/mhwp_schedule.csv", "data/appointments.csv")
-                
-                elif appointment_choice == "3":  # Return to main menu
-                    print("Returning to main menu...")
-                    break
-        elif patient_choice == '7':  # View upcoming appointments
+        elif main_choice == '3':  # Appointments & Records
             while True:
-                display_upcoming_appointments_with_mhwp(
-                    user.username, 
-                    "data/appointments.csv", 
-                    "data/assignments.csv"
-                )
+                print("\nAppointments & Records:")
+                print("1. Book/Cancel Appointment")
+                print("2. Check Appointments")
+                print("3. Leave a Comment for Your MHWP")
+                print("4. Back to Main Menu")
+
+                records_choice = input("Select an option (1-4): ").strip()
+
+                if records_choice == '1':
+                    import pandas as pd
+            
+                    while True:
+                        print("\nBook/Cancel Appointment:")
+                        print("1. Book an appointment")
+                        print("2. Cancel an appointment")
+                        print("3. Return to main menu")
+
+                        appointment_choice = input("Select an option (1/2/3): ").strip()
+
+                        if appointment_choice == "1":  # Book an appointment
                 
-                # Prompt user to return to main menu
-                print("\nPress '1' to return to the main menu.")
-                return_choice = input("Enter your choice: ").strip()
+                            book_appointment_with_schedule(user, "data/mhwp_schedule.csv", "data/assignments.csv", "data/appointments.csv")
+
+
+                        elif appointment_choice == "2":  # Cancel an appointment
+                            cancel_appointment_with_display(user, "data/mhwp_schedule.csv", "data/appointments.csv")
                 
-                if return_choice == '1':
+                        elif appointment_choice == "3":  # Return to main menu
+                            print("Returning to main menu...")
+                            break
+                        
+                elif records_choice == '2':
+                    while True:
+                        display_upcoming_appointments_with_mhwp(
+                            user.username, 
+                            "data/appointments.csv", 
+                            "data/assignments.csv"
+                        )
+                
+                        # Prompt user to return to main menu
+                        print("\nPress '1' to return to the main menu.")
+                        return_choice = input("Enter your choice: ").strip()
+                
+                        if return_choice == '1':
+                            break  # Return to main menu
+                        else:
+                            print("Invalid choice. Please press '1' to return to the main menu.")
+
+
+                elif records_choice == '3':
+                    mhwp_username = get_mhwp_for_patient(user.username)
+                    if mhwp_username:
+                        try:
+                            rating = float(input("Enter a rating for your MHWP (0-5): ").strip())
+                            comment = input("Enter your comment for your MHWP: ").strip()
+                            add_comment(user.username, mhwp_username, rating, comment)
+                        except ValueError:
+                            print("Invalid input. Rating must be a number.")
+                    else:
+                        print("Unable to find your MHWP. Comment not saved.")
+
+
+                elif records_choice == '4':
                     break  # Return to main menu
                 else:
-                    print("Invalid choice. Please press '1' to return to the main menu.")
+                    print("Invalid choice, please try again.")
 
-
-        elif patient_choice == '8':  # Journaling
-            enter_journaling(user.username)
-                
-        elif patient_choice == '9':  # Questionnaire
-            submit_questionnaire(user.username)      
-    
-        elif patient_choice == '10':  # Comment
-            mhwp_username = get_mhwp_for_patient(user.username)
-            if mhwp_username:
-                try:
-                    rating = float(input("Enter a rating for your MHWP (0-5): ").strip())
-                    comment = input("Enter your comment for your MHWP: ").strip()
-                    add_comment(user.username, mhwp_username, rating, comment)
-                except ValueError:
-                    print("Invalid input. Rating must be a number.")
-            else:
-                print("Unable to find your MHWP. Comment not saved.")
-                       
-        elif patient_choice == '11':  # Meditation
-            handle_search_meditation()  
-            
-        elif patient_choice == '12':
-            confirm = input("Confirm delete account? (yes/no): ")
-            if confirm.lower() == "yes":
-                user.delete_from_csv()
-                print("Account deleted successfully.")
-                break
-            
-        elif patient_choice == '13':
-            handle_mood_tracking(user)
-            
-        elif patient_choice == '14':
+        elif main_choice == '4':  # Logout
             print("Logging out.")
             break
-        
+
         else:
             print("Invalid choice, please try again.")
+
+
 
 def handle_mood_tracking(user):
     print("\nMood Tracking")
