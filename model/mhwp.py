@@ -10,8 +10,6 @@ from services.patient_records import view_patient_records
 from utils.notification import send_email_notification, get_email_by_username
 from services.record import view_records_of_patient
 from services.dashboard import display_dashboard
-import pandas as pd
-from config import USER_DATA_PATH
 
 
 def initialize_schedule_file(file_path):
@@ -374,11 +372,18 @@ def handle_mhwp_menu(user):
                 new_username = input("Enter new username: ").strip()
                 if not new_username:
                     print("Username cannot be empty.")
-                    continue             
+                    continue
+
+                import pandas as pd
+                from config import USER_DATA_PATH
+                
+                
                 user_df = pd.read_csv(USER_DATA_PATH)
                 if new_username in user_df['username'].values:
                     print("Username already exists. Please choose a different one.")
                     continue
+
+               
                 if user.update_info(new_username=new_username):
                     continue
                 else:
