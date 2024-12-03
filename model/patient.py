@@ -16,6 +16,7 @@ def display_mhwp_schedule_for_patient(user, schedule_file, assignments_file):
     Allows the patient to select a date by its real-time ID.
     """
     try:
+        print("\nNote: You can notify the Admin to change your MHWP before booking an appointment.")
         # Retrieve the assigned MHW for the patient
         assignments = pd.read_csv(assignments_file, header=None, names=["patient_username", "mhwp_username"])
         mhwp_record = assignments[assignments['patient_username'] == user.username]
