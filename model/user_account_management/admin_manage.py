@@ -56,17 +56,34 @@ class AdminManage:
             return False
 
         try:
+
             user_df = pd.read_csv(USER_DATA_PATH)
             if username not in user_df['username'].values:
                 print("User does not exist.")
                 return False
-            
+
             target_role = user_df[user_df['username'] == username]['role'].values[0]
-            if self.delete_user_from_files(username, target_role):
-                print(f"User '{username}' deleted successfully by admin.")
-                return True
-            return False
+            print(f"Deleting {target_role} user: {username}")
+            
+            user_df = user_df[user_df['username'] != username]
+            user_df.to_csv(USER_DATA_PATH, index=False, na_rep='')
+            print("1. Deleted from user_data.csv successfully")
+            
+            if target_role == "patient":
+                patient_df = pd.read_csv(PATIENTS_DATA_PATH)
+                patient_df = patient_df[patient_df['username'] != username]
+                patient_df.to_csv(PATIENTS_DATA_PATH, index=False, na_rep='')
+                print("2. Deleted from patients.csv successfully")
+                    
+            elif target_role == "mhwp":
+                mhwp_df = pd.read_csv(MHWP_DATA_PATH)
+                mhwp_df = mhwp_df[mhwp_df['username'] != username]
+                mhwp_df.to_csv(MHWP_DATA_PATH, index=False, na_rep='')
+                print("2. Deleted from mhwp.csv successfully")
+                    
+            print(f"User '{username}' and all related records deleted successfully.")
+            return True
 
         except Exception as e:
-            print(f"Error deleting user: {str(e)}")
+            print(f"Error during deletion: {str(e)}")
             return False
