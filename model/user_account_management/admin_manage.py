@@ -50,37 +50,40 @@ class AdminManage:
             print(f"Error in admin update: {str(e)}")
             return False
 
-    def admin_delete_user(self, username):
+        def admin_delete_user(self, username):
         if self.role != "admin":
             print("Only admin users can delete others.")
             return False
 
         try:
-
+            # Load the user data
             user_df = pd.read_csv(USER_DATA_PATH)
             if username not in user_df['username'].values:
                 print("User does not exist.")
                 return False
 
+            # Get the target user's role
             target_role = user_df[user_df['username'] == username]['role'].values[0]
             print(f"Deleting {target_role} user: {username}")
-            
+
+            # Remove the user from user_data.csv
             user_df = user_df[user_df['username'] != username]
             user_df.to_csv(USER_DATA_PATH, index=False, na_rep='')
             print("1. Deleted from user_data.csv successfully")
-            
+
+            # Check the target role and remove associated data
             if target_role == "patient":
                 patient_df = pd.read_csv(PATIENTS_DATA_PATH)
                 patient_df = patient_df[patient_df['username'] != username]
                 patient_df.to_csv(PATIENTS_DATA_PATH, index=False, na_rep='')
                 print("2. Deleted from patients.csv successfully")
-                    
+
             elif target_role == "mhwp":
                 mhwp_df = pd.read_csv(MHWP_DATA_PATH)
                 mhwp_df = mhwp_df[mhwp_df['username'] != username]
                 mhwp_df.to_csv(MHWP_DATA_PATH, index=False, na_rep='')
                 print("2. Deleted from mhwp.csv successfully")
-                    
+
             print(f"User '{username}' and all related records deleted successfully.")
             return True
 
