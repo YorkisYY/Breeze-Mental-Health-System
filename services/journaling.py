@@ -5,7 +5,7 @@ JOURNAL_FILE = "data/patient_journaling.csv"
 
 def enter_journaling(username):
     """
-    让患者输入 Journaling 并存储到 CSV 文件
+    Allow patients to input journaling and save to CSV file
     """
     print("\nEnter a new journal entry:")
     entry = input("Your journal entry: ").strip()
@@ -14,14 +14,14 @@ def enter_journaling(username):
         print("No entry provided. Journaling cancelled.")
         return
 
-    # 生成新记录
+    # Generate a new record
     new_entry = {
         "patient_username": username,
         "entry": entry,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
-    # 保存到 journaling.csv
+    # Save to journaling.csv
     try:
         journal_df = pd.read_csv(JOURNAL_FILE)
         journal_df = pd.concat([journal_df, pd.DataFrame([new_entry])], ignore_index=True)
@@ -30,3 +30,4 @@ def enter_journaling(username):
 
     journal_df.to_csv(JOURNAL_FILE, index=False)
     print("Your journal entry has been saved successfully!")
+

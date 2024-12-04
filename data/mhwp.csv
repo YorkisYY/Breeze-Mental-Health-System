@@ -1,4 +1,10 @@
 username,assigned_patients,account_status,registration_date,email,emergency_email,major
-,n,active,2024-12-01,yyy@gmail.com,yyyy@gmail.com,Emotional Management
+,y,active,2024-12-01,yyy@gmail.com,yyyy@gmail.com,Emotional Management
 l,n,active,2024-12-02,l@gmail.com,ll@gmail.com,Emotional Management
 bb,,active,2024-12-02,bb@gmail.com,bbb@gmail.com,Severe Disorders
+<<<<<<< HEAD
+=======
+qqq3,qqq1,active,2024-12-02,qinxingjian123@163.com,q@11.com,Emotional Management
+baishao,bsx,active,2024-12-02,1@gmail.com,2@gmail.com,Severe Disorders
+hougege,houdidi,active,2024-12-03,505664119@qq.com,realhouyi@gmail.com,Anxiety
+>>>>>>> a827bce0d7c3fe4885fb3aee536760b4d77059ea

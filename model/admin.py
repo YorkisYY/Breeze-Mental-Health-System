@@ -5,6 +5,9 @@ import random
 from config import USER_DATA_PATH
 from config import PATIENTS_DATA_PATH
 from config import MHWP_DATA_PATH
+from model.user_account_management.user_data_manage import toggle_user_account_status
+import pandas as pd
+from utils.list_all_user import list_all_users
 
 MATCHING_RULES = {
     "Emotional Management": {"Anxiety", "Depression", "PTSD", "Bipolar Disorder"},
@@ -529,6 +532,7 @@ def handle_admin_menu(user):
         print("9. Initialize User Data")
         print("10. Logout")
         print("11. Initialize MHWP Schedule Data")
+        print("12. Enable/Disable User Account") # @Arthur: 2024_12_03 add user account status management
 
         admin_choice = input("Select an option (1-9): ").strip()
 
@@ -600,13 +604,34 @@ def handle_admin_menu(user):
             break
 
 
-        elif admin_choice == '11':  # Initialize MHWP Schedule Data
+        elif admin_choice == '11':  # Initialize/clean MHWP Schedule Data
 
             print("\n--- Initializing MHWP Schedule Data ---")
+            confirmation = input("This will clear all existing MHWP schedule data. Are you sure? (yes/no): ").strip().lower()
+            
+            if confirmation == 'yes':
+                initialize_mhwp_schedule("data/mhwp_schedule.csv")
+                print("MHWP schedule data has been reset.")
+            else:
+                print("Operation cancelled. MHWP schedule data remains unchanged.")
+            
+        elif admin_choice == '12':  # Manage user account status
+            print("\n--- Manage User Account Status ---")
+            print("Select user type to modify:")
+            print("1. MHWP")
+            print("2. Patient")
+            
+            role_choice = input("Enter choice (1-2): ").strip()
+            if role_choice == '1':
+                selected_username = list_all_users('mhwp')
+            elif role_choice == '2':
+                selected_username = list_all_users('patient')
+            else:
+                print("Invalid choice")
+                continue
 
-            initialize_mhwp_schedule("data/mhwp_schedule.csv")
-
-            print("MHWP schedule data has been reset.")
-
-        else:
-            print("Invalid choice, please try again.")
+            if selected_username:
+                success, message = toggle_user_account_status(selected_username)
+                print(message)
+            else:
+                print("Operation cancelled")

@@ -89,7 +89,7 @@ class UserDataManage:
             print("User data file not found.")
             return False
     def delete_from_csv(self):
-        """Delete user from user_data.csv and corresponding role-specific file if applicable."""
+        """Delete user from user_data.csv and patients.csv if applicable."""
         try:
             user_df = pd.read_csv(USER_DATA_PATH)
             user_df = user_df[user_df['username'] != self.username]
@@ -105,7 +105,6 @@ class UserDataManage:
                     print("Patient data file not found. Skipping patient record deletion.")
                 except Exception as e:
                     print(f"Error deleting patient record: {str(e)}")
-                    
             elif self.role == "mhwp":
                 try:
                     mhwp_df = pd.read_csv(MHWP_DATA_PATH)
@@ -122,3 +121,51 @@ class UserDataManage:
             print("User data file not found.")
         except Exception as e:
             print(f"Error deleting user: {str(e)}")
+            
+# @Arthur: 2024_12_03 9:12PM add user account status management
+def toggle_user_account_status(username, user_data_path=USER_DATA_PATH, 
+                                mhwp_data_path=MHWP_DATA_PATH, 
+                                patients_data_path=PATIENTS_DATA_PATH):
+    """
+    Toggle user account status between active/inactive.
+    Returns tuple (success, message)
+    """
+    # Check if user exists and get their role
+    df = pd.read_csv(user_data_path)
+    user_data = df[df['username'] == username]
+    
+    if user_data.empty:
+        return False, f"User '{username}' not found."
+        
+    role = user_data['role'].values[0]
+    
+    if role == 'admin':
+        return False, "Cannot modify admin account status"
+    
+    if role == 'mhwp':
+        df = pd.read_csv(mhwp_data_path)
+        current_status = df[df['username'] == username]['account_status'].values[0]
+        print(f"\nCurrent status for MHWP '{username}': {current_status}")
+        confirmation = input(f"Change status to {'inactive' if current_status == 'active' else 'active'}? (y/n): ").lower()
+        
+        if confirmation != 'y':
+            return False, f"Status change cancelled for MHWP '{username}'"
+            
+        new_status = 'inactive' if current_status == 'active' else 'active'
+        df.loc[df['username'] == username, 'account_status'] = new_status
+        df.to_csv(mhwp_data_path, index=False)
+        return True, f"MHWP account '{username}' status changed to {new_status}"
+        
+    if role == 'patient':
+        df = pd.read_csv(patients_data_path)
+        current_status = df[df['username'] == username]['account_status'].values[0]
+        print(f"\nCurrent status for patient '{username}': {current_status}")
+        confirmation = input(f"Change status to {'inactive' if current_status == 'active' else 'active'}? (y/n): ").lower()
+        
+        if confirmation != 'y':
+            return False, f"Status change cancelled for patient '{username}'"
+            
+        new_status = 'inactive' if current_status == 'active' else 'active'
+        df.loc[df['username'] == username, 'account_status'] = new_status
+        df.to_csv(patients_data_path, index=False)
+        return True, f"Patient account '{username}' status changed to {new_status}"
