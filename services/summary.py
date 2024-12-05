@@ -334,14 +334,15 @@ def display_summary():
                     print("Invalid data, please try again.")
                     continue
                 status = input("Enter status(1-4), 1:cancelled, 2:confirmed, 3:all, 4:separate statistics):")
-                if choice == "1":
+                if status == "1":
                     results = get_bookings(appointments, start_date, end_date, "cancelled")
-                elif choice == "2":
+                elif status == "2":
                     results = get_bookings(appointments, start_date, end_date, "confirmed")
-                elif choice == "3":
+                elif status == "3":
                     results = get_bookings(appointments, start_date, end_date, "all")
-                elif choice == "4":
+                elif status == "4":
                     results = get_bookings(appointments, start_date, end_date, "Separate statistics")
+                    print("1")
                     print(results)
                 else:
                     print("Invalid choice, please try again.")
@@ -352,6 +353,7 @@ def display_summary():
                 #
                 #
                 #
+                print("2")
                 print(results)
                 #
 
@@ -373,4 +375,4 @@ def display_summary():
     except Exception as e:
         print(f"Error displaying summary: {e}")
 
-# display_summary()
+display_summary()
