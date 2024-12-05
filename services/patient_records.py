@@ -5,6 +5,7 @@ from datetime import datetime
 APPOINTMENTS_FILE = "data/appointments.csv"
 MOOD_DATA_FILE = "data/mood_data.csv"
 JOURNAL_ENTRIES_FILE = "data/patient_journaling.csv"
+JOURNAL_ENTRIES_FILE = "data/patient_journaling.csv"
 MENTAL_ASSESSMENTS_FILE = "data/mental_assessments.csv"
 PATIENT_NOTES_FILE = "data/patient_notes.csv"
 

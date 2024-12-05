@@ -1,4 +1,11 @@
 WHAT ARE WE WORKING ON !!!!-----------------------------------------------------
+## 12-th Commit: disable/enable user account
+----------
+**Arthur: 2024_12_03 11:19**
+1. add confirmation for the admin before cleaning up the mhwp schedule data.(need further cleaning by Desheng)
+2. add user account status management for admin. changed files: 
+model/admin.py, model/user_account_management/user_data_manage.py, services/login.py
+3. add list_all_users() in utils to list all users from mhwp and patients to select one.
 
 ## Eleventh Commit
 ----------

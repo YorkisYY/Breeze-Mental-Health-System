@@ -3,6 +3,15 @@ from datetime import datetime
 from config import MHWP_DATA_PATH
 
 class MhwpManage:
+    """
+    Manages MHWP (Mental Health Worker Professional) records and operations.
+
+    Functions:
+        check_mhwp_record_exists(): Verifies if MHWP record exists in database
+        initialize_mhwp_record(): Creates new MHWP record with user information
+        update_mhwp_major(): Admin function to update MHWP's specialization
+        update_mhwp_status(): Admin function to toggle MHWP account status
+    """
     def check_mhwp_record_exists(self, mhwp_data_path=MHWP_DATA_PATH):
         """Check if the MHWP record already exists."""
         try:

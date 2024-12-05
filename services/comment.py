@@ -128,6 +128,7 @@ def get_available_appointments(patient_username):
 
 
 
+
 def view_comments(mhwp_username):
     """
     View all comments for a specific MHWP.
