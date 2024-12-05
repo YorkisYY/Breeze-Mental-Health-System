@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import re
+import getpass
 from model.user_account_management.user import User
 from config import USER_DATA_PATH
 from datetime import datetime
@@ -22,7 +23,7 @@ def is_username_unique(username, role):
 def register_user():
     # Prompt user to enter username and password
     username = input("Enter username: ").strip()
-    password = input("Enter password: ").strip()
+    password = getpass.getpass("Enter password: ").strip()
 
     # Ensure username and password are not empty
     if not username or not password:
