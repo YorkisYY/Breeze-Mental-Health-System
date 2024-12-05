@@ -1,6 +1,7 @@
 # handles all login related function and user interface 
 
 import pandas as pd
+import getpass
 from model.user_account_management.user import User  
 from model.admin import handle_admin_menu
 from model.mhwp import handle_mhwp_menu
@@ -15,7 +16,7 @@ def login_user():
        User object if login successful, None otherwise
    """
    username = input("Enter username: ").strip()
-   password = input("Enter password: ").strip()
+   password = getpass.getpass("Enter password: ").strip()
    
    # Create user object with temporary role
    user = User(username, password, "temp")

@@ -40,18 +40,30 @@ def generate_feedback(status_list):
             feedback.append(STATUS_FEEDBACK[status])
     return "\n".join(feedback)
 
-def submit_questionnaire(patient_username, appointments_file="data/appointments.csv"):
-    """Allow the patient to complete the questionnaire and store the results."""
+def submit_questionnaire(patient_username, assignments_file="data/assignments.csv"):
+    """
+    Allow the patient to complete the questionnaire and store the results.
+    Now reads from the assignment.csv file.
+    """
     try:
-        appointments = pd.read_csv(appointments_file)
-        patient_appointment = appointments[appointments["patient_username"] == patient_username]
-        if patient_appointment.empty:
+        # Load the assignment data
+        assignments = pd.read_csv(assignments_file)
+
+        # Filter assignments for the current patient
+        patient_assignment = assignments[assignments["patient_username"] == patient_username]
+        if patient_assignment.empty:
             print("Error: No MHWP found for this patient.")
             return
-        mhwp_username = patient_appointment.iloc[0]["mhwp_username"]
+
+        # Retrieve the assigned MHWP username
+        mhwp_username = patient_assignment.iloc[0]["mhwp_username"]
+        print(f"Assigned MHWP for patient '{patient_username}': {mhwp_username}")
     except FileNotFoundError:
-        print("Error: Appointments file not found.")
+        print("Error: Assignments file not found.")
         return
+    except Exception as e:
+        print(f"Error: {e}")
+
 
     print("\nWelcome to the Mental Health Questionnaire!")
     print("For each question, answer with a number between 1 (Not at all) to 5 (Nearly every day).")

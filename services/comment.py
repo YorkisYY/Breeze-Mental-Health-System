@@ -7,35 +7,39 @@ APPOINTMENTS_FILE = "data/appointments.csv"
 
 
 def comment(patient_username):
-    """
-    Provide a commenting feature based on the logged-in user's username to fetch appointment information.
-    """
     available_appointments, option_map = get_available_appointments(patient_username)
 
-    if not available_appointments.empty:
-        try:
-            # User inputs option
-            option = int(input("Select an appointment option to comment on (1, 2, ...): "))
+    # If no available appointments, exit the function
+    if available_appointments.empty:
+        return
 
-            # Check if the option is valid
-            if option not in option_map:
-                print("Invalid option selected.")
-                return
+    try:
+        # Prompt the user to select an appointment
+        option = int(input("Select an appointment option to comment on (1, 2, ...): "))
 
-            # Use the option to find the corresponding DataFrame row
-            selected_appointment = available_appointments.iloc[option_map[option]]
-            appointment_id = selected_appointment["id"]
-            mhwp_username = selected_appointment["mhwp_username"]
-            appointment_datetime = selected_appointment["datetime"].strftime("%Y-%m-%d %H:%M:%S")
+        # Validate the user's selection
+        if option not in option_map:
+            print("Invalid option selected.")
+            return
 
-            # Get comment details
-            rating = float(input("Enter your rating (0-5): "))
-            comment_text = input("Enter your comment: ")
+        # Retrieve the selected appointment details
+        selected_appointment = available_appointments.iloc[option_map[option]]
+        appointment_id = selected_appointment["id"]
+        mhwp_username = selected_appointment["mhwp_username"]
+        appointment_datetime = selected_appointment["datetime"].strftime("%Y-%m-%d %H:%M:%S")
 
-            # Add comment
-            add_comment(patient_username, mhwp_username, rating, comment_text, appointment_id, appointment_datetime)
-        except ValueError:
-            print("Invalid input. Please select a valid option.")
+        # Prompt the user for rating and comment
+        rating = float(input("Enter your rating (0-5): "))
+        comment_text = input("Enter your comment: ")
+
+        # Add the comment to the comments file
+        add_comment(patient_username, mhwp_username, rating, comment_text, appointment_id, appointment_datetime)
+    except ValueError:
+        
+        # Handle invalid input
+        print("Invalid input. Please select a valid option.")
+
+
 
             
             
@@ -84,22 +88,16 @@ def add_comment(patient_username, mhwp_username, rating, comment, appointment_id
 
 
 def get_available_appointments(patient_username):
-    """
-    Get a list of appointments that are eligible for commenting.
-    Condition: status is 'confirmed' and the time has passed.
-    """
+   
     try:
-        # Read appointment data
         appointments = pd.read_csv(APPOINTMENTS_FILE)
 
-        # Filter appointments belonging to the patient and create a copy
         patient_appointments = appointments[appointments["patient_username"] == patient_username].copy()
 
         if patient_appointments.empty:
             print("No appointments found for this patient.")
-            return pd.DataFrame()
+            return pd.DataFrame(), {}
 
-        # Filter eligible appointments
         now = datetime.now()
         patient_appointments["datetime"] = pd.to_datetime(
             patient_appointments["date"] + " " + patient_appointments["timeslot"].str.split("-").str[0]
@@ -110,25 +108,23 @@ def get_available_appointments(patient_username):
 
         if available_appointments.empty:
             print("No appointments available for commenting.")
-            return pd.DataFrame()
+            return pd.DataFrame(), {}
 
-        # Display available appointments
         print("\nAvailable appointments for commenting:")
         print("--------------------------------------------------------------")
         print("Option | Appointment ID | Date       | Time      | MHWP Username")
         print("--------------------------------------------------------------")
-        option_map = {}  # Map option to DataFrame index
-        for idx, (i, row) in enumerate(available_appointments.iterrows(), start=1):  # Start numbering from 1
+        option_map = {}
+        for idx, (i, row) in enumerate(available_appointments.iterrows(), start=1):
             print(f"{idx:<6} | {row['id']:<14} | {row['date']} | {row['timeslot']} | {row['mhwp_username']}")
-            option_map[idx] = i  # Save the mapping between option and DataFrame index
+            option_map[idx] = i
         print("--------------------------------------------------------------")
 
         return available_appointments, option_map
+
     except Exception as e:
         print(f"Error loading appointments: {e}")
         return pd.DataFrame(), {}
-
-
 
 
 
@@ -145,6 +141,7 @@ def view_comments(mhwp_username):
 
         if mhwp_comments.empty:
             print(f"No comments found for MHWP '{mhwp_username}'.")
+            return
         else:
             print(f"\nComments for MHWP '{mhwp_username}':")
             print("------------------------------------------------------------------")
