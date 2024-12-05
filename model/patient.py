@@ -346,7 +346,7 @@ def cancel_appointment_with_display(user, schedule_file, appointment_file):
 
         # Display appointment list
         print("\nYour current appointments:")
-        user_appointments = user_appointments[['id', 'date', 'timeslot', 'status', 'mhwp_username']]
+        user_appointments = user_appointments[user_appointments['status'] != 'cancelled']
         print(tabulate(user_appointments, headers='keys', tablefmt='grid', showindex=False))
 
         # Enter the ID to cancel the appointment
