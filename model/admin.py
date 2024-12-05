@@ -9,6 +9,32 @@ from model.user_account_management.user_data_manage import toggle_user_account_s
 import pandas as pd
 from utils.list_all_user import list_all_users
 
+"""
+Admin module for managing system-wide operations and user assignments.
+
+Functions:
+    get_patients_with_symptoms(): Returns dict of patients and their symptoms
+    get_mhwps_with_major(): Returns dict of MHWPs and their specializations
+    update_mhwp_csv_with_assignments(): Updates assigned_patients column in mhwp.csv
+    update_patients_csv_with_assignments(): Updates assigned_mhwp column in patients.csv
+    initialize_mhwp_schedule(): Creates fresh mhwp_schedule.csv with headers
+    initialize_user_data(): Creates fresh user_data.csv with headers
+    initialize_assignments(): Creates fresh assignments.csv with headers
+    get_patients(): Returns list of patient usernames
+    get_mhwps(): Returns list of MHWP usernames
+    get_mhwps_with_schedule(): Returns set of MHWPs with available time slots
+    get_current_assignments(): Returns dict of current MHWP-patient assignments
+    save_assignments(): Writes assignments to CSV and displays table
+    balanced_assign_patients_and_mhwps(): Matches patients to MHWPs based on symptoms
+    modify_assignments(): Handles manual assignment changes and unassigned users
+    display_unassigned_users(): Shows table of users without assignments
+    display_assignments(): Shows current assignment pairings
+    handle_admin_menu(): Main admin interface for system management
+
+Constants:
+    MATCHING_RULES: Dict defining symptom categories for each MHWP major
+"""
+
 MATCHING_RULES = {
     "Emotional Management": {"Anxiety", "Depression", "PTSD", "Bipolar Disorder"},
     "Behavioral Therapy": {"OCD", "ADHD", "Eating Disorder", "Substance Abuse"},
