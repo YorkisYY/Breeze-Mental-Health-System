@@ -97,7 +97,7 @@ def get_available_appointments(patient_username):
 
         if patient_appointments.empty:
             print("No appointments found for this patient.")
-            return pd.DataFrame()
+            return pd.DataFrame(), {}  # Return empty DataFrame and empty dict
 
         # Filter eligible appointments
         now = datetime.now()

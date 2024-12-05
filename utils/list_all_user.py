@@ -1,6 +1,7 @@
 import pandas as pd
 from tabulate import tabulate
 from config import *
+import time
 
 def list_all_users(role_type, mhwp_data_path=MHWP_DATA_PATH, patients_data_path=PATIENTS_DATA_PATH):
     """
@@ -10,10 +11,10 @@ def list_all_users(role_type, mhwp_data_path=MHWP_DATA_PATH, patients_data_path=
     """
     if role_type == 'mhwp':
         df = pd.read_csv(mhwp_data_path)
-        headers = ['#', 'Username', 'Major', 'Status']
+        headers = ['#', 'Username', 'Status', 'Major']
     else:
         df = pd.read_csv(patients_data_path)
-        headers = ['#', 'Username', 'Symptoms', 'Status']
+        headers = ['#', 'Username', 'Status', 'Symptoms']
         
     users = df.to_dict('records')
     page_size = 9
@@ -22,8 +23,6 @@ def list_all_users(role_type, mhwp_data_path=MHWP_DATA_PATH, patients_data_path=
     
     while True:
         print("\033[H\033[J")  # Clear screen
-        print(f"\nUser List (Page {current_page + 1}/{total_pages})")
-        print("Enter: - previous page, + next page, 0 to cancel, or 1-9 to select user")
         
         start_idx = current_page * page_size
         page_users = users[start_idx:start_idx + page_size]
@@ -34,27 +33,35 @@ def list_all_users(role_type, mhwp_data_path=MHWP_DATA_PATH, patients_data_path=
                 table_data.append([
                     idx,
                     user['username'],
-                    user.get('major', 'N/A'),
-                    user.get('account_status', 'active')
+                    user.get('account_status', 'active'),
+                    user.get('major', 'N/A')
                 ])
             else:
                 table_data.append([
                     idx,
                     user['username'],
-                    user.get('symptoms', 'N/A'),
-                    user.get('account_status', 'active')
+                    user.get('account_status', 'active'),
+                    user.get('symptoms', 'N/A')
                 ])
             
-        print(tabulate(table_data, headers=headers, tablefmt='grid'))        
+        print(tabulate(table_data, headers=headers, tablefmt='grid'))   
+        print(f"User List (Page {current_page + 1}/{total_pages})")
+        print("Enter: - previous page, + next page, 0 to cancel, or 1-9 to select user")
+             
         choice = input("\nEnter choice: ").strip()
+        if not choice:  # Handle empty input
+            continue
         
         if choice == '-' and current_page > 0:
             current_page -= 1
         elif choice == '+' and current_page < total_pages - 1:
             current_page += 1
-        elif choice == '0':
-            return None
-        elif choice in '123456789':
+        elif choice.isdigit() and len(choice) == 1 and choice in '123456789':
             idx = int(choice) - 1
             if idx < len(page_users):
                 return page_users[idx]['username']
+        elif choice == '0':
+            return None
+        else:
+            print("Invalid choice. Please try again.")
+            time.sleep(1)  # Give users time to read the message
