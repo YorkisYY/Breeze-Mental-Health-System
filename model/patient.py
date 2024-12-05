@@ -346,7 +346,7 @@ def cancel_appointment_with_display(user, schedule_file, appointment_file):
 
         # Display appointment list
         print("\nYour current appointments:")
-        user_appointments = user_appointments[['id', 'date', 'timeslot', 'status', 'mhwp_username']]
+        user_appointments = user_appointments[user_appointments['status'] != 'cancelled']
         print(tabulate(user_appointments, headers='keys', tablefmt='grid', showindex=False))
 
         # Enter the ID to cancel the appointment
@@ -522,7 +522,7 @@ def handle_patient_menu(user):
         print("\nPatient Options:")
         print("1. Account Management")
         print("2. Health & Wellbeing")
-        print("3. Appointments & Records")
+        print("3. Appointments & Comments")
         print("4. Logout")
 
         main_choice = input("Select an option (1-4): ").strip()
@@ -618,7 +618,7 @@ def handle_patient_menu(user):
 
         elif main_choice == '3':  # Appointments & Records
             while True:
-                print("\nAppointments & Records:")
+                print("\nAppointments & Comments:")
                 print("1. Book/Cancel Appointment")
                 print("2. Check Appointments")
                 print("3. Leave a Comment for Your MHWP")
