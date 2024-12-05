@@ -98,16 +98,16 @@ def register_user():
     
     # For patients, select their symptoms
     elif role == "patient":
-        print("\nSelect your primary condition:")
+        print("\nSelect your primary condition (choose one only):")
         conditions = {
             "1": "Anxiety",
-            "2": "Depression", 
+            "2": "Depression",
             "3": "PTSD",
             "4": "Bipolar Disorder",
             "5": "OCD",
-            "6": "ADHD", 
+            "6": "ADHD",
             "7": "Eating Disorder",
-            "8": "Substance Abuse",
+            "8": "Substance Abuse", 
             "9": "Schizophrenia",
             "10": "Borderline Personality Disorder",
             "11": "Other/General Wellbeing"
@@ -116,7 +116,7 @@ def register_user():
         for num, condition in conditions.items():
             print(f"{num}. {condition}")
         
-        condition_input = input("\nEnter condition number (1-11): ").strip()
+        condition_input = input("\nEnter condition number (1-11, select one only): ").strip()
         try:
             if condition_input in conditions:
                 symptoms = conditions[condition_input]
