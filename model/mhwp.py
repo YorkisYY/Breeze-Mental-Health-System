@@ -446,8 +446,8 @@ def handle_modify_availibility(user, file_path=SCHEDULE_DATA_PATH):
         print("\nModify Your Availability Options:")
         print("1. Take a Leave (Adjust availability for specific dates)")
         print("2. Change Time Slots for Specific Dates")
-        print("3. Back to main menu")
-        print("4. Add Available Timeslot")
+        print("3. Add Available Timeslot")
+        print("4. Back to main menu")
 
         modify_choice = input("Select an option (1-3): ").strip()
         if modify_choice == '1':  # Take a Leave
