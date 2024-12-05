@@ -8,8 +8,10 @@ from config import MHWP_DATA_PATH
 from config import assignments_completed
 from model.user_account_management.user_data_manage import toggle_user_account_status
 import pandas as pd
-from utils.list_all_user import list_all_users
 
+from services.summary import display_summary
+from utils.list_all_user import list_all_users
+from services.summary import display_summary
 """
 Admin module for managing system-wide operations and user assignments.
 
@@ -514,6 +516,7 @@ def handle_admin_menu(user):
         print("7. Display Unassigned Patients and MHWPs")
         print("8. Enable/Disable User Account") # @Arthur: 2024_12_03 add user account status management
         print("9. Logout")
+        print("10. Summary")
         
         admin_choice = input("Select an option (1-9): ").strip()
 
@@ -593,6 +596,12 @@ def handle_admin_menu(user):
                 
         elif admin_choice == '9':  # Logout
             print("Logging out of admin session.")
+            break
+
+        elif admin_choice == '10':  # Logout
+
+            display_summary()
+
             break
 
         else:
