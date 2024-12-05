@@ -56,21 +56,17 @@ class AdminManage:
             return False
 
         try:
-
             user_df = pd.read_csv(USER_DATA_PATH)
             if username not in user_df['username'].values:
                 print("User does not exist.")
                 return False
                 
-
             target_role = user_df[user_df['username'] == username]['role'].values[0]
             print(f"Deleting {target_role} user: {username}")
-            
 
             user_df = user_df[user_df['username'] != username]
             user_df.to_csv(USER_DATA_PATH, index=False, na_rep='')
-            print("1. Deleted from user_data.csv successfully")
-            
+            print("Deleted from user_data.csv successfully")
 
             if target_role == "patient":
                 patient_df = pd.read_csv(PATIENTS_DATA_PATH)
@@ -85,6 +81,10 @@ class AdminManage:
                 print("2. Deleted from mhwp.csv successfully")
                     
             print(f"User '{username}' and all related records deleted successfully.")
+            
+            if username == self.username:
+                print("You have deleted your own account. Logging out...")
+                return "self_deleted"
             return True
 
         except Exception as e:

@@ -574,10 +574,11 @@ def handle_admin_menu(user):
                 new_emergency_email or None
             )
 
-        elif admin_choice == '2':  # Delete another user
+        elif admin_choice == '2':
             target_username = input("Enter the username to delete: ").strip()
-            user.admin_delete_user(target_username)
-
+            result = user.admin_delete_user(target_username)
+            if result == "self_deleted":
+                return 
         elif admin_choice == '3':  # View system statistics
             print("\nSystem statistics feature coming soon...")
 
