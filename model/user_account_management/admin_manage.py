@@ -72,13 +72,11 @@ class AdminManage:
                 patient_df = pd.read_csv(PATIENTS_DATA_PATH)
                 patient_df = patient_df[patient_df['username'] != username]
                 patient_df.to_csv(PATIENTS_DATA_PATH, index=False, na_rep='')
-                print("2. Deleted from patients.csv successfully")
                     
             elif target_role == "mhwp":
                 mhwp_df = pd.read_csv(MHWP_DATA_PATH)
                 mhwp_df = mhwp_df[mhwp_df['username'] != username]
                 mhwp_df.to_csv(MHWP_DATA_PATH, index=False, na_rep='')
-                print("2. Deleted from mhwp.csv successfully")
                     
             print(f"User '{username}' and all related records deleted successfully.")
             
