@@ -1,4 +1,12 @@
 WHAT ARE WE WORKING ON !!!!-----------------------------------------------------
+## 13-th Commit: schedule management and auto update
+----------
+**Arthur: 2024_12_09 07:39**
+1. add schedule template management for mhwp. Now the mhwp have more freedom in create, update, delete schedule template. 
+2. add auto update for mhwp schedule based on the schedule template. up to 4 weeks ahead.
+3. change multiple schedule table display for better formatting.
+4. modularize the mhwp code for better readability.
+
 ## 12-th Commit: disable/enable user account
 ----------
 **Arthur: 2024_12_03 11:19**

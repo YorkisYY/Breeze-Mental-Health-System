@@ -205,22 +205,31 @@ def setup_mhwp_schedule_template(user, file_path=MHWP_SCHEDULE_TEMPLATE_PATH):
 
 def handle_set_schedule(user):
     print("\nSchedule Management Options:")
-    print("1. Set up your availability")
+    print("1. Set up your schedule template")
     print("2. Modify your availability")
     print("3. View your current schedule")
-    print("4. Modify your schedule template")
 
     schedule_choice = input("Select an option (1-3): ").strip()
 
     if schedule_choice == '1':
-        setup_mhwp_schedule(user)
+        setup_mhwp_schedule_template(user)
+        update_mhwp_schedules() # Update mhwp schedules after template is set
     elif schedule_choice == '2':
         handle_modify_availibility(user)
     elif schedule_choice == '3':
         handle_view_schedule(user)
-    elif schedule_choice == '4':
-        setup_mhwp_schedule_template(user)
-        update_mhwp_schedules() # Update mhwp schedules after template is set
     else:
         print("Invalid choice. Please select a valid option.")
+        
+    # if schedule_choice == '1':
+    #     setup_mhwp_schedule(user) # no longer use this function to set schedule
+    # elif schedule_choice == '2':
+    #     handle_modify_availibility(user)
+    # elif schedule_choice == '3':
+    #     handle_view_schedule(user)
+    # elif schedule_choice == '4':
+    #     setup_mhwp_schedule_template(user)
+    #     update_mhwp_schedules() # Update mhwp schedules after template is set
+    # else:
+    #     print("Invalid choice. Please select a valid option.")
         
