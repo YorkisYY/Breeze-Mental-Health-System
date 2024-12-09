@@ -11,7 +11,7 @@ from services.comment import view_comments
 from services.patient_records import view_patient_records
 from utils.notification import send_email_notification, get_email_by_username
 from services.dashboard import display_dashboard
-from .mhwp_management.mhwp_schedule import *
+from .mhwp_management import *
 
 def handle_update_personal_info(user):
     print("\nUpdate Personal Information Options:")
