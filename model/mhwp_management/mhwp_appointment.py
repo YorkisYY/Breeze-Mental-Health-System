@@ -65,7 +65,6 @@ def generate_day_from_date(date_str):
         return "Invalid Date"
 
 
-
 def setup_mhwp_schedule(user,file_path=SCHEDULE_DATA_PATH): # choice 1, setup availability schedule(old style)
     """Set up availability schedule for the Mental Health Worker with slots."""
     print("\nSetup Your Availability")

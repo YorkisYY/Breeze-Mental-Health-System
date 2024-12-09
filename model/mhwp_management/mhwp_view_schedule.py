@@ -6,7 +6,6 @@ from tabulate import tabulate
 from os.path import exists
 import pandas as pd
 from datetime import datetime, timedelta
-from mhwp_appointment import *
 from config import *
 
 def display_upcoming_appointments(username, file_path=APPOINTMENTS_DATA_PATH):

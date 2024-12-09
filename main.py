@@ -6,13 +6,6 @@ from services import *
 from model import *
 from config import *
 from model.mhwp_management.mhwp_schedule import *
-# # Create data directory if it doesn't exist
-# DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
-# if not os.path.exists(DATA_DIR):
-#     os.makedirs(DATA_DIR)
-
-# # CSV file directory
-# USER_FILE_PATH = os.path.join(DATA_DIR, 'user_data.csv')
 
 def handle_exit():
     print("Exiting the system now.")
@@ -40,7 +33,7 @@ def main():
         '3': lambda: handle_exit(),
     }
     #@mikrostiff: break on false
-    #@mikrostiff: ")()" is not a tyoo. the () executes the result of menu_actions      
+
     while menu_actions.get(choice, handle_invalid)():
         choice = show_menu()
 
