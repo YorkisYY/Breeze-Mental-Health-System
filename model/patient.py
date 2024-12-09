@@ -11,7 +11,7 @@ from tabulate import tabulate
 from os.path import exists
 import csv
 import pandas as pd
-from config import USER_DATA_PATH
+from config import *
 
 def display_mhwp_schedule_for_patient(user, schedule_file, assignments_file):
     """
@@ -54,10 +54,21 @@ def display_mhwp_schedule_for_patient(user, schedule_file, assignments_file):
             "09:00-10:00 (0)", "10:00-11:00 (1)", "11:00-12:00 (2)",
             "12:00-13:00 (3)", "13:00-14:00 (4)", "14:00-15:00 (5)", "15:00-16:00 (6)"
         ]
+        # Create mapping of original column names to shorter display names
+        header_mapping = {
+            "Date": "Date",
+            "Day": "Day"
+        }
+        # Add time slot mappings
+        for i, hour in enumerate(range(set_start_hour, set_end_hour)):
+            original_col = f"{hour:02d}:00-{hour+1:02d}:00 ({i})"  # Original column name
+            display_col = f"{hour}-{hour+1}{'am' if hour < 12 else 'pm'}({i})"  # New display name
+            header_mapping[original_col] = display_col
+
+        # Create shorter headers
         display_schedule = mhwp_schedule.copy()
-        for col in availability_columns:
-            if col in display_schedule.columns:
-                display_schedule[col] = display_schedule[col].replace({"■": "Available", "□": "Unavailable", "●": "Unavailable", "▲": "Unavailable"})
+        display_schedule = display_schedule.rename(columns=header_mapping)
+        display_schedule = display_schedule.replace({"■": "■", "□": "□", "●": "□", "▲": "□"})
 
         # Paginate schedule (10 rows per page)
         page_size = 10
@@ -71,7 +82,9 @@ def display_mhwp_schedule_for_patient(user, schedule_file, assignments_file):
 
             print(f"\nSchedule (Page {current_page}/{total_pages}):")
             print(tabulate(page_data, headers="keys", tablefmt="grid", showindex=False))
-
+            print("Legend: ■=Available, □=Unavailable")
+            # Show time slot reference 
+            print("Time Slot:", list(header_mapping.values())[2:])
             # Pagination options
             print("\nOptions:")
             print("1. Next page")

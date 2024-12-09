@@ -59,7 +59,10 @@ def display_current_schedule(username, file_path=SCHEDULE_DATA_PATH):
             reader = csv.reader(file)
             headers = next(reader)  # Get headers
             user_data = [row for row in reader if row[0] == username]
-
+            time_slots = [f"{hour}-{hour+1}{'am' if hour < 12 else 'pm'} ({i})" for i, hour in enumerate(range(set_start_hour, set_end_hour))]
+            # Create display table
+            headers = ["Date"] + ["Day"] +  time_slots
+            
         if not user_data:
             print("\nNo available schedule found for your account. Please set up your availability.")
             return

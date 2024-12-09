@@ -134,7 +134,7 @@ def setup_mhwp_schedule_template(user, file_path=MHWP_SCHEDULE_TEMPLATE_PATH):
         print(tabulate(rows, headers=headers, tablefmt="grid"))
         print("Legend: ■=Available, □=Unavailable")
         # Show time slot reference 
-        print("Time Slot Reference:")
+        print("Time Slot:")
         print(time_slots)
         
         print(f"\nSelect time slots for {weekdays[day]}")
