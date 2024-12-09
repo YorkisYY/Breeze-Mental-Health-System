@@ -8,9 +8,9 @@ from config import MHWP_DATA_PATH
 from model.user_account_management.user_data_manage import toggle_user_account_status
 import pandas as pd
 
-from services.summary import display_summary
+# from services.summary import display_summary
 from utils.list_all_user import list_all_users
-from services.summary import display_summary
+
 """
 Admin module for managing system-wide operations and user assignments.
 
@@ -600,7 +600,7 @@ def handle_admin_menu(user):
 
         elif admin_choice == '10':  # Logout
 
-            display_summary()
+            # display_summary()
 
             break
 

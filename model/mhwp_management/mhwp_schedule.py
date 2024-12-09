@@ -31,21 +31,23 @@ def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_S
     
     for mhwp in mhwp_users:
         # Check if MHWP has existing schedule
-        mhwp_schedule = existing_schedules[existing_schedules['mhwp_username'] == mhwp] if not existing_schedules.empty else pd.DataFrame()
+        if not existing_schedules.empty:
+            mhwp_schedule = existing_schedules[existing_schedules['mhwp_username'] == mhwp].copy()
+        else:
+            mhwp_schedule = pd.DataFrame()
         
         if mhwp_schedule.empty:
             # Generate full 4 weeks
             start_date = today
             end_date = week_starts[3] + timedelta(days=7)
         else:
-            # Convert dates for comparison
-            mhwp_schedule['Date'] = pd.to_datetime(mhwp_schedule['Date'], format='%Y/%m/%d')
+            # Convert dates for comparison using loc
+            mhwp_schedule.loc[:, 'Date'] = pd.to_datetime(mhwp_schedule['Date'], format='%Y/%m/%d')
             
             # Keep first 2 weeks only
             keep_schedules = mhwp_schedule[mhwp_schedule['Date'] < week_starts[2]]
             if not keep_schedules.empty:
-                new_schedules.extend(keep_schedules.to_dict('records'))
-            
+                new_schedules.extend(keep_schedules.to_dict('records'))            
             # Check weeks 3-4 for appointments
             for week_num in [2, 3]:
                 week_schedule = mhwp_schedule[
@@ -82,22 +84,25 @@ def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_S
                 new_schedules.append(schedule_entry)
             current_date += timedelta(days=1)
     
-    # Convert to DataFrame, remove duplicates keeping latest entry
+    # Convert to DataFrame, sort by username and date
     final_schedules = pd.DataFrame(new_schedules)
-    # Sort by date first to ensure newest entries are kept
     final_schedules['Date'] = pd.to_datetime(final_schedules['Date'])
-    final_schedules = final_schedules.sort_values('Date')
-    # Keep last occurrence (newest) when dropping duplicates
+    
+    # Sort by username first, then date
+    final_schedules = final_schedules.sort_values(['mhwp_username', 'Date'])
+    
+    # Keep last occurrence when dropping duplicates
     final_schedules = final_schedules.drop_duplicates(
         subset=['mhwp_username', 'Date'], 
         keep='last'
     )
+    
     # Format date back to string
     final_schedules['Date'] = final_schedules['Date'].dt.strftime('%Y/%m/%d')
 
     # Save sorted schedules
     final_schedules.to_csv(schedule_file, index=False)
-    print("\nSchedule updated successfully!")
+    # print("\nSchedule updated successfully!")
     return True
 
     
@@ -198,32 +203,6 @@ def setup_mhwp_schedule_template(user, file_path=MHWP_SCHEDULE_TEMPLATE_PATH):
     template_df.to_csv(file_path, index=False)
 
 
-    
-# def save_schedule_template(templates, file_path=MHWP_SCHEDULE_TEMPLATE_PATH):
-#     """Saves MHWP weekly schedule template to CSV"""
-#     try:
-#         # Create directory if it doesn't exist
-#         os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        
-#         template_rows = []
-#         for template in templates:
-#             row = {
-#                 'mhwp_username': template['mhwp_username'],
-#                 'weekday': template['weekday']
-#             }
-#             row.update(template['time_slots'])
-#             template_rows.append(row)
-            
-#         template_df = pd.DataFrame(template_rows)
-#         template_df.to_csv(file_path, index=False)
-#         print("Schedule template saved successfully!")
-#         return True
-        
-#     except Exception as e:
-#         print(f"Error saving schedule template: {e}")
-#         return False
-    
-    
 def handle_set_schedule(user):
     print("\nSchedule Management Options:")
     print("1. Set up your availability")
