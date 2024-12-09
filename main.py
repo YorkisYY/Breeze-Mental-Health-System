@@ -5,7 +5,7 @@ from utils.display_banner import display_banner
 from services import *
 from model import *
 from config import *
-
+from model.mhwp_management.mhwp_schedule import *
 # # Create data directory if it doesn't exist
 # DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 # if not os.path.exists(DATA_DIR):
@@ -30,7 +30,7 @@ def show_menu():
     return input("Select an option (1/2/3): ")
 
 def main():
-    
+    update_mhwp_schedules() # Update mhwp schedules when program starts
     display_banner() # Display welcome banner with original ASCII art 
     choice = show_menu() # show original login choice.
     

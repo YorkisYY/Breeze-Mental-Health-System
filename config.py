@@ -12,4 +12,7 @@ PATIENTS_DATA_PATH = os.path.join(DATA_DIR, 'patients.csv')
 MHWP_DATA_PATH = os.path.join(DATA_DIR, 'mhwp.csv')
 APPOINTMENTS_DATA_PATH = os.path.join(DATA_DIR, 'appointments.csv')
 SCHEDULE_DATA_PATH = os.path.join(DATA_DIR, 'mhwp_schedule.csv')
+MHWP_SCHEDULE_TEMPLATE_PATH = os.path.join(DATA_DIR, 'mhwp_schedule_template.csv')
 # OTHER_DATA_PATH = os.path.join(DATA_DIR, '#place your csv file name here')
+set_start_hour = 9 # start hour of the day's schedule
+set_end_hour = 16 # end hour of the day's schedule
