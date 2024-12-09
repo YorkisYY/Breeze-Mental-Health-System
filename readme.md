@@ -6,6 +6,7 @@ WHAT ARE WE WORKING ON !!!!-----------------------------------------------------
 2. add auto update for mhwp schedule based on the schedule template. up to 4 weeks ahead.
 3. change multiple schedule table display for better formatting.
 4. modularize the mhwp code for better readability.
+5. disable the summary module seems it is still in development. waiting for @PengFfeiWang to finish it.
 
 ## 12-th Commit: disable/enable user account
 ----------
