@@ -23,7 +23,7 @@ def show_menu():
     return input("Select an option (1/2/3): ")
 
 def main():
-    update_mhwp_schedules() # Update mhwp schedules when program starts
+    update_mhwp_schedules(silent=True)  # Silent update on startup
     display_banner() # Display welcome banner with original ASCII art 
     choice = show_menu() # show original login choice.
     

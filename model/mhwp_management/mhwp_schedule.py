@@ -12,7 +12,7 @@ from .mhwp_appointment import *
 from .mhwp_view_schedule import *   
 from .mhwp_availability import *
 
-def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_SCHEDULE_TEMPLATE_PATH):
+def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_SCHEDULE_TEMPLATE_PATH, silent=False):
     today = datetime.now()
     week_starts = [
         today,  # Current week
@@ -58,8 +58,9 @@ def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_S
                 if not week_schedule.empty:
                     has_appointments = week_schedule.iloc[:, 3:].isin(["●"]).any().any()
                     if has_appointments:
-                        print(f"\nWarning: Detected confirmed appointments for {mhwp} in Week {week_num + 1}")
-                        print(f"Please cancel appointments for {week_starts[week_num].strftime('%Y/%m/%d')} - {(week_starts[week_num] + timedelta(days=6)).strftime('%Y/%m/%d')}")
+                        if not silent:
+                            print(f"\nWarning: Detected confirmed appointments for {mhwp} in Week {week_num + 1}")
+                            print(f"Please cancel appointments for {week_starts[week_num].strftime('%Y/%m/%d')} - {(week_starts[week_num] + timedelta(days=6)).strftime('%Y/%m/%d')}")
                         return False
             
             # Update weeks 3-4
@@ -102,7 +103,8 @@ def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_S
 
     # Save sorted schedules
     final_schedules.to_csv(schedule_file, index=False)
-    # print("\nSchedule updated successfully!")
+    if not silent:
+        print("\nSchedule updated successfully!")
     return True
 
     
