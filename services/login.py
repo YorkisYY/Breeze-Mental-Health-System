@@ -35,7 +35,7 @@ def login_user():
 
 def verify_staff(role):
     """Verify staff members with role-specific code"""
-    verification_code = input(f"Enter {role} verification code: ")
+    verification_code = getpass.getpass(f"Enter {role} verification code: ").strip()
     if verification_code == "0000":
         print("Verification successful!")
         return True

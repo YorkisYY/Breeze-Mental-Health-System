@@ -13,6 +13,7 @@ class User(UserBase, UserDataManage, UserUpdate, PatientManage, MhwpManage, Admi
     """
     User class that combines all functionality through inheritance
     """
+    # by calling User we can use every function
     def __init__(self, username, password, role, email=None, emergency_email=None, symptoms=None, major=None):
         UserBase.__init__(self, username, password, role, email, emergency_email)
         self.symptoms = symptoms

@@ -13,12 +13,16 @@ from .mhwp_view_schedule import *
 from .mhwp_availability import *
 
 def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_SCHEDULE_TEMPLATE_PATH, silent=False):
+    """
+    The main function is to update the schedule of mhwp.
+    """
     today = datetime.now()
+    #today and the next three weeks
     week_starts = [
-        today,  # Current week
-        today + timedelta(weeks=1),  # Next week 
-        today + timedelta(weeks=2),  # Week 3
-        today + timedelta(weeks=3)   # Week 4
+        today,  
+        today + timedelta(weeks=1),  
+        today + timedelta(weeks=2), 
+        today + timedelta(weeks=3)   
     ]
     
     # Read templates first
@@ -34,25 +38,26 @@ def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_S
     new_schedules = []
     
     for mhwp in mhwp_users:
-        # Check if MHWP has existing schedule
+        # Check if username=mhwp_username
         if not existing_schedules.empty:
             mhwp_schedule = existing_schedules[existing_schedules['mhwp_username'] == mhwp].copy()
         else:
             mhwp_schedule = pd.DataFrame()
-        
+
+        # Generate full four weeks if the mhwp does not have schedule
         if mhwp_schedule.empty:
-            # Generate full 4 weeks
+            
             start_date = today
             end_date = week_starts[3] + timedelta(days=7)
         else:
             # Convert dates for comparison using loc
             mhwp_schedule.loc[:, 'Date'] = pd.to_datetime(mhwp_schedule['Date'], format='%Y/%m/%d')
             
-            # Keep first 2 weeks only
+            # remain some information from the  first two weeks
             keep_schedules = mhwp_schedule[mhwp_schedule['Date'] < week_starts[2]]
             if not keep_schedules.empty:
                 new_schedules.extend(keep_schedules.to_dict('records'))            
-            # Check weeks 3-4 for appointments
+            # Check the third week and fourth week for appointments
             for week_num in [2, 3]:
                 week_schedule = mhwp_schedule[
                     (mhwp_schedule['Date'] >= week_starts[week_num]) & 
@@ -67,21 +72,22 @@ def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_S
                             print(f"Please cancel appointments for {week_starts[week_num].strftime('%Y/%m/%d')} - {(week_starts[week_num] + timedelta(days=6)).strftime('%Y/%m/%d')}")
                         return False
             
-            # Update weeks 3-4
+            # update some information (week 2 and 3)
             start_date = week_starts[2] + timedelta(days=1)
             end_date = week_starts[3] + timedelta(days=7)
         
-        # Generate new schedules for this MHWP
+        # form new schedules(mhwp) 
         mhwp_templates = templates_df[templates_df['mhwp_username'] == mhwp].to_dict('records')
         current_date = start_date
         while current_date < end_date:
-            # Find matching template for current weekday
+            #Template is matched with  current weekday
             day_template = next((t for t in mhwp_templates if int(t['weekday']) == current_date.weekday()), None)
             if day_template:
                 schedule_entry = {
                     'mhwp_username': mhwp,
                     'Date': current_date.strftime("%Y/%m/%d"),
                     'Day': current_date.strftime("%A")
+
                 }
                 for col in templates_df.columns:
                     if '(' in col:
@@ -89,23 +95,23 @@ def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_S
                 new_schedules.append(schedule_entry)
             current_date += timedelta(days=1)
     
-    # Convert to DataFrame, sort by username and date
+    # It is converted to DateFrame and sorted by date and username
     final_schedules = pd.DataFrame(new_schedules)
     final_schedules['Date'] = pd.to_datetime(final_schedules['Date'])
     
-    # Sort by username first, then date
+    # The priority ( username → date)
     final_schedules = final_schedules.sort_values(['mhwp_username', 'Date'])
     
-    # Keep last occurrence when dropping duplicates
+    # Ensure no duplicates and obtain last occurrence
     final_schedules = final_schedules.drop_duplicates(
         subset=['mhwp_username', 'Date'], 
         keep='last'
     )
     
-    # Format date back to string
+    # Format date is converted back to string
     final_schedules['Date'] = final_schedules['Date'].dt.strftime('%Y/%m/%d')
 
-    # Save sorted schedules
+    # Save and update this schedules
     final_schedules.to_csv(schedule_file, index=False)
     if not silent:
         print("\nSchedule updated successfully!")
@@ -113,11 +119,9 @@ def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_S
 
     
 def setup_mhwp_schedule_template(user, file_path=MHWP_SCHEDULE_TEMPLATE_PATH):
-    # Read existing templates if any
     existing_templates = []
     if os.path.exists(file_path):
         templates_df = pd.read_csv(file_path)
-        # Keep other MHWPs' templates
         existing_templates = templates_df[templates_df['mhwp_username'] != user.username].to_dict('records')
 
     weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -133,9 +137,8 @@ def setup_mhwp_schedule_template(user, file_path=MHWP_SCHEDULE_TEMPLATE_PATH):
         row = [day] + ["□" for _ in time_slots]
         rows.append(row)
 
-    # Process each weekday
+    # for loop （each weekday）
     for day in range(7):
-        # Display current template
         print("\nCurrent Schedule Template:")
         print(tabulate(rows, headers=headers, tablefmt="grid"))
         print("Legend: ■=Available, □=Unavailable")
@@ -157,24 +160,24 @@ def setup_mhwp_schedule_template(user, file_path=MHWP_SCHEDULE_TEMPLATE_PATH):
             if choice == "r":  # Return to previous menu
                 return
             
-            if choice == "-":  # All slots unavailable
+            if choice == "-":  # All slots is unavailable
                 for i in range(1, len(time_slots)+1):
                     rows[day][i] = "□"
                 prev_slots = ["□" for _ in time_slots]
                 break
-            elif choice == "+":  # All slots available
+            elif choice == "+":  # All slots is available
                 for i in range(1, len(time_slots)+1):
                     rows[day][i] = "■"
                 prev_slots = ["■" for _ in time_slots]
                 break
-            elif not choice and prev_slots and day > 0:  # Copy previous day
+            elif not choice and prev_slots and day > 0:  
                 for i in range(1, len(time_slots)+1):
                     rows[day][i] = prev_slots[i-1]
                 break
-            elif not choice and day == 0:  # First day can't copy
+            elif not choice and day == 0:  
                 print("Cannot copy previous day's slots on first day")
                 continue
-            else:  # Specific slots
+            else:  
                 try:
                     indices = [int(idx) for idx in choice.split(",") if idx.strip()]
                     if all(0 <= idx < len(time_slots) for idx in indices):
@@ -187,7 +190,7 @@ def setup_mhwp_schedule_template(user, file_path=MHWP_SCHEDULE_TEMPLATE_PATH):
                 except ValueError:
                     print("Invalid input. Please enter numbers separated by commas, or -, +, or Enter")
         
-        # Store template for this day
+        # Store template(current day) 
         template = {
             'mhwp_username': user.username,
             'weekday': day
@@ -197,7 +200,7 @@ def setup_mhwp_schedule_template(user, file_path=MHWP_SCHEDULE_TEMPLATE_PATH):
             template[slot] = rows[day][i+1]
         templates.append(template)
 
-    # Show final template
+    # display final schedule template
     print("\nFinal Schedule Template:")
     print(tabulate(rows, headers=headers, tablefmt="grid"))
     
@@ -219,23 +222,12 @@ def handle_set_schedule(user):
 
     if schedule_choice == '1':
         setup_mhwp_schedule_template(user)
-        update_mhwp_schedules() # Update mhwp schedules after template is set
+        update_mhwp_schedules()
     elif schedule_choice == '2':
         handle_modify_availibility(user)
     elif schedule_choice == '3':
         handle_view_schedule(user)
     else:
         print("Invalid choice. Please select a valid option.")
-        
-    # if schedule_choice == '1':
-    #     setup_mhwp_schedule(user) # no longer use this function to set schedule
-    # elif schedule_choice == '2':
-    #     handle_modify_availibility(user)
-    # elif schedule_choice == '3':
-    #     handle_view_schedule(user)
-    # elif schedule_choice == '4':
-    #     setup_mhwp_schedule_template(user)
-    #     update_mhwp_schedules() # Update mhwp schedules after template is set
-    # else:
-    #     print("Invalid choice. Please select a valid option.")
+
         

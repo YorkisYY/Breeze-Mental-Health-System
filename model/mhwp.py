@@ -24,7 +24,7 @@ def handle_mhwp_menu(user):
         print("5. View your dashboard")
         print("6. Logout")
 
-        main_choice = input("Select an option (1-5): ").strip()
+        main_choice = input("Select an option (1-6): ").strip()
         if main_choice == '1':
             if handle_update_personal_info(user):  # If account is deleted
                 return
