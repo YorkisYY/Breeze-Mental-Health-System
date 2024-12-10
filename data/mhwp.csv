@@ -1,1 +1,7 @@
 username,assigned_patients,account_status,registration_date,email,emergency_email,major
+mhwp1,patient1,active,2024-12-10,1595445311@qq.com,15954@qq.com,Emotional Management
+mhwp2,"patient3,qqq1",active,2024-12-10,1270946449@qq.com,12709@qq.com,Emotional Management
+mhwp3,"patient4,patient5",active,2024-12-10,505664119@qq.com,50566@qq.com,Behavioral Therapy
+mhwp4,"patient6,houdidi",active,2024-12-10,example003@gmail.com,example0003@gmail.com,Severe Disorders
+mhwp5,,active,2024-12-10,example004@gmail.com,example0004@gmail.com,General Wellbeing
+mhwp6,"patient2,patient7",active,2024-12-10,example006@gmail.com,example0006@gmail.com,Emotional Management
