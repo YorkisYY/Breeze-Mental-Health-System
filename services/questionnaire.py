@@ -87,6 +87,8 @@ def submit_questionnaire(patient_username, assignments_file="data/assignments.cs
 
     status = [category for category, score in results.items() if score >= 10]
     feedback = generate_feedback(status)
+    if not feedback:  # 如果反馈为空，则生成默认反馈
+        feedback = "Thank you for completing the questionnaire. No potential issues have been detected at this time. Please continue to pay attention to your mental health and seek professional help if necessary."
 
     assessment_data = {
         "patient_username": patient_username,

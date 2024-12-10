@@ -47,12 +47,10 @@ def add_comment(patient_username, mhwp_username, rating, comment, appointment_id
     Add a patient's evaluation (rating and comment) of the MHWP to the comments file and link it to a specific appointment.
     """
     try:
-        # Validate rating range
         if not (0 <= rating <= 5):
             print("Invalid rating. Please provide a rating between 0 and 5.")
             return
 
-        # Prepare comment data
         comment_data = {
             "patient_username": patient_username,
             "mhwp_username": mhwp_username,
@@ -63,22 +61,26 @@ def add_comment(patient_username, mhwp_username, rating, comment, appointment_id
             "appointment_datetime": appointment_datetime,
         }
 
-        # Read or create the comments file
         try:
             comments_df = pd.read_csv(COMMENTS_PATH)
-            
-            # Check if the appointment has already been commented on
-            if not comments_df.empty and appointment_id in comments_df["appointment_id"].values:
+        except (FileNotFoundError, pd.errors.EmptyDataError):
+            comments_df = pd.DataFrame({
+                "patient_username": pd.Series(dtype='str'),
+                "mhwp_username": pd.Series(dtype='str'),
+                "rating": pd.Series(dtype='float'),
+                "comment": pd.Series(dtype='str'),
+                "timestamp": pd.Series(dtype='str'),
+                "appointment_id": pd.Series(dtype='int'),
+                "appointment_datetime": pd.Series(dtype='str')
+            })
+
+        if not comments_df.empty and "appointment_id" in comments_df.columns:
+            if appointment_id in comments_df["appointment_id"].values:
                 print("You have already commented on this appointment.")
                 return
 
-            # Append new data if the file is not empty
-            comments_df = pd.concat([comments_df, pd.DataFrame([comment_data])], ignore_index=True)
-        except FileNotFoundError:
-            # Create a new file if it doesn't exist
-            comments_df = pd.DataFrame([comment_data])
-
-        # Save the comment
+        new_comment_df = pd.DataFrame([comment_data])
+        comments_df = pd.concat([comments_df, new_comment_df], ignore_index=True)
         comments_df.to_csv(COMMENTS_PATH, index=False)
         print("Comment added successfully!")
 

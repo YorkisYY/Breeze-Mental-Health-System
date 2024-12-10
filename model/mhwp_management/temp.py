@@ -1,5 +1,5 @@
 import datetime
-import pandas
+
 from config import SCHEDULE_DATA_PATH, MHWP_SCHEDULE_TEMPLATE_PATH 
 def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_SCHEDULE_TEMPLATE_PATH, silent=False):
     today = datetime.now()
