@@ -1,9 +1,7 @@
 import pandas as pd
 from services.comment import view_comments
 from datetime import datetime
-from config import APPOINTMENTS_DATA_PATH, ASSIGNMENTS_DATA_PATH, MOOD_DATA_PATH, JOURNAL_ENTRIES_PATH, MENTAL_ASSESSMENTS_PATH, PATIENT_NOTES__PATH
-
-
+from config import APPOINTMENTS_DATA_PATH, ASSIGNMENTS_DATA_PATH, MOOD_DATA_PATH, JOURNAL_ENTRIES_PATH, MENTAL_ASSESSMENTS_PATH, PATIENT_NOTES_PATH
 
 
 CONDITIONS = ["Anxiety", "Depression", "Autism", "Stress"]
@@ -205,7 +203,7 @@ def add_record(patient_username):
 
             # Check if a record already exists
             try:
-                notes_df = pd.read_csv(PATIENT_NOTES__PATH)
+                notes_df = pd.read_csv(PATIENT_NOTES_PATH)
                 if not notes_df.empty and appointment_id in notes_df["id"].values:
                     print("A record already exists for this appointment.")
                     return
@@ -238,7 +236,7 @@ def add_record(patient_username):
             notes_df = pd.concat([notes_df, pd.DataFrame([record_data])], ignore_index=True)
 
             # Save the record
-            notes_df.to_csv(PATIENT_NOTES__PATH, index=False)
+            notes_df.to_csv(PATIENT_NOTES_PATH, index=False)
             print("Record added successfully!")
 
         except ValueError:
@@ -253,7 +251,7 @@ def view_notes(mhwp_username):
     """
     try:
         # Load medical records file
-        notes_df = pd.read_csv(PATIENT_NOTES__PATH)
+        notes_df = pd.read_csv(PATIENT_NOTES_PATH)
 
         # Filter records belonging to the MHWP
         mhwp_notes = notes_df[notes_df["mhwp_username"] == mhwp_username]
@@ -281,11 +279,11 @@ def view_my_records(patient_username):
     """
     try:
         # Load patient notes file
-        notes_df = pd.read_csv(PATIENT_NOTES__PATH)
+        notes_df = pd.read_csv(PATIENT_NOTES_PATH)
     except FileNotFoundError:
         # If file does not exist, create an empty DataFrame and save it
         notes_df = pd.DataFrame(columns=["patient_username", "mhwp_username", "date", "condition", "notes", "id"])
-        notes_df.to_csv(PATIENT_NOTES__PATH, index=False)
+        notes_df.to_csv(PATIENT_NOTES_PATH, index=False)
         print("No medical records found. File has been initialized.")
         return
 
