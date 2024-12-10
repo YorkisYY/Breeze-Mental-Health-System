@@ -3,6 +3,7 @@ from services.comment import view_comments
 from datetime import datetime
 
 APPOINTMENTS_FILE = "data/appointments.csv"
+ASSIGNMENTS_FILE = "data/assignments.csv"
 MOOD_DATA_FILE = "data/mood_data.csv"
 JOURNAL_ENTRIES_FILE = "data/patient_journaling.csv"
 MENTAL_ASSESSMENTS_FILE = "data/mental_assessments.csv"
@@ -17,15 +18,19 @@ def view_patient_records(mhwp_username):
     """
     try:
         # Get patients under MHWP
-        appointments_df = pd.read_csv(APPOINTMENTS_FILE)
-
+        assignments_df = pd.read_csv(ASSIGNMENTS_FILE)
+        
         # Check if required columns are present
-        if "mhwp_username" not in appointments_df.columns or "patient_username" not in appointments_df.columns:
+        if "mhwp_username" not in assignments_df.columns or "patient_username" not in assignments_df.columns:
             print("Error: CSV file is missing required columns.")
             return
+        
+        assignments_df["mhwp_username"] = assignments_df["mhwp_username"].str.strip()
+        assignments_df["patient_username"] = assignments_df["patient_username"].str.strip()
+        mhwp_username = mhwp_username.strip()
 
         # Filter patients under MHWP
-        patients = appointments_df[appointments_df["mhwp_username"] == mhwp_username]["patient_username"].unique()
+        patients = assignments_df[assignments_df["mhwp_username"] == mhwp_username]["patient_username"].unique()
 
         if not patients:
             print("You currently have no registered patients.")
