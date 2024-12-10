@@ -13,6 +13,7 @@ import csv
 import pandas as pd
 from config import *
 from .patient_management.patient_account import handle_account_management
+from .patient_management.health_wellbeing import handle_health_wellbeing
 
 
 def display_mhwp_schedule_for_patient(user, schedule_file, assignments_file):
@@ -539,32 +540,8 @@ def handle_patient_menu(user):
         if main_choice == '1':  # Account Management
             handle_account_management(user)
                                                 
-        elif main_choice == '2':  # Health & Wellbeing
-            while True:
-                print("\nHealth & Wellbeing:")
-                print("1. View Medical Records")
-                print("2. Submit a Mood Questionnaire")
-                print("3. Track Mood")
-                print("4. Enter a Journaling")
-                print("5. Explore Meditation Resources")
-                print("6. Back to Main Menu")
-
-                wellbeing_choice = input("Select an option (1-6): ").strip()
-
-                if wellbeing_choice == '1':
-                    view_my_records(user.username)
-                elif wellbeing_choice == '2':
-                    submit_questionnaire(user.username)      
-                elif wellbeing_choice == '3':
-                    handle_mood_tracking(user)
-                elif wellbeing_choice == '4':
-                    enter_journaling(user.username)  
-                elif wellbeing_choice == '5':
-                    handle_search_meditation()  
-                elif wellbeing_choice == '6':
-                    break  
-                else:
-                    print("Invalid choice, please try again.")
+        elif main_choice == '2':  
+            handle_health_wellbeing(user)
 
         elif main_choice == '3':  # Appointments & Records
             while True:
