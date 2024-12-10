@@ -9,7 +9,6 @@ from config import assignments_completed
 from model.user_account_management.user_data_manage import toggle_user_account_status
 import pandas as pd
 
-from services.summary import display_summary
 from utils.list_all_user import list_all_users
 from services.summary import display_summary
 """
@@ -541,7 +540,7 @@ def handle_admin_menu(user):
             if result == "self_deleted":
                 return 
         elif admin_choice == '3':  # View system statistics
-            print("\nSystem statistics feature coming soon...")
+            display_summary()
 
         elif admin_choice == '4':  # View all assignments
             print("\n--- All Assignments ---")

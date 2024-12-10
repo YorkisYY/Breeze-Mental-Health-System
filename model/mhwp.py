@@ -698,7 +698,8 @@ def handle_mhwp_menu(user):
         print("2. Set your schedule")
         print("3. Manage appointments")
         print("4. View patient records")
-        print("5. Logout")
+        print("5. View your dashboard")
+        print("6. Logout")
 
         main_choice = input("Select an option (1-5): ").strip()
         if main_choice == '1':
@@ -719,7 +720,10 @@ def handle_mhwp_menu(user):
                 print(f"Error viewing patient records: {str(e)}")
 
         elif main_choice == '5':  # Logout
+            display_dashboard(user.username)
+
+        elif main_choice == '6':  # Logout
             break
 
         else:
-            print("Invalid choice. Please select an option between 1 and 5.")
+            print("Invalid choice. Please select an option between 1 and 6.")

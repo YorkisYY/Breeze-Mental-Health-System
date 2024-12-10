@@ -333,17 +333,18 @@ def display_summary():
                 if start_date > end_date:
                     print("Invalid data, please try again.")
                     continue
-                status = input("Enter status(1-4), 1:cancelled, 2:confirmed, 3:all, 4:separate statistics):")
+                status = input("Enter status(1-4), 1:cancelled, 2:confirmed, 3:pending, 4:all, 5:separate statistics):")
                 if status == "1":
                     results = get_bookings(appointments, start_date, end_date, "cancelled")
                 elif status == "2":
                     results = get_bookings(appointments, start_date, end_date, "confirmed")
                 elif status == "3":
-                    results = get_bookings(appointments, start_date, end_date, "all")
+                    results = get_bookings(appointments, start_date, end_date, "pending")
                 elif status == "4":
+                    results = get_bookings(appointments, start_date, end_date, "all")
+                elif status == "5":
                     results = get_bookings(appointments, start_date, end_date, "Separate statistics")
-                    print("1")
-                    print(results)
+
                 else:
                     print("Invalid choice, please try again.")
 
@@ -353,14 +354,18 @@ def display_summary():
                 #
                 #
                 #
-                print("2")
                 print(results)
+
+                #医生预约病人分布图
+                #医生预约数量变化图
+                #医生预约状态分布图
                 #
 
             elif choice == "2":
                 pass
-                appointments = pd.read_csv('appointment.csv')
-                plot_appointment_trends(appointments)
+                print("do it or not?")
+                # appointments = pd.read_csv('appointment.csv')
+                # plot_appointment_trends(appointments)
                 # print("Returning to main menu.")
                 # break
 
@@ -375,4 +380,5 @@ def display_summary():
     except Exception as e:
         print(f"Error displaying summary: {e}")
 
-display_summary()
+appointments = pd.read_csv('appointment.csv')
+plot_appointment_trends(appointments)
