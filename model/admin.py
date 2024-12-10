@@ -11,7 +11,7 @@ from .admin_management import *
 
 def admin_modify_user_info_meun(user):
     while True:
-        print("1. Update Another User's Info")
+        print("\n1. Update Another User's Info")
         print("2. Delete Another User")
         print("3. Enable/Disable User Account") # @Arthur: 2024_12_03 add user account status management
         print("4. return main meun") 
@@ -66,13 +66,13 @@ def admin_modify_user_info_meun(user):
 def admin_manage_assignment_menu(user):
     while True:
 
-        print("1. View All Assignments")
+        print("\n1. View All Assignments")
         print("2. Assign Patients to MHWPs")
         print("3. Modify Assignments")
         print("4. Display Unassigned Patients and MHWPs")
         print("5. return main meun") 
         
-        info_choice = input("Select an option (1-6): ").strip()
+        info_choice = input("Select an option (1-5): ").strip()
 
         if info_choice == '1':  # View all assignments
             print("\n--- All Assignments ---")
@@ -113,7 +113,7 @@ def handle_admin_menu(user):
         print("3. View System Statistics")
         print("4. Logout")
         
-        admin_choice = input("Select an option (1-9): ").strip()
+        admin_choice = input("Select an option (1-4): ").strip()
 
         if admin_choice == '1':  # Update another user's info
             admin_modify_user_info_meun(user)

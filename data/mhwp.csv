@@ -1,14 +1,14 @@
 username,assigned_patients,account_status,registration_date,email,emergency_email,major
-mhwp1,patient1,active,2024-12-10,1595445311@qq.com,15954@qq.com,Emotional Management
-mhwp2,"patient3,qqq1",active,2024-12-10,1270946449@qq.com,12709@qq.com,Emotional Management
-mhwp3,"patient4,patient5",active,2024-12-10,505664119@qq.com,50566@qq.com,Behavioral Therapy
-mhwp4,"patient6,houdidi",active,2024-12-10,example003@gmail.com,example0003@gmail.com,Severe Disorders
+mhwp1,"patient1,houdidi3,patient7",active,2024-12-10,1595445311@qq.com,15954@qq.com,Emotional Management
+mhwp2,"patient3,qqq1,houdidi4,bsx",active,2024-12-10,1270946449@qq.com,12709@qq.com,Emotional Management
+mhwp3,"patient4,patient5,houdidi1,houdidi6,houdidi8,patient4,patient5",active,2024-12-10,505664119@qq.com,50566@qq.com,Behavioral Therapy
+mhwp4,"patient6,houdidi,houdidi,houdidi5,houdidi7,patient6",active,2024-12-10,example003@gmail.com,example0003@gmail.com,Severe Disorders
 mhwp5,,active,2024-12-10,example004@gmail.com,example0004@gmail.com,General Wellbeing
-mhwp6,"patient2,patient7",active,2024-12-10,example006@gmail.com,example0006@gmail.com,Emotional Management
-hougege,"houdidi2,houdidi3,houdidi4",active,2024-12-05,505664119@qq.com,realhouyi@gmail.com,Emotional Management
-hougege1,"houdidi,houdidi1,houdidi6,houdidi8",active,2024-12-05,505664119@qq.com,realhouyi@gmail.com,Behavioral Therapy
+mhwp6,"patient2,patient7,houdidi2,qqq,patient1,patient2,patient3,qqq1",active,2024-12-10,example006@gmail.com,example0006@gmail.com,Emotional Management
+hougege,,active,2024-12-05,505664119@qq.com,realhouyi@gmail.com,Emotional Management
+hougege1,,active,2024-12-05,505664119@qq.com,realhouyi@gmail.com,Behavioral Therapy
 hougege2,,active,2024-12-05,505664119@qq.com,realhouyi@gmail.com,Severe Disorders
 hougege3,,active,2024-12-05,505664119@qq.com,realhouyi@gmail.com,General Wellbeing
 hougege4,,active,2024-12-05,505664119@qq.com,realhouyi@gmail.com,Behavioral Therapy
-baishaoxiong,bsx,active,2024-12-05,1@qq.com,2@qq.com,Emotional Management
-qqq1,qqq,active,2024-12-10,qinxingjian123@163.com,1@123.com,Emotional Management
+baishaoxiong,,active,2024-12-05,1@qq.com,2@qq.com,Emotional Management
+qqq1,,active,2024-12-10,qinxingjian123@163.com,1@123.com,Emotional Management
