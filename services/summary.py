@@ -2,7 +2,9 @@ import pandas as pd
 import os
 from tabulate import tabulate
 from datetime import datetime, timedelta
-from config import ASSIGNMENTS_DATA_PATH, APPOINTMENTS_DATA_PATH
+from config import ASSIGNMENTS_DATA_PATH, APPOINTMENTS_DATA_PATH, PATIENTS_DATA_PATH, MHWP_DATA_PATH
+
+
 
 # read csv files
 def read_csv(file_path):
@@ -82,228 +84,9 @@ def get_bookings(appointments, start_date, end_date, status):
         status_counts = filtered_appointments["mhwp_username"].value_counts()
     return status_counts
 
-# appointments = load_appointments()
-# start_date = datetime.strptime("2024/10/01", "%Y/%m/%d")
-# end_date = datetime.strptime("2024/12/30", "%Y/%m/%d")
-#
-# results = get_bookings(appointments, start_date, end_date, "Separate statistics")
-# print(results)
-
-# # 汇总分配和预约详情
-# def generate_summary():
-#     # 加载数据
-#     assignments = load_assignments()
-#     appointments = load_appointments()
-#
-#     # 汇总患者与 MHWPs 的分配
-#     assignment_summary = assignments.groupby("mhwp_username")["patient_username"].apply(list)
-#
-#     # 统计当前一周的确认预约数量
-#     confirmed_counts = get_confirmed_bookings_this_week(appointments)
-#
-#     # 创建结果表
-#     summary = pd.DataFrame({
-#         "MHWP": assignment_summary.index,
-#         "Patients": assignment_summary.values,
-#         "Confirmed Bookings (This Week)": [confirmed_counts.get(mhwp, 0) for mhwp in assignment_summary.index]
-#     })
-#
-#     return summary
-
-
-# 展示结果
-# def display_summary():
-#     try:
-#         summary = generate_summary()
-#         print("Summary of Assignments and Bookings:")
-#         print(summary.to_string(index=False))
-#     except Exception as e:
-#         print(f"Error generating summary: {e}")
-#
-
-
-#
-# def plot_appointment_trends(appointments):
-#     # 按日期统计预约数量
-#     appointment_counts = appointments.groupby('date').size()
-#
-#     # 生成折线图显示预约数量趋势
-#     plt.figure(figsize=(10, 6))
-#     plt.plot(appointment_counts.index, appointment_counts.values, marker='o')
-#     plt.title('Appointments Trend')
-#     plt.xlabel('Date')
-#     plt.ylabel('Number of Appointments')
-#     plt.xticks(rotation=45)
-#     plt.tight_layout()
-#     plt.show()
-# #
-# def get_patients_by_mhwp(mhwp_username):
-#     patients = load_patient_data()
-#     if patients.empty: # In case the file just have Table head without any data rows
-#         print("No patient data available.")
-#         return pd.DataFrame()
-#     return patients[patients["assigned_mhwp"] == mhwp_username]
-
-# more information about patients
-# def get_patient_mood_data(username):
-#     moods = load_mood_data()
-#     if moods.empty: # In case the file just have Table head without any data rows
-#         print("No mood data available.")
-#         return pd.DataFrame()
-#     return moods[moods["username"] == username]
-
-color_code_to_score = {
-    "Green": 1,
-    "Blue": 2,
-    "Yellow": 3,
-    "Orange": 4,
-    "Red": 5,
-}
-#
-# def generate_summary(mhwp_username):
-#     try:
-#         patients = get_patients_by_mhwp(mhwp_username)
-#         moods = load_mood_data()
-#
-#         if patients.empty:
-#             print("No patient data available for summary.")
-#             return pd.DataFrame()
-#
-#         summary = []
-#         for _, patient in patients.iterrows():
-#             username = patient["username"]
-#             mood_data = moods[moods["username"] == username] # Mood of one patient
-#
-#             total_moods = len(mood_data)
-#
-#             if total_moods == 0:
-#                 last_mood = "N/A"
-#                 average_mood = "N/A"
-#             else:
-#                 mood_data = mood_data.sort_values(by="timestamp", ascending=False)
-#
-#
-#                 last_mood = mood_data.iloc[0]["color_code"]
-#                 mood_data["mood_score"] = mood_data["color_code"].map(color_code_to_score)
-#                 average_mood = mood_data["mood_score"].mean()
-#
-#
-#             summary.append({
-#                 "username": username,
-#                 #"Name": patient["username"],
-#                 #"Appointments": patient["total_appointments"],
-#                 "Mood Entries": total_moods,
-#                 "Last Mood": last_mood,
-#                 "Average Mood Score": average_mood
-#             })
-#
-#         return pd.DataFrame(summary)
-#
-#     except KeyError as e: # In case nonexistent columns
-#         print(f"Data error: Missing column {e}")
-#         return pd.DataFrame()
-#     except Exception as e:
-#         print(f"Unexpected error during summary generation: {e}")
-#         return pd.DataFrame()
-#
-#
 
 
 
-def display_patient_summary_tabulate(summary_data):
-    """
-    Display patient summary using tabulate for better formatting.
-    :param summary_data: List of dictionaries containing patient summary.
-    """
-    if summary_data.empty:
-        print("No patient data available.")
-        return
-
-    print("Patient Summary:")
-    print(tabulate(summary_data, headers="keys", tablefmt="grid"))
-
-#
-# def display_patient_summary(summary_data):
-#     """
-#     Display patient summary as a text table.
-#     :param summary_data: pandas.DataFrame containing patient summary information.
-#     """
-#     if summary_data.empty:
-#         print("No patient data available.")
-#         return
-#
-#     print("Patient Summary:")
-#     print("-" * 60)
-#     print(summary_data.to_string(index=False))
-#     print("-" * 60)
-
-#
-# import matplotlib.pyplot as plt
-#
-# # color_code to color mapping for the pie chart
-# color_mapping = {
-#     "Green": "green",
-#     "Blue": "blue",
-#     "Yellow": "yellow",
-#     "Orange": "orange",
-#     "Red": "red"
-# }
-#
-# def plot_mood(patient_username):
-#     try:
-#         moods = load_mood_data()
-#
-#         if moods.empty:
-#             print("No mood data found.")
-#             return
-#
-#         mood_data = moods[moods["username"] == patient_username]
-#
-#             # 如果没有情绪数据，跳过
-#         if mood_data.empty:
-#             print(f"No mood data available for patient {patient_username}.")
-#             return
-#             # 按时间排序情绪数据
-#         mood_data = mood_data.sort_values(by="timestamp", ascending=True)
-#
-#             # 将颜色码映射为评分
-#         mood_data["mood_score"] = mood_data["color_code"].map(color_code_to_score)
-#
-#
-#         try:    # 画出情绪评分的折线图
-#             plt.figure(figsize=(10, 5))
-#             plt.plot(mood_data["timestamp"], mood_data["mood_score"], label=f"{patient_username}'s Mood Trend",
-#                     marker='o')
-#             plt.xlabel("Timestamp")
-#             plt.ylabel("Mood Score (1 = Green, 5 = Red)")
-#             plt.title(f"Mood Trend for {patient_username}")
-#             plt.xticks(rotation=45)
-#             plt.legend()
-#             plt.tight_layout()
-#             plt.show()
-#         except Exception as e:
-#             print(f"Error while plotting mood trend: {e}")
-#
-#         try:
-#             #显示情绪状态分布的饼图
-#             mood_counts = mood_data["color_code"].value_counts()
-#             # 使用颜色映射将每个情绪状态对应颜色
-#             colors = [color_mapping.get(x) for x in mood_counts.index]
-#             plt.figure(figsize=(7, 7))
-#             mood_counts.plot(kind='pie', autopct='%1.1f%%',
-#                              colors=colors,
-#                              startangle=90, counterclock=False)  # startangle设置起始角度
-#             plt.title("Mood Status Distribution")
-#             plt.ylabel("")  # 去掉y轴标签
-#             plt.show()
-#         except Exception as e:
-#             print(f"Error while generating mood pie chart: {e}")
-#
-#
-#
-#     except Exception as e:
-#         print(f"Error while generating mood trend plots: {e}")
-#
 def print_result(result):
     # 如果 result 是 Series, 转换成 DataFrame
     if isinstance(result, pd.Series):
@@ -313,51 +96,52 @@ def print_result(result):
 
 
     print()
-    # print(result_df.to_string(index=True, header=True))
+
     print(tabulate(result_df, headers='keys', tablefmt='grid', showindex=True))
 
-# def print_result(result):
-#     # 转换为 DataFrame，再删除最后一行
-#     result_df = result.to_frame(name='count')
-#     result_df = result_df[:-1]  # 删除最后一行
-#
-#     print()
-#     print(result_df)
+def get_valid_date_input(prompt):
+    while True:
+        user_input = input(prompt).strip()
+        try:
+            # 尝试将输入转化为日期格式 (YYYY/MM/DD)
+            date = datetime.strptime(user_input, "%Y/%m/%d")
+            return date
+        except ValueError:
+            print("Invalid date format. Please use YYYY/MM/DD format.")
 
-def display_summary():
+
+def display_booking_summary():
     try:
         appointments = load_appointments()
         start_date, end_date = thisWeek()
         results = get_bookings(appointments, start_date, end_date, "confirmed")
 
-
-        # print(results)
-
         if results.empty:
             print("No summary data available.")
         else:
             print("Appointments confirmed for the current week")
-            # print(results)
+
             print_result(results)
-
-
 
         while True:
             print(f"\nWhat do you want to do next?")
             print("1. Modify the time range and status of the summary")
-            print("2. See specific MHWP details")
-            print("3. Returning to main menu")
 
-            choice = input("Select an option (1-3): ").strip()
+            print("2. Returning to main menu")
+
+            choice = input("Select an option (1-2): ").strip()
             if choice == "1":
+
                 appointments = load_appointments()
-                start_date = input("Enter start date (YYYY/MM/DD): ")
-                end_date = input("Enter end date (YYYY/MM/DD): ")
+
+                start_date = get_valid_date_input("Enter start date (YYYY/MM/DD): ")
+                end_date = get_valid_date_input("Enter end date (YYYY/MM/DD): ")
                 start_date = datetime.strptime(start_date, "%Y/%m/%d")
                 end_date = datetime.strptime(end_date, "%Y/%m/%d")
                 if start_date > end_date:
                     print("Invalid data, please try again.")
                     continue
+
                 status = input("Enter status(1-4), 1:cancelled, 2:confirmed, 3:pending, 4:all, 5:separate statistics):")
                 if status == "1":
                     results = get_bookings(appointments, start_date, end_date, "cancelled")
@@ -373,29 +157,34 @@ def display_summary():
                 else:
                     print("Invalid choice, please try again.")
 
-
-                # print(get_bookings(appointments, start_date, end_date, "all"))
-                # print(get_bookings(appointments, start_date, end_date, "Separate statistics"))
-                #
-                #
-                #
                 print_result(results)
 
-                #医生预约病人分布图
-                #医生预约数量变化图
-                #医生预约状态分布图
-                #
-
             elif choice == "2":
-                pass
-                print("do it or not?")
-                # appointments = pd.read_csv('appointment.csv')
-                # plot_appointment_trends(appointments)
-                # print("Returning to main menu.")
-                # break
+                print("Returning to last menu.")
+                break
+
+            else:
+                print("Invalid choice, please try again.")
+
+    except Exception as e:
+        print(f"Error displaying booking summary: {e}")
 
 
-            elif choice == "3":
+def display_summary():
+    try:
+        while True:
+            print(f"\nWhat do you want to do?")
+            print("1. See the summary of booking")
+            print("2. Displays information about MHWPs and their patients")
+            print("3. Returning to main menu")
+            type = input("Select an option (1-3): ").strip()
+            if type == "1":
+                display_booking_summary()
+            elif type == "2":
+                display_mhwp_summary()
+                view_patients_for_mhwp()
+
+            elif type == "3":
                 print("Returning to main menu.")
                 break
 
@@ -405,5 +194,156 @@ def display_summary():
     except Exception as e:
         print(f"Error displaying summary: {e}")
 
+
+def load_patients():
+    try:
+        return read_csv(PATIENTS_DATA_PATH)
+    except Exception as e:
+        print(e)
+        return pd.DataFrame()
+
+
+def load_mhwp():
+    try:
+        return read_csv(MHWP_DATA_PATH)
+    except Exception as e:
+        print(e)
+        return pd.DataFrame()  # 如果加载失败，返回空的DataFrame
+
+
+
+def get_patients_for_mhwp(mhwp_name):
+    # 加载患者数据和分配数据
+    patients = load_patients()
+
+    mhwp = load_mhwp()
+
+    # 找到该MHWP负责的所有患者
+    mhwp_info = mhwp[mhwp['username'] == mhwp_name]
+
+    if mhwp_info.empty:
+        print(f"No information found for MHWP {mhwp_name}.")
+        return
+
+    assigned_patients = mhwp_info['assigned_patients'].values[0]
+    assigned_patients_list = assigned_patients.split(',') if assigned_patients else []
+
+    if not assigned_patients_list:
+        print(f"MHWP {mhwp_name} has no assigned patients.")
+        return
+
+    # 根据患者用户名获取患者的基本信息
+    patients_assigned = patients[patients['username'].isin(assigned_patients_list)]
+
+    #     重置索引并移除原始的索引列
+    patients_assigned = patients_assigned.reset_index(drop=True)
+
+    # 输出该MHWP负责的所有患者信息
+    print(f"Patients assigned to MHWP {mhwp_name}:")
+    # print(patients_assigned[['username', 'symptoms', 'registration_date']])
+    print(tabulate(patients_assigned[['username', 'symptoms', 'registration_date']], headers='keys', tablefmt='grid',
+                   showindex=False))
+
+def calculate_mhwp_patient_counts():
+    # 加载数据
+    mhwp = load_mhwp()
+    patients = load_patients()
+    assignments = load_assignments()
+
+    # 创建一个空的列表来存储MHWP和患者数
+    mhwp_patient_counts = []
+
+    # 遍历每个MHWP
+    for _, mhwp_row in mhwp.iterrows():
+        mhwp_name = mhwp_row['username']
+        mhwp_major = mhwp_row['major']
+
+        # 获取MHWP负责的患者列表
+        assigned_patients = mhwp_row['assigned_patients']
+        if pd.isna(assigned_patients):
+            patient_count = 0
+        else:
+            assigned_patients_list = assigned_patients.split(',')
+            patient_count = len(assigned_patients_list)
+
+        # 将信息添加到列表
+        mhwp_patient_counts.append([mhwp_name, mhwp_major, patient_count])
+
+    # 转换为DataFrame
+    mhwp_summary_df = pd.DataFrame(mhwp_patient_counts,
+                                   columns=['MHWP Name', 'Specialization (Major)', 'Assigned Patient Count'])
+
+    # 返回DataFrame
+    return mhwp_summary_df
+
+
+# 展示MHWP及其患者数和专业领域
+def display_mhwp_summary():
+    mhwp_summary_df = calculate_mhwp_patient_counts()
+
+    if mhwp_summary_df.empty:
+        print("No MHWP data available.")
+        return
+
+    # 打印MHWP统计表
+    print("\nMHWP Summary (including specialization and number of patients assigned):")
+    # print(mhwp_summary_df.to_string(index=False))
+    print(tabulate(mhwp_summary_df, headers='keys', tablefmt='grid', showindex=False))
+
+def view_patients_for_mhwp():
+    while True:
+        try:
+            print("Please enter whose patient you would like to see.")
+            mhwp_name = input("Please type the name of MHWP or enter '0' to exit: ")
+
+            # 用户输入0时退出
+            if mhwp_name == "0":
+                print("Exiting patient view.")
+                break  # Exit the loop and return to main menu
+
+                # 确保用户输入非空且格式有效
+            if not mhwp_name:
+                print("Error: MHWP name cannot be empty. Please try again.")
+                continue
+
+                # 获取所有MHWP名称并进行验证，确保用户输入的MHWP名称有效
+            mhwp_data = load_mhwp()  # 假设加载的MHWP数据包含所有可用的MHWP
+            valid_mhwp_names = mhwp_data['username'].tolist()
+
+                # 检查用户输入的MHWP名称是否存在于有效名称列表中
+            if mhwp_name not in valid_mhwp_names:
+                print(f"Error: '{mhwp_name}' is not a valid MHWP. Please enter a valid MHWP name.")
+                continue
+
+                # 获取并显示该MHWP的患者信息
+            get_patients_for_mhwp(mhwp_name)
+
+
+        except ValueError as ve:
+            print(f"Error: {ve}")  # 捕获异常并输出错误信息
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")  # 捕获其他异常并输出错误信息
+        # finally:
+        #     # 可选择是否继续或退出
+        #     print("\nWould you like to see another MHWP's patients?")
+        #     continue_choice = input("Enter 'yes' to continue, '0' to exit: ").strip().lower()
+        #     if continue_choice == '0':
+        #         print("Exiting patient view.")
+        #         break  # Exit the loop and return to main menu
+
+
 if __name__ == '__main__':
-    display_summary()
+    # view_patients_for_mhwp()
+    display_mhwp_summary()
+    display_booking_summary()
+    # get_patients_for_mhwp('hougege')
+    # display_summary()
+#     appointments = load_appointments()
+#     plot_mhwps_distribution(appointments)
+#
+# # 画出医生预约数量变化图
+#     plot_appointment_trends(appointments)
+#
+# # 画出医生预约状态分布图
+#     plot_appointment_status_distribution(appointments)
+
