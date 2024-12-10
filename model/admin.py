@@ -5,9 +5,9 @@ import random
 from config import USER_DATA_PATH
 from config import PATIENTS_DATA_PATH
 from config import MHWP_DATA_PATH
-from config import assignments_completed
 from model.user_account_management.user_data_manage import toggle_user_account_status
 import pandas as pd
+
 
 from utils.list_all_user import list_all_users
 from services.summary import display_summary
@@ -260,8 +260,9 @@ def balanced_assign_patients_and_mhwps(patient_data_path="data/patients.csv",
     """
     Assign patients to MHWPs in a balanced way, prioritizing unassigned MHWPs and matching symptoms to majors.
     """
-    global assignments_completed
-    if assignments_completed:
+    # Check if assignments already exist in assignments.csv
+    current_assignments = get_current_assignments(assignments_path)
+    if current_assignments and any(len(patients) > 0 for patients in current_assignments.values()):
         print("Assignments have already been completed. No need to repeat.")
         return
 
@@ -599,7 +600,7 @@ def handle_admin_menu(user):
 
         elif admin_choice == '10':  # Logout
 
-            display_summary()
+            # display_summary()
 
             break
 

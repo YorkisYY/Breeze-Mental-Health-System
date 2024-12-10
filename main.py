@@ -5,14 +5,7 @@ from utils.display_banner import display_banner
 from services import *
 from model import *
 from config import *
-
-# # Create data directory if it doesn't exist
-# DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
-# if not os.path.exists(DATA_DIR):
-#     os.makedirs(DATA_DIR)
-
-# # CSV file directory
-# USER_FILE_PATH = os.path.join(DATA_DIR, 'user_data.csv')
+from model.mhwp_management.mhwp_schedule import *
 
 def handle_exit():
     print("Exiting the system now.")
@@ -30,7 +23,7 @@ def show_menu():
     return input("Select an option (1/2/3): ")
 
 def main():
-    
+    update_mhwp_schedules(silent=True)  # Silent update on startup
     display_banner() # Display welcome banner with original ASCII art 
     choice = show_menu() # show original login choice.
     
@@ -40,7 +33,7 @@ def main():
         '3': lambda: handle_exit(),
     }
     #@mikrostiff: break on false
-    #@mikrostiff: ")()" is not a tyoo. the () executes the result of menu_actions      
+
     while menu_actions.get(choice, handle_invalid)():
         choice = show_menu()
 

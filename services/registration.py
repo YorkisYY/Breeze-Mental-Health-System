@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import re
+import getpass
 from model.user_account_management.user import User
 from config import USER_DATA_PATH
 from datetime import datetime
@@ -22,7 +23,7 @@ def is_username_unique(username, role):
 def register_user():
     # Prompt user to enter username and password
     username = input("Enter username: ").strip()
-    password = input("Enter password: ").strip()
+    password = getpass.getpass("Enter password: ").strip()
 
     # Ensure username and password are not empty
     if not username or not password:
@@ -97,7 +98,7 @@ def register_user():
     
     # For patients, select their symptoms
     elif role == "patient":
-        print("\nSelect your primary condition(s):")
+        print("\nSelect your primary condition (choose one only):")
         conditions = {
             "1": "Anxiety",
             "2": "Depression",
@@ -106,7 +107,7 @@ def register_user():
             "5": "OCD",
             "6": "ADHD",
             "7": "Eating Disorder",
-            "8": "Substance Abuse",
+            "8": "Substance Abuse", 
             "9": "Schizophrenia",
             "10": "Borderline Personality Disorder",
             "11": "Other/General Wellbeing"
@@ -115,14 +116,13 @@ def register_user():
         for num, condition in conditions.items():
             print(f"{num}. {condition}")
         
-        conditions_input = input("\nEnter condition numbers (comma-separated, e.g. 1,2,3): ").strip()
-        selected_conditions = []
+        condition_input = input("\nEnter condition number (1-11, select one only): ").strip()
         try:
-            for num in conditions_input.split(','):
-                num = num.strip()
-                if num in conditions:
-                    selected_conditions.append(conditions[num])
-            symptoms = ",".join(selected_conditions)
+            if condition_input in conditions:
+                symptoms = conditions[condition_input]
+            else:
+                print("Invalid condition selection.")
+                return True
         except:
             print("Invalid condition selection.")
             return True
