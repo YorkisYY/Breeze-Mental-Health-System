@@ -1,7 +1,7 @@
 
 import pandas as pd
 import os
-
+from config import MOOD_DATA_PATH, PATIENTS_DATA_PATH
 
 
 
@@ -22,7 +22,7 @@ def read_csv(file_path):
 # load data from patients
 def load_patient_data():
     try:
-        return read_csv("../data/patients.csv")
+        return read_csv(PATIENTS_DATA_PATH)
     except Exception as e:
         print(e)
         return pd.DataFrame() # Returning empty DataFrame in case of an error(make sure the safe of following stage)
@@ -30,7 +30,7 @@ def load_patient_data():
 # load data from mood
 def load_mood_data():
     try:
-        return read_csv("../data/mood_data.csv")
+        return read_csv(MOOD_DATA_PATH)
     except Exception as e:
         print(e)
         return pd.DataFrame() # Returning empty DataFrame in case of an error(make sure the safe of following stage)
@@ -366,6 +366,8 @@ def display_dashboard(mhwp_username):
         print(f"Error displaying dashboard: {e}")
 
 
+if __name__ == '__main__':
+    display_dashboard('hougege4')
 
 #
 # def dashboard_menu(mhwp_username):
