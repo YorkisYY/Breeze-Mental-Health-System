@@ -3,6 +3,7 @@ from services.meditation import handle_search_meditation
 from services.journaling import enter_journaling
 from services.patient_records import view_my_records
 from services.questionnaire import submit_questionnaire
+from tabulate import tabulate
 
 def handle_health_wellbeing(user):
     """
@@ -63,4 +64,10 @@ def display_mood_history(username):
     print("\nYour recent mood history:")
     history = MoodEntry.get_user_mood_history(username)
     if not history.empty:
-        print(history[['timestamp', 'color_code', 'comments']].head())
+        print(tabulate(
+            history[['timestamp', 'color_code', 'comments']].head(),
+            headers=['Timestamp', 'Mood', 'Comments'],
+            tablefmt='grid',
+            showindex=False
+        ))
+

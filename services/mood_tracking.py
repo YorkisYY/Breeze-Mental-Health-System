@@ -7,7 +7,7 @@ class MoodEntry:
         self.username = username
         self.color_code = color_code
         self.comments = comments
-        self.timestamp = timestamp or datetime.now()
+        self.timestamp = timestamp or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         # Color code mapping
         self.color_mapping = {
@@ -19,32 +19,29 @@ class MoodEntry:
         }
 
     def save_mood_entry(self):
-        """Save mood entry to CSV file"""
         try:
-            # Create DataFrame with the new entry
-            new_entry = pd.DataFrame({
-                'username': [self.username],
-                'color_code': [self.color_mapping.get(self.color_code, "Unknown")],
-                'comments': [self.comments],
-                'timestamp': [self.timestamp]
-            })
-
-            # Append to existing file or create new one
+            # Create single row of data first
+            data = {
+                'username': self.username,
+                'color_code': self.color_mapping.get(self.color_code, "Unknown"),
+                'comments': self.comments,
+                'timestamp': self.timestamp
+            }
+            new_entry = pd.DataFrame([data])  # Note the list wrapper
+            
             try:
                 df = pd.read_csv(MOOD_DATA_PATH)
                 df = pd.concat([df, new_entry], ignore_index=True)
             except FileNotFoundError:
                 df = new_entry
-
+                
             df.to_csv(MOOD_DATA_PATH, index=False)
             print("Mood entry saved successfully!")
             return True
-
+            
         except Exception as e:
             print(f"Error saving mood entry: {e}")
-            return False
-
-    @staticmethod
+            return False    @staticmethod
     def get_user_mood_history(username):
         """Retrieve mood history for a specific user"""
         try:

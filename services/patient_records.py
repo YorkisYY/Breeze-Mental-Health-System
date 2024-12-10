@@ -26,7 +26,8 @@ def view_patient_records(mhwp_username):
         # Filter patients under MHWP
         patients = assignments_df[assignments_df["mhwp_username"] == mhwp_username]["patient_username"].unique()
 
-        if not patients:
+      
+        if patients.size == 0:  
             print("You currently have no registered patients.")
             return
 
