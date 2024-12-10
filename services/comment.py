@@ -80,12 +80,19 @@ def add_comment(patient_username, mhwp_username, rating, comment, appointment_id
                 return
 
         new_comment_df = pd.DataFrame([comment_data])
-        comments_df = pd.concat([comments_df, new_comment_df], ignore_index=True)
+
+        if comments_df.empty:
+            comments_df = new_comment_df
+        else:
+            comments_df = pd.concat([comments_df, new_comment_df], ignore_index=True)
+
         comments_df.to_csv(COMMENTS_PATH, index=False)
         print("Comment added successfully!")
 
     except Exception as e:
         print(f"Error adding comment: {e}")
+
+
 
 
 def get_available_appointments(patient_username):
@@ -126,6 +133,7 @@ def get_available_appointments(patient_username):
     except Exception as e:
         print(f"Error loading appointments: {e}")
         return pd.DataFrame(), {}
+
 
 
 
