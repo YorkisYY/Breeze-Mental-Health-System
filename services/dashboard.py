@@ -219,6 +219,38 @@ def plot_mood(patient_username):
         print(f"Error while generating mood trend plots: {e}")
 
 
+import numpy as np
+import pickle
+from services.trainModal import compute_tfidf
+# 加载模型
+with open('emotion_model.pkl', 'rb') as f:
+    model = pickle.load(f)
+
+word_index = model['word_index']
+idf = model['idf']
+centers = model['centers']
+
+
+# 新数据情绪识别
+def predict_emotion(new_document, word_index, idf, centers):
+    # 计算新文档的TF-IDF特征
+    new_tfidf = compute_tfidf([new_document], word_index, idf)[0]  # 计算新文档的TF-IDF特征
+
+    # 计算新文档与每个聚类中心的距离
+    distances = np.linalg.norm(centers - new_tfidf, axis=1)  # 计算与每个簇中心的距离
+
+    # 找到距离最小的中心
+    cluster_id = np.argmin(distances)
+    return cluster_id
+
+
+# 使用已加载的模型进行预测
+new_comment = "feeling a bit stressed"
+predicted_cluster = predict_emotion(new_comment, word_index, idf, centers)
+print(f"Predicted cluster for the new comment: {predicted_cluster}")
+
+
+
 def display_dashboard(mhwp_username):
     try:
         summary = generate_summary(mhwp_username)
@@ -237,7 +269,24 @@ def display_dashboard(mhwp_username):
             if choice == "1":
                 patient_name = input("Please type in the username of the patient:").strip()
                 plot_mood(patient_name)
+
+                # 显示情绪预测
+                print("Would you like to predict the patient's mood? (Y/N)")
+                predict_choice = input().strip()
+                if predict_choice.lower() == "y":
+                    try:
+                        # 提取最后一个情绪数据并预测
+
+                        last_mood_comment = get_patient_mood_data(patient_name)
+                        last_mood_comment = last_mood_comment.iloc[-1]["comments"]
+                        predicted_cluster = predict_emotion(last_mood_comment, word_index, idf, centers)
+                        mood_labels = ["Green", "Blue", "Yellow", "Orange", "Red"]
+                        print(f"Predicted mood for {patient_name}: {mood_labels[predicted_cluster]}")
+                    except Exception as e:
+                        print(f"Error during prediction: {e}")
+
                 print("Do you want to see more information about the patient?(Y/N)")
+
                 while True:
                     isSee = input()
                     if isSee == "Y":
