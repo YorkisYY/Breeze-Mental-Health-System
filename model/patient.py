@@ -610,29 +610,3 @@ def handle_patient_menu(user):
         else:
             print("Invalid choice, please try again.")
 
-
-
-def handle_mood_tracking(user):
-    print("\nMood Tracking")
-    print("How are you feeling today?")
-    print("1. Green - Very Good (Feeling great, energetic, positive)")
-    print("2. Blue - Good (Calm, content, peaceful)")
-    print("3. Yellow - Neutral (OK, balanced)")
-    print("4. Orange - Not Great (Worried, uneasy)")
-    print("5. Red - Poor (Distressed, anxious, depressed)")
-    
-    color_choice = input("Select your mood (1-5): ").strip()
-    if color_choice in ["1", "2", "3", "4", "5"]:
-        comments = input("Would you like to add any comments about your mood? ").strip()
-        mood_entry = MoodEntry(user.username, color_choice, comments)
-        mood_entry.save_mood_entry()
-        
-        display_mood_history(user.username)
-    else:
-        print("Invalid mood selection.")
-
-def display_mood_history(username):
-    print("\nYour recent mood history:")
-    history = MoodEntry.get_user_mood_history(username)
-    if not history.empty:
-        print(history[['timestamp', 'color_code', 'comments']].head())
