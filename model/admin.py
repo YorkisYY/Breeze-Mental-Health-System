@@ -260,11 +260,7 @@ def balanced_assign_patients_and_mhwps(patient_data_path="data/patients.csv",
     """
     Assign patients to MHWPs in a balanced way, prioritizing unassigned MHWPs and matching symptoms to majors.
     """
-    # Check if assignments already exist in assignments.csv
-    current_assignments = get_current_assignments(assignments_path)
-    if current_assignments and any(len(patients) > 0 for patients in current_assignments.values()):
-        print("Assignments have already been completed. No need to repeat.")
-        return
+
 
     # Load necessary data
     eligible_mhwps = get_mhwps_with_schedule(schedule_path)  # 获取有设置 schedule 的 MHWPs
@@ -349,10 +345,9 @@ def modify_assignments(assignments_path="data/assignments.csv",
         print(f"Patient '{patient_to_modify}' has the symptom: {symptom}")
 
         # Find eligible MHWPs based on matching rules
-        mhwps_with_schedule = get_mhwps_with_schedule(schedule_path)
         eligible_mhwps = [
             mhwp for mhwp, major in get_mhwps_with_major(mhwp_data_path).items()
-            if mhwp in mhwps_with_schedule and symptom in MATCHING_RULES.get(major, set())
+            if symptom in MATCHING_RULES.get(major, set())
         ]
 
         if not eligible_mhwps:
@@ -381,7 +376,6 @@ def modify_assignments(assignments_path="data/assignments.csv",
         update_patients_csv_with_assignments(assignments_path, patient_data_path)
         print(f"\nPatient '{patient_to_modify}' has been reassigned to MHWP '{new_mhwp}'.")
 
-
     elif choice == '2':  # Reassign for unassigned patients and MHWPs
         # Load necessary data
         current_assignments = get_current_assignments(assignments_path)
@@ -397,21 +391,19 @@ def modify_assignments(assignments_path="data/assignments.csv",
         # Notify about unassigned MHWPs without schedule
         if unassigned_mhwps_without_schedule:
             print("\n--- Unassigned MHWPs with no available schedule ---")
-            mhwp_table = [{"MHWP Username": mhwp, "Status": "No Schedule"} for mhwp in
-                          unassigned_mhwps_without_schedule]
+            mhwp_table = [{"MHWP Username": mhwp, "Status": "No Schedule"} for mhwp in unassigned_mhwps_without_schedule]
             print(tabulate(mhwp_table, headers="keys", tablefmt="grid"))
         # Assign unassigned patients to MHWPs with schedules
         if unassigned_patients:
             print("\n--- Assigning unassigned patients to available MHWPs ---")
             patients_with_symptoms = get_patients_with_symptoms(patient_data_path)
             mhwps_with_major = get_mhwps_with_major(mhwp_data_path)
-            remaining_unassigned_patients = []  # Track patients who cannot be assigned to unassigned MHWPs
             for patient in list(unassigned_patients):
                 symptom = patients_with_symptoms.get(patient)
                 if not symptom:
                     print(f"No symptom found for patient '{patient}'. Skipping.")
                     continue
-                # Find eligible unassigned MHWPs for the patient
+                # Find eligible MHWPs for the patient
                 eligible_mhwps = [
                     mhwp for mhwp in unassigned_mhwps_with_schedule
                     if symptom in MATCHING_RULES.get(mhwps_with_major.get(mhwp, ""), set())
@@ -423,36 +415,10 @@ def modify_assignments(assignments_path="data/assignments.csv",
                     unassigned_patients.remove(patient)
                     print(f"Assigned: Patient '{patient}' -> MHWP '{selected_mhwp}'")
                 else:
-                    remaining_unassigned_patients.append(patient)
-                    print(
-                        f"Patient '{patient}' cannot be assigned to unassigned MHWPs due to no eligible MHWPs with a schedule.")
-
-            # Handle remaining unassigned patients
-            if remaining_unassigned_patients:
-                print("\n--- Assigning remaining unassigned patients to MHWPs who already have assignments ---")
-                for patient in remaining_unassigned_patients:
-                    symptom = patients_with_symptoms.get(patient)
-                    if not symptom:
-                        print(f"No symptom found for patient '{patient}'. Skipping.")
-                        continue
-
-                    # Find eligible MHWPs with existing assignments
-                    eligible_mhwps = [
-                        mhwp for mhwp in current_assignments.keys()
-                        if symptom in MATCHING_RULES.get(mhwps_with_major.get(mhwp, ""), set())
-                    ]
-                    if eligible_mhwps:
-                        # Assign to MHWP with the least patients
-                        mhwp_with_least_patients = min(
-                            eligible_mhwps,
-                            key=lambda mhwp: len(current_assignments.get(mhwp, []))
-                        )
-                        current_assignments.setdefault(mhwp_with_least_patients, []).append(patient)
-                        print(f"Assigned: Patient '{patient}' -> MHWP '{mhwp_with_least_patients}'")
-                    else:
-                        print(f"Patient '{patient}' cannot be assigned due to no eligible MHWPs.")
+                    print(f"Patient '{patient}' cannot be assigned due to no eligible MHWP with a schedule.")
         else:
             print("\nNo unassigned patients to process.")
+
         # Save the results and update related files
         save_assignments(current_assignments, assignments_path)
         update_mhwp_csv_with_assignments(assignments_path=assignments_path, mhwp_data_path=mhwp_data_path)
@@ -461,7 +427,6 @@ def modify_assignments(assignments_path="data/assignments.csv",
     else:
         print("\nInvalid choice. Returning to menu.")
         return
-
 def display_unassigned_users(patient_data_path="data/patients.csv",
                              mhwp_data_path="data/mhwp.csv",
                              assignments_path="data/assignments.csv"):
