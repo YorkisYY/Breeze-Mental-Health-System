@@ -1,10 +1,4 @@
 patient_username,mhwp_username,date,score,status
-houdidi2,hougege,2024-12-05,45,"Depression, Anxiety, Autism"
-houdidi2,hougege,2024-12-05,18,Normal
-bsx,baishaoxiong,2024-11-27,9,Normal
-bsx,baishaoxiong,2024-11-27,18,Normal
-n,l,2024-11-27,18,Normal
-bsx,baishaoxiong,2024-12-03,9,Normal
-bsx,baishaoxiong,2024-12-05,45,"Depression, Anxiety, Autism"
-bsx,baishaoxiong,2024-12-05,22,Depression
-bsx,baishaoxiong,2024-12-10,9,Normal
+patient1,mhwp1,2024-12-10,34,"Depression, Anxiety, Autism"
+patient2,mhwp6,2024-12-10,31,"Anxiety, Autism"
+qqq1,mhwp2,2024-12-10,24,Normal
