@@ -5,20 +5,6 @@ import csv
 import configparser
 import os
 
-# def load_email_config(config_file="email_config.ini"):
-#     """
-#     Load SMTP configuration from an INI file.
-#     """
-#     config = configparser.ConfigParser()
-#     config.read(config_file)
-#     smtp_settings = config["SMTP"]
-#     return {
-#         "smtp_server": smtp_settings.get("smtp_server"),
-#         "smtp_port": smtp_settings.getint("smtp_port"),
-#         "smtp_ssl": smtp_settings.get("smtp_ssl"),
-#         "auth_username": smtp_settings.get("auth_username"),
-#         "auth_password": smtp_settings.get("auth_password"),
-#     }
 
 def load_email_config(config_file="email_config.ini"):
     """

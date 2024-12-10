@@ -23,7 +23,7 @@ def is_username_unique(username, role):
 def register_user():
     # Prompt user to enter username and password
     username = input("Enter username: ").strip()
-    password = getpass.getpass("Enter password: ").strip()
+    password = input("Enter password: ").strip()
 
     # Ensure username and password are not empty
     if not username or not password:
