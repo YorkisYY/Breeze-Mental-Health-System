@@ -127,9 +127,8 @@ def setup_mhwp_schedule(user,file_path=SCHEDULE_DATA_PATH): # choice 1, setup av
         selected_indices = input(
             "\nEnter the indices of your available time slots, separated by commas (e.g., 0,2,4): ").strip()
         try:
-            # 将用户输入转换为整数列表，并过滤出0-6范围内的数字
             selected_indices = [int(idx) for idx in selected_indices.split(",") if idx.isdigit()]
-            if all(0 <= idx <= 6 for idx in selected_indices):  # 检查所有索引是否在范围内
+            if all(0 <= idx <= 6 for idx in selected_indices):  
                 break
             else:
                 print("Error: Please enter valid indices between 0 and 6 only.")
@@ -138,7 +137,7 @@ def setup_mhwp_schedule(user,file_path=SCHEDULE_DATA_PATH): # choice 1, setup av
 
     for row in rows:
         for idx in selected_indices:
-            row[idx + 3] = "■"  # 更新时间段的状态 (offset by 3 for username, date, and day)
+            row[idx + 3] = "■"  
     print("\nYour updated schedule (applying changes to all selected weekdays):")
     print(tabulate(rows, headers=headers, tablefmt="grid"))
 
@@ -247,6 +246,31 @@ def notify_patient(mhwp_username, selected_appointment, action):
     else:
         print("Error: Could not retrieve patient's email address.")
 
+def notify_mhwp(mhwp_username, selected_appointment, action):
+    """
+    Sends an email notification to the patient regarding the appointment action.
+    """
+    mhwp_email = get_email_by_username(mhwp_username)
+    if mhwp_email:
+        subject = f"Your appointment has been successfully {action}ed"
+        if action == "confirm":
+            message = (
+                f"Dear {mhwp_username},\n\n"
+                f"Your appointment with {selected_appointment['patient_username']} on {selected_appointment['date']} "
+                f"at {selected_appointment['timeslot']} has been successfully confirmed.\n\n"
+                "Regards,\nBreeze Mental Health Support System"
+            )
+        elif action == "cancel":
+            message = (
+                f"Dear {mhwp_username},\n\n"
+                f"Your appointment with {selected_appointment['patient_username']} on {selected_appointment['date']} "
+                f"at {selected_appointment['timeslot']} has been successfully cancelled.\n\n"
+                "Regards,\nBreeze Mental Health Support System"
+            )
+        send_email_notification(mhwp_email, subject, message)
+    else:
+        print("Error: Could not retrieve mhwp's email address.")
+
         
 def manage_appointment_action(user, manage_choice, appointments_file=APPOINTMENTS_DATA_PATH, schedule_file=SCHEDULE_DATA_PATH):
     """
@@ -271,6 +295,7 @@ def manage_appointment_action(user, manage_choice, appointments_file=APPOINTMENT
             update_appointment_status(selected_appointment, action, appointments_file)
             update_schedule(selected_appointment, action, schedule_file)
             notify_patient(user.username, selected_appointment, action)
+            notify_mhwp(user.username, selected_appointment, action)
         else:
             print("Invalid ID. Please try again.")
     except ValueError:
