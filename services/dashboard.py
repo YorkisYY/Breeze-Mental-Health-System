@@ -221,7 +221,7 @@ def plot_mood(patient_username):
 
 import numpy as np
 import pickle
-from trainModal import compute_tfidf
+from services.trainModal import compute_tfidf
 # 加载模型
 with open('emotion_model.pkl', 'rb') as f:
     model = pickle.load(f)
