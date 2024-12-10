@@ -51,6 +51,8 @@ def get_bookings(appointments, start_date, end_date, status):
     # 转换日期格式
     appointments["date"] = pd.to_datetime(appointments["date"], format="%Y/%m/%d")
 
+    # print(appointments)
+
     if status == "all":
         # 如果选择了 "all"，就筛选出指定时间范围内的所有预约
         filtered_appointments = appointments[
@@ -120,20 +122,21 @@ def get_bookings(appointments, start_date, end_date, status):
 #
 
 
-def plot_appointment_trends(appointments):
-    # 按日期统计预约数量
-    appointment_counts = appointments.groupby('date').size()
-
-    # 生成折线图显示预约数量趋势
-    plt.figure(figsize=(10, 6))
-    plt.plot(appointment_counts.index, appointment_counts.values, marker='o')
-    plt.title('Appointments Trend')
-    plt.xlabel('Date')
-    plt.ylabel('Number of Appointments')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
 #
+# def plot_appointment_trends(appointments):
+#     # 按日期统计预约数量
+#     appointment_counts = appointments.groupby('date').size()
+#
+#     # 生成折线图显示预约数量趋势
+#     plt.figure(figsize=(10, 6))
+#     plt.plot(appointment_counts.index, appointment_counts.values, marker='o')
+#     plt.title('Appointments Trend')
+#     plt.xlabel('Date')
+#     plt.ylabel('Number of Appointments')
+#     plt.xticks(rotation=45)
+#     plt.tight_layout()
+#     plt.show()
+# #
 # def get_patients_by_mhwp(mhwp_username):
 #     patients = load_patient_data()
 #     if patients.empty: # In case the file just have Table head without any data rows
@@ -219,32 +222,32 @@ def display_patient_summary_tabulate(summary_data):
     print("Patient Summary:")
     print(tabulate(summary_data, headers="keys", tablefmt="grid"))
 
+#
+# def display_patient_summary(summary_data):
+#     """
+#     Display patient summary as a text table.
+#     :param summary_data: pandas.DataFrame containing patient summary information.
+#     """
+#     if summary_data.empty:
+#         print("No patient data available.")
+#         return
+#
+#     print("Patient Summary:")
+#     print("-" * 60)
+#     print(summary_data.to_string(index=False))
+#     print("-" * 60)
 
-def display_patient_summary(summary_data):
-    """
-    Display patient summary as a text table.
-    :param summary_data: pandas.DataFrame containing patient summary information.
-    """
-    if summary_data.empty:
-        print("No patient data available.")
-        return
-
-    print("Patient Summary:")
-    print("-" * 60)
-    print(summary_data.to_string(index=False))
-    print("-" * 60)
-
-
-import matplotlib.pyplot as plt
-
-# color_code to color mapping for the pie chart
-color_mapping = {
-    "Green": "green",
-    "Blue": "blue",
-    "Yellow": "yellow",
-    "Orange": "orange",
-    "Red": "red"
-}
+#
+# import matplotlib.pyplot as plt
+#
+# # color_code to color mapping for the pie chart
+# color_mapping = {
+#     "Green": "green",
+#     "Blue": "blue",
+#     "Yellow": "yellow",
+#     "Orange": "orange",
+#     "Red": "red"
+# }
 #
 # def plot_mood(patient_username):
 #     try:
@@ -309,13 +312,16 @@ def display_summary():
         start_date, end_date = thisWeek()
         results = get_bookings(appointments, start_date, end_date, "confirmed")
 
+
+        # print(results)
+
         if results.empty:
             print("No summary data available.")
-            return
-        print("Appointments confirmed for the current week")
-        print(results)
+        else:
+            print("Appointments confirmed for the current week")
+            print(results)
 
-        # display_patient_summary_tabulate(summary)
+            #display_patient_summary_tabulate(results)
 
         while True:
             print(f"\nWhat do you want to do next?")
@@ -381,4 +387,4 @@ def display_summary():
         print(f"Error displaying summary: {e}")
 
 if __name__ == '__main__':
-    display_summary('houbaba')
+    display_summary()
