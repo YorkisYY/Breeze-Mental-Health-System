@@ -24,9 +24,13 @@ def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_S
     # Read templates first
     templates_df = pd.read_csv(template_file)
     mhwp_users = templates_df['mhwp_username'].unique()
-    
-    # Read existing schedules if any
-    existing_schedules = pd.read_csv(schedule_file) if os.path.exists(schedule_file) else pd.DataFrame()
+    # Read existing schedules and clean past entries
+    existing_schedules = pd.DataFrame()
+    if os.path.exists(schedule_file):
+        existing_schedules = pd.read_csv(schedule_file)
+        existing_schedules['Date'] = pd.to_datetime(existing_schedules['Date'])
+        yesterday = today - timedelta(days=1)
+        existing_schedules = existing_schedules[existing_schedules['Date'] > yesterday]    
     new_schedules = []
     
     for mhwp in mhwp_users:
