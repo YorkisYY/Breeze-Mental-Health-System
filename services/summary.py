@@ -2,7 +2,7 @@ import pandas as pd
 import os
 from tabulate import tabulate
 from datetime import datetime, timedelta
-
+from config import ASSIGNMENTS_DATA_PATH, APPOINTMENTS_DATA_PATH
 
 # read csv files
 def read_csv(file_path):
@@ -24,7 +24,7 @@ def read_csv(file_path):
 # load data from assignments
 def load_assignments():
     try:
-        return read_csv("../data/assignments.csv")
+        return read_csv(ASSIGNMENTS_DATA_PATH)
     except Exception as e:
         print(e)
         return pd.DataFrame() # Returning empty DataFrame in case of an error(make sure the safe of following stage)
@@ -32,7 +32,7 @@ def load_assignments():
 # load data from appointments
 def load_appointments():
     try:
-        return read_csv("../data/appointments.csv")
+        return read_csv(APPOINTMENTS_DATA_PATH)
     except Exception as e:
         print(e)
         return pd.DataFrame() # Returning empty DataFrame in case of an error(make sure the safe of following stage)
@@ -87,26 +87,26 @@ def get_bookings(appointments, start_date, end_date, status):
 # results = get_bookings(appointments, start_date, end_date, "Separate statistics")
 # print(results)
 
-# 汇总分配和预约详情
-def generate_summary():
-    # 加载数据
-    assignments = load_assignments()
-    appointments = load_appointments()
-
-    # 汇总患者与 MHWPs 的分配
-    assignment_summary = assignments.groupby("mhwp_username")["patient_username"].apply(list)
-
-    # 统计当前一周的确认预约数量
-    confirmed_counts = get_confirmed_bookings_this_week(appointments)
-
-    # 创建结果表
-    summary = pd.DataFrame({
-        "MHWP": assignment_summary.index,
-        "Patients": assignment_summary.values,
-        "Confirmed Bookings (This Week)": [confirmed_counts.get(mhwp, 0) for mhwp in assignment_summary.index]
-    })
-
-    return summary
+# # 汇总分配和预约详情
+# def generate_summary():
+#     # 加载数据
+#     assignments = load_assignments()
+#     appointments = load_appointments()
+#
+#     # 汇总患者与 MHWPs 的分配
+#     assignment_summary = assignments.groupby("mhwp_username")["patient_username"].apply(list)
+#
+#     # 统计当前一周的确认预约数量
+#     confirmed_counts = get_confirmed_bookings_this_week(appointments)
+#
+#     # 创建结果表
+#     summary = pd.DataFrame({
+#         "MHWP": assignment_summary.index,
+#         "Patients": assignment_summary.values,
+#         "Confirmed Bookings (This Week)": [confirmed_counts.get(mhwp, 0) for mhwp in assignment_summary.index]
+#     })
+#
+#     return summary
 
 
 # 展示结果
@@ -133,21 +133,21 @@ def plot_appointment_trends(appointments):
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
-
-def get_patients_by_mhwp(mhwp_username):
-    patients = load_patient_data()
-    if patients.empty: # In case the file just have Table head without any data rows
-        print("No patient data available.")
-        return pd.DataFrame()
-    return patients[patients["assigned_mhwp"] == mhwp_username]
+#
+# def get_patients_by_mhwp(mhwp_username):
+#     patients = load_patient_data()
+#     if patients.empty: # In case the file just have Table head without any data rows
+#         print("No patient data available.")
+#         return pd.DataFrame()
+#     return patients[patients["assigned_mhwp"] == mhwp_username]
 
 # more information about patients
-def get_patient_mood_data(username):
-    moods = load_mood_data()
-    if moods.empty: # In case the file just have Table head without any data rows
-        print("No mood data available.")
-        return pd.DataFrame()
-    return moods[moods["username"] == username]
+# def get_patient_mood_data(username):
+#     moods = load_mood_data()
+#     if moods.empty: # In case the file just have Table head without any data rows
+#         print("No mood data available.")
+#         return pd.DataFrame()
+#     return moods[moods["username"] == username]
 
 color_code_to_score = {
     "Green": 1,
@@ -156,54 +156,54 @@ color_code_to_score = {
     "Orange": 4,
     "Red": 5,
 }
-
-def generate_summary(mhwp_username):
-    try:
-        patients = get_patients_by_mhwp(mhwp_username)
-        moods = load_mood_data()
-
-        if patients.empty:
-            print("No patient data available for summary.")
-            return pd.DataFrame()
-
-        summary = []
-        for _, patient in patients.iterrows():
-            username = patient["username"]
-            mood_data = moods[moods["username"] == username] # Mood of one patient
-
-            total_moods = len(mood_data)
-
-            if total_moods == 0:
-                last_mood = "N/A"
-                average_mood = "N/A"
-            else:
-                mood_data = mood_data.sort_values(by="timestamp", ascending=False)
-
-
-                last_mood = mood_data.iloc[0]["color_code"]
-                mood_data["mood_score"] = mood_data["color_code"].map(color_code_to_score)
-                average_mood = mood_data["mood_score"].mean()
-
-
-            summary.append({
-                "username": username,
-                #"Name": patient["username"],
-                #"Appointments": patient["total_appointments"],
-                "Mood Entries": total_moods,
-                "Last Mood": last_mood,
-                "Average Mood Score": average_mood
-            })
-
-        return pd.DataFrame(summary)
-
-    except KeyError as e: # In case nonexistent columns
-        print(f"Data error: Missing column {e}")
-        return pd.DataFrame()
-    except Exception as e:
-        print(f"Unexpected error during summary generation: {e}")
-        return pd.DataFrame()
-
-
+#
+# def generate_summary(mhwp_username):
+#     try:
+#         patients = get_patients_by_mhwp(mhwp_username)
+#         moods = load_mood_data()
+#
+#         if patients.empty:
+#             print("No patient data available for summary.")
+#             return pd.DataFrame()
+#
+#         summary = []
+#         for _, patient in patients.iterrows():
+#             username = patient["username"]
+#             mood_data = moods[moods["username"] == username] # Mood of one patient
+#
+#             total_moods = len(mood_data)
+#
+#             if total_moods == 0:
+#                 last_mood = "N/A"
+#                 average_mood = "N/A"
+#             else:
+#                 mood_data = mood_data.sort_values(by="timestamp", ascending=False)
+#
+#
+#                 last_mood = mood_data.iloc[0]["color_code"]
+#                 mood_data["mood_score"] = mood_data["color_code"].map(color_code_to_score)
+#                 average_mood = mood_data["mood_score"].mean()
+#
+#
+#             summary.append({
+#                 "username": username,
+#                 #"Name": patient["username"],
+#                 #"Appointments": patient["total_appointments"],
+#                 "Mood Entries": total_moods,
+#                 "Last Mood": last_mood,
+#                 "Average Mood Score": average_mood
+#             })
+#
+#         return pd.DataFrame(summary)
+#
+#     except KeyError as e: # In case nonexistent columns
+#         print(f"Data error: Missing column {e}")
+#         return pd.DataFrame()
+#     except Exception as e:
+#         print(f"Unexpected error during summary generation: {e}")
+#         return pd.DataFrame()
+#
+#
 
 
 
@@ -245,62 +245,62 @@ color_mapping = {
     "Orange": "orange",
     "Red": "red"
 }
-
-def plot_mood(patient_username):
-    try:
-        moods = load_mood_data()
-
-        if moods.empty:
-            print("No mood data found.")
-            return
-
-        mood_data = moods[moods["username"] == patient_username]
-
-            # 如果没有情绪数据，跳过
-        if mood_data.empty:
-            print(f"No mood data available for patient {patient_username}.")
-            return
-            # 按时间排序情绪数据
-        mood_data = mood_data.sort_values(by="timestamp", ascending=True)
-
-            # 将颜色码映射为评分
-        mood_data["mood_score"] = mood_data["color_code"].map(color_code_to_score)
-
-
-        try:    # 画出情绪评分的折线图
-            plt.figure(figsize=(10, 5))
-            plt.plot(mood_data["timestamp"], mood_data["mood_score"], label=f"{patient_username}'s Mood Trend",
-                    marker='o')
-            plt.xlabel("Timestamp")
-            plt.ylabel("Mood Score (1 = Green, 5 = Red)")
-            plt.title(f"Mood Trend for {patient_username}")
-            plt.xticks(rotation=45)
-            plt.legend()
-            plt.tight_layout()
-            plt.show()
-        except Exception as e:
-            print(f"Error while plotting mood trend: {e}")
-
-        try:
-            #显示情绪状态分布的饼图
-            mood_counts = mood_data["color_code"].value_counts()
-            # 使用颜色映射将每个情绪状态对应颜色
-            colors = [color_mapping.get(x) for x in mood_counts.index]
-            plt.figure(figsize=(7, 7))
-            mood_counts.plot(kind='pie', autopct='%1.1f%%',
-                             colors=colors,
-                             startangle=90, counterclock=False)  # startangle设置起始角度
-            plt.title("Mood Status Distribution")
-            plt.ylabel("")  # 去掉y轴标签
-            plt.show()
-        except Exception as e:
-            print(f"Error while generating mood pie chart: {e}")
-
-
-
-    except Exception as e:
-        print(f"Error while generating mood trend plots: {e}")
-
+#
+# def plot_mood(patient_username):
+#     try:
+#         moods = load_mood_data()
+#
+#         if moods.empty:
+#             print("No mood data found.")
+#             return
+#
+#         mood_data = moods[moods["username"] == patient_username]
+#
+#             # 如果没有情绪数据，跳过
+#         if mood_data.empty:
+#             print(f"No mood data available for patient {patient_username}.")
+#             return
+#             # 按时间排序情绪数据
+#         mood_data = mood_data.sort_values(by="timestamp", ascending=True)
+#
+#             # 将颜色码映射为评分
+#         mood_data["mood_score"] = mood_data["color_code"].map(color_code_to_score)
+#
+#
+#         try:    # 画出情绪评分的折线图
+#             plt.figure(figsize=(10, 5))
+#             plt.plot(mood_data["timestamp"], mood_data["mood_score"], label=f"{patient_username}'s Mood Trend",
+#                     marker='o')
+#             plt.xlabel("Timestamp")
+#             plt.ylabel("Mood Score (1 = Green, 5 = Red)")
+#             plt.title(f"Mood Trend for {patient_username}")
+#             plt.xticks(rotation=45)
+#             plt.legend()
+#             plt.tight_layout()
+#             plt.show()
+#         except Exception as e:
+#             print(f"Error while plotting mood trend: {e}")
+#
+#         try:
+#             #显示情绪状态分布的饼图
+#             mood_counts = mood_data["color_code"].value_counts()
+#             # 使用颜色映射将每个情绪状态对应颜色
+#             colors = [color_mapping.get(x) for x in mood_counts.index]
+#             plt.figure(figsize=(7, 7))
+#             mood_counts.plot(kind='pie', autopct='%1.1f%%',
+#                              colors=colors,
+#                              startangle=90, counterclock=False)  # startangle设置起始角度
+#             plt.title("Mood Status Distribution")
+#             plt.ylabel("")  # 去掉y轴标签
+#             plt.show()
+#         except Exception as e:
+#             print(f"Error while generating mood pie chart: {e}")
+#
+#
+#
+#     except Exception as e:
+#         print(f"Error while generating mood trend plots: {e}")
+#
 
 
 def display_summary():
@@ -380,5 +380,5 @@ def display_summary():
     except Exception as e:
         print(f"Error displaying summary: {e}")
 
-appointments = pd.read_csv('appointment.csv')
-plot_appointment_trends(appointments)
+if __name__ == '__main__':
+    display_summary('houbaba')
