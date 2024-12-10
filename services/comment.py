@@ -1,9 +1,8 @@
 import pandas as pd
 from datetime import datetime
+from config import COMMENTS_PATH, APPOINTMENTS_DATA_PATH
 
 
-COMMENTS_FILE = "data/comments.csv"
-APPOINTMENTS_FILE = "data/appointments.csv"
 
 
 def comment(patient_username):
@@ -66,7 +65,7 @@ def add_comment(patient_username, mhwp_username, rating, comment, appointment_id
 
         # Read or create the comments file
         try:
-            comments_df = pd.read_csv(COMMENTS_FILE)
+            comments_df = pd.read_csv(COMMENTS_PATH)
             
             # Check if the appointment has already been commented on
             if not comments_df.empty and appointment_id in comments_df["appointment_id"].values:
@@ -80,7 +79,7 @@ def add_comment(patient_username, mhwp_username, rating, comment, appointment_id
             comments_df = pd.DataFrame([comment_data])
 
         # Save the comment
-        comments_df.to_csv(COMMENTS_FILE, index=False)
+        comments_df.to_csv(COMMENTS_PATH, index=False)
         print("Comment added successfully!")
 
     except Exception as e:
@@ -90,7 +89,7 @@ def add_comment(patient_username, mhwp_username, rating, comment, appointment_id
 def get_available_appointments(patient_username):
    
     try:
-        appointments = pd.read_csv(APPOINTMENTS_FILE)
+        appointments = pd.read_csv(APPOINTMENTS_DATA_PATH)
 
         patient_appointments = appointments[appointments["patient_username"] == patient_username].copy()
 
@@ -135,7 +134,7 @@ def view_comments(mhwp_username):
     """
     try:
         # Load the comments file
-        comments_df = pd.read_csv(COMMENTS_FILE)
+        comments_df = pd.read_csv(COMMENTS_PATH)
         
         # Filter comments belonging to the MHWP
         mhwp_comments = comments_df[comments_df["mhwp_username"] == mhwp_username]

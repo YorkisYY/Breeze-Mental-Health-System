@@ -22,7 +22,9 @@ class UserUpdate:
                 'patient_notes.csv': ['patient_username', 'mhwp_username'],
                 'mhwp_schedule.csv': ['mhwp_username'] if role == 'mhwp' else None
             }
-
+    #By setting up a dictionary that if the key is the vlaue withn different csv, the value would be changed at the same time
+    #if allows us to check more situation with different roles such as patient
+    #The dicitonary includes all the csv to change the key we want simultaneously
             for file, columns in updates.items():
                 if columns:
                     try:
@@ -42,6 +44,8 @@ class UserUpdate:
         except Exception as e:
             print(f"Error updating files: {str(e)}")
             return False
+    # This deletion method is smiliar to the update function, but as we like to keep some record. 
+    # The function is not used
     def delete_user_from_files(self, username, role):
         try:
             deletes = {
@@ -251,6 +255,7 @@ class UserUpdate:
         except Exception as e:
             print(f"Error updating emergency email in files: {str(e)}")
             return False
+    #password update
     def update_password(self, new_password):
         """Update user password and synchronize with relevant files."""
         if not self.load_from_csv():
