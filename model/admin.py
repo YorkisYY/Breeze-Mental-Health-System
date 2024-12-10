@@ -516,7 +516,7 @@ def handle_admin_menu(user):
         print("7. Display Unassigned Patients and MHWPs")
         print("8. Enable/Disable User Account") # @Arthur: 2024_12_03 add user account status management
         print("9. Logout")
-        print("10. Summary")
+
         
         admin_choice = input("Select an option (1-9): ").strip()
 
@@ -598,11 +598,6 @@ def handle_admin_menu(user):
             print("Logging out of admin session.")
             break
 
-        elif admin_choice == '10':  # Logout
-
-            # display_summary()
-
-            break
 
         else:
             print("Invalid choice. Please select a valid option.")

@@ -304,7 +304,25 @@ def display_patient_summary_tabulate(summary_data):
 #     except Exception as e:
 #         print(f"Error while generating mood trend plots: {e}")
 #
+def print_result(result):
+    # 如果 result 是 Series, 转换成 DataFrame
+    if isinstance(result, pd.Series):
+        result_df = result.to_frame(name='count')
+    else:
+        result_df = result  # 如果已经是 DataFrame，则直接使用
 
+
+    print()
+    # print(result_df.to_string(index=True, header=True))
+    print(tabulate(result_df, headers='keys', tablefmt='grid', showindex=True))
+
+# def print_result(result):
+#     # 转换为 DataFrame，再删除最后一行
+#     result_df = result.to_frame(name='count')
+#     result_df = result_df[:-1]  # 删除最后一行
+#
+#     print()
+#     print(result_df)
 
 def display_summary():
     try:
@@ -319,9 +337,10 @@ def display_summary():
             print("No summary data available.")
         else:
             print("Appointments confirmed for the current week")
-            print(results)
+            # print(results)
+            print_result(results)
 
-            #display_patient_summary_tabulate(results)
+
 
         while True:
             print(f"\nWhat do you want to do next?")
@@ -360,7 +379,7 @@ def display_summary():
                 #
                 #
                 #
-                print(results)
+                print_result(results)
 
                 #医生预约病人分布图
                 #医生预约数量变化图
