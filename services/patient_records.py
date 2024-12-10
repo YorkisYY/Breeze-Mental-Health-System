@@ -1,7 +1,7 @@
 import pandas as pd
 from services.comment import view_comments
 from datetime import datetime
-from config import ASSIGNMENTS_DATA_PATH
+from config import ASSIGNMENTS_DATA_PATH, MOOD_DATA_PATH
 APPOINTMENTS_FILE = "data/appointments.csv"
 ASSIGNMENTS_FILE = "data/assignments.csv"
 MOOD_DATA_FILE = "data/mood_data.csv"
@@ -96,7 +96,7 @@ def view_mood_tracker(patient_username):
     """
     print("\n1. Mood Tracker:")
     try:
-        mood_df = pd.read_csv(MOOD_DATA_FILE)
+        mood_df = pd.read_csv(MOOD_DATA_PATH)
         patient_moods = mood_df[mood_df["username"] == patient_username]
         if not patient_moods.empty:
             print(patient_moods[["color_code", "comments", "timestamp"]].to_string(index=False))
