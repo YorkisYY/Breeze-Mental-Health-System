@@ -11,7 +11,7 @@ def handle_update_personal_info(user):
         print("5. Delete account")
         print("6. Back to main menu")
 
-        info_choice = input("Select an option (1-5): ").strip()
+        info_choice = input("Select an option (1-6): ").strip()
 
         if info_choice == '1':  # Update username
             try:
