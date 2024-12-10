@@ -45,7 +45,7 @@ def handle_patient_menu(user):
 
                 records_choice = input("Select an option (1-4): ").strip()
 
-                if records_choice == '1'：
+                if records_choice == '1':
                     while True:
                         print("\nBook/Cancel Appointment:")
                         print("1. Book an appointment")
