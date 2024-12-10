@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import datetime
+from config import JOURNAL_ENTRIES_PATH
 
-JOURNAL_FILE = "data/patient_journaling.csv"
 
 def enter_journaling(username):
     """
@@ -23,11 +23,11 @@ def enter_journaling(username):
 
     # Save to journaling.csv
     try:
-        journal_df = pd.read_csv(JOURNAL_FILE)
+        journal_df = pd.read_csv(JOURNAL_ENTRIES_PATH)
         journal_df = pd.concat([journal_df, pd.DataFrame([new_entry])], ignore_index=True)
     except FileNotFoundError:
         journal_df = pd.DataFrame([new_entry])
 
-    journal_df.to_csv(JOURNAL_FILE, index=False)
+    journal_df.to_csv(JOURNAL_ENTRIES_PATH, index=False)
     print("Your journal entry has been saved successfully!")
 

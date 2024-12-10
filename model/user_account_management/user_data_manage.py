@@ -2,7 +2,8 @@ import pandas as pd
 from datetime import datetime
 from config import USER_DATA_PATH, PATIENTS_DATA_PATH, MHWP_DATA_PATH
 
-class UserDataManage:  
+class UserDataManage: 
+    #initializing the data 
     def save_to_csv(self):
         try:
             # Load user data
@@ -88,8 +89,10 @@ class UserDataManage:
         except FileNotFoundError:
             print("User data file not found.")
             return False
+        
     def delete_from_csv(self):
         """Delete user from user_data.csv and patients.csv if applicable."""
+        #it would simultaneously delete the user account within mhwp or patient. csv
         try:
             user_df = pd.read_csv(USER_DATA_PATH)
             user_df = user_df[user_df['username'] != self.username]

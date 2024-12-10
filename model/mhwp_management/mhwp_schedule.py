@@ -28,8 +28,13 @@ def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_S
     # Read templates first
     templates_df = pd.read_csv(template_file)
     mhwp_users = templates_df['mhwp_username'].unique()
-    
-    existing_schedules = pd.read_csv(schedule_file) if os.path.exists(schedule_file) else pd.DataFrame()
+    # Read existing schedules and clean past entries
+    existing_schedules = pd.DataFrame()
+    if os.path.exists(schedule_file):
+        existing_schedules = pd.read_csv(schedule_file)
+        existing_schedules['Date'] = pd.to_datetime(existing_schedules['Date'])
+        yesterday = today - timedelta(days=1)
+        existing_schedules = existing_schedules[existing_schedules['Date'] > yesterday]    
     new_schedules = []
     
     for mhwp in mhwp_users:
@@ -90,23 +95,24 @@ def update_mhwp_schedules(schedule_file=SCHEDULE_DATA_PATH, template_file=MHWP_S
                 new_schedules.append(schedule_entry)
             current_date += timedelta(days=1)
     
-    # It is converted to DateFrame and sorted by date and username
-    final_schedules = pd.DataFrame(new_schedules)
-    final_schedules['Date'] = pd.to_datetime(final_schedules['Date'])
+    # Get columns from schedule file if it exists, else from template
+    if os.path.exists(schedule_file):
+        schedule_columns = pd.read_csv(schedule_file, nrows=0).columns.tolist()
+    else:
+        schedule_columns = ['mhwp_username', 'Date', 'Day'] + [col for col in templates_df.columns if '(' in col]
     
-    # The priority ( username → date)
-    final_schedules = final_schedules.sort_values(['mhwp_username', 'Date'])
-    
-    # Ensure no duplicates and obtain last occurrence
-    final_schedules = final_schedules.drop_duplicates(
-        subset=['mhwp_username', 'Date'], 
-        keep='last'
-    )
-    
-    # Format date is converted back to string
-    final_schedules['Date'] = final_schedules['Date'].dt.strftime('%Y/%m/%d')
+    # Convert to DataFrame with correct columns
+    final_schedules = pd.DataFrame(new_schedules, columns=schedule_columns) if new_schedules else pd.DataFrame(columns=schedule_columns)
+    if not final_schedules.empty:  # Only process if there are schedules
+        final_schedules['Date'] = pd.to_datetime(final_schedules['Date'])
+        final_schedules = final_schedules.sort_values(['mhwp_username', 'Date'])
+        final_schedules = final_schedules.drop_duplicates(
+            subset=['mhwp_username', 'Date'],
+            keep='last'
+        )
+        final_schedules['Date'] = final_schedules['Date'].dt.strftime('%Y/%m/%d')
 
-    # Save and update this schedules
+    # Save sorted schedules (even if empty)
     final_schedules.to_csv(schedule_file, index=False)
     if not silent:
         print("\nSchedule updated successfully!")

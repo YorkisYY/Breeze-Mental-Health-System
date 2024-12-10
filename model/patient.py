@@ -16,6 +16,9 @@ from .patient_management.health_wellbeing import handle_health_wellbeing
 from .patient_management.appointment import *
 def handle_patient_menu(user):
     remind_to_complete_questionnaire(user.username)
+    """
+    There are some patient options: account management,health&wellbeing,book/cancel/check appointment,leave a comment for your mhwp
+    """
 
     while True:
         print("\nPatient Options:")
@@ -29,7 +32,7 @@ def handle_patient_menu(user):
         if main_choice == '1':  # Account Management
             handle_account_management(user)
                                                 
-        elif main_choice == '2':  
+        elif main_choice == '2':  #Health&wellbeing
             handle_health_wellbeing(user)
 
         elif main_choice == '3':  # Appointments & Records
@@ -43,8 +46,6 @@ def handle_patient_menu(user):
                 records_choice = input("Select an option (1-4): ").strip()
 
                 if records_choice == '1':
-                    import pandas as pd
-            
                     while True:
                         print("\nBook/Cancel Appointment:")
                         print("1. Book an appointment")

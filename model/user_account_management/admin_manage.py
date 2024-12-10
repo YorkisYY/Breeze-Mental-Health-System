@@ -7,8 +7,9 @@ class AdminManage:
         if self.role != "admin":
             print("Only admin users can update others.")
             return False
-
+        # Method for admin to update a user's information
         try:
+        # Check whether the username is within the csv or not
             user_df = pd.read_csv(USER_DATA_PATH)
             if target_username not in user_df['username'].values:
                 print("Target user does not exist.")
@@ -18,17 +19,18 @@ class AdminManage:
             current_username = target_username
             changes_made = False
 
-            # Update username
+        # The function would simultaneously change the info within user_data.csv and every csv which matches the username.
+        # A username would only be allowed to register for a singel role, such as a can't be registered as a MHWP and patient.
             if new_username and new_username != target_username:
                 if new_username in user_df['username'].values:
                     print("New username is already in use.")
                     return False
-                
+        #call the function within the userupdate.file, searching for all csv
                 if not self.update_username_in_files(target_username, new_username, user_role):
                     return False
                 current_username = new_username
                 changes_made = True
-
+        #the function of updating is only related to username and password so the email and emergency_email would be independent case    
             # Update email
             if new_email:
                 if not self.update_email_in_files(current_username, new_email, user_role):
@@ -51,10 +53,8 @@ class AdminManage:
             return False
 
     def admin_delete_user(self, username):
-        if self.role != "admin":
-            print("Only admin users can delete others.")
-            return False
-
+        # admin also can delete users, and the information would be deleted from user_data.csv and MHWP.csv or patient.csv.
+        # It depends on the character, as our discussion we would like to keep some record
         try:
             user_df = pd.read_csv(USER_DATA_PATH)
             if username not in user_df['username'].values:

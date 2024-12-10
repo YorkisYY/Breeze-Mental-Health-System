@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import datetime, timedelta
+from config import MENTAL_ASSESSMENTS_PATH
 
-MENTAL_ASSESSMENTS_FILE = "data/mental_assessments.csv"
 
 # Mental health questionnaire questions and scoring standards
 QUESTIONS = {
@@ -96,13 +96,13 @@ def submit_questionnaire(patient_username, assignments_file="data/assignments.cs
         "status": ", ".join(status) if status else "Normal"
     }
     try:
-        assessments_df = pd.read_csv(MENTAL_ASSESSMENTS_FILE)
+        assessments_df = pd.read_csv(MENTAL_ASSESSMENTS_PATH)
         # Change: Replace append with pd.concat
         assessments_df = pd.concat([assessments_df, pd.DataFrame([assessment_data])], ignore_index=True)
     except FileNotFoundError:
         assessments_df = pd.DataFrame([assessment_data])
 
-    assessments_df.to_csv(MENTAL_ASSESSMENTS_FILE, index=False)
+    assessments_df.to_csv(MENTAL_ASSESSMENTS_PATH, index=False)
     print("\nThank you for completing the questionnaire!")
     print(f"Your feedback:\n{feedback}")
 
@@ -113,11 +113,11 @@ def remind_to_complete_questionnaire(patient_username):
     """
     try:
         # Read the questionnaire records
-        assessments_df = pd.read_csv(MENTAL_ASSESSMENTS_FILE)
+        assessments_df = pd.read_csv(MENTAL_ASSESSMENTS_PATH)
     except FileNotFoundError:
         # If the questionnaire file does not exist, create an empty file and directly remind
         assessments_df = pd.DataFrame(columns=["patient_username", "mhwp_username", "date", "score", "status"])
-        assessments_df.to_csv(MENTAL_ASSESSMENTS_FILE, index=False)
+        assessments_df.to_csv(MENTAL_ASSESSMENTS_PATH, index=False)
 
     # Filter records for the current patient
     patient_records = assessments_df[assessments_df["patient_username"] == patient_username]
