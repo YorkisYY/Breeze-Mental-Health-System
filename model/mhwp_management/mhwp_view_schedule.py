@@ -12,7 +12,6 @@ def display_upcoming_appointments(username, file_path=APPOINTMENTS_DATA_PATH):
     """
     The main point:
        The confirmed and pending appointments(MHWP) for the next week is printed
-
     """
     if not os.path.exists(file_path):
         print(f"Error: Appointment file '{file_path}' not found.")

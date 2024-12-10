@@ -1,7 +1,7 @@
 import pandas as pd
 from services.comment import view_comments
 from datetime import datetime
-
+from config import ASSIGNMENTS_DATA_PATH
 APPOINTMENTS_FILE = "data/appointments.csv"
 ASSIGNMENTS_FILE = "data/assignments.csv"
 MOOD_DATA_FILE = "data/mood_data.csv"
@@ -18,7 +18,7 @@ def view_patient_records(mhwp_username):
     """
     try:
         # Get patients under MHWP
-        assignments_df = pd.read_csv(ASSIGNMENTS_FILE)
+        assignments_df = pd.read_csv(ASSIGNMENTS_DATA_PATH)
         
         # Check if required columns are present
         if "mhwp_username" not in assignments_df.columns or "patient_username" not in assignments_df.columns:
@@ -143,6 +143,7 @@ def get_available_appointments(patient_username):
     Get all eligible appointments for the patient.
     Conditions: status is 'confirmed' and time has passed.
     """
+    print("\n4. Patient Comment:")
     try:
         # Read appointment data
         appointments = pd.read_csv(APPOINTMENTS_FILE)
