@@ -380,5 +380,5 @@ def display_summary():
     except Exception as e:
         print(f"Error displaying summary: {e}")
 
-appointments = pd.read_csv('appointment.csv')
-plot_appointment_trends(appointments)
+#appointments = pd.read_csv('appointment.csv')
+#plot_appointment_trends(appointments)
