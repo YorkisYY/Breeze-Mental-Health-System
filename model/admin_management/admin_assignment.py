@@ -4,7 +4,6 @@ from tabulate import tabulate
 import random
 from config import *
 from model.user_account_management.user_data_manage import toggle_user_account_status
-import pandas as pd
 from utils.list_all_user import list_all_users
 from services.summary import display_summary
 

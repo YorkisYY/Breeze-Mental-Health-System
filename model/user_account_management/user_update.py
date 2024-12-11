@@ -20,7 +20,8 @@ class UserUpdate:
                 'mental_assessments.csv': ['patient_username', 'mhwp_username'],
                 'patient_journaling.csv': ['patient_username'] if role == 'patient' else None,
                 'patient_notes.csv': ['patient_username', 'mhwp_username'],
-                'mhwp_schedule.csv': ['mhwp_username'] if role == 'mhwp' else None
+                'mhwp_schedule.csv': ['mhwp_username'] if role == 'mhwp' else None,
+                'mhwp_schedule_template.csv': ['mhwp_username'] if role == 'mhwp' else None
             }
     #By setting up a dictionary that if the key is the vlaue withn different csv, the value would be changed at the same time
     #if allows us to check more situation with different roles such as patient
@@ -61,7 +62,8 @@ class UserUpdate:
                 'mental_assessments.csv': 'patient_username' if role == 'patient' else 'mhwp_username',
                 'patient_journaling.csv': 'patient_username' if role == 'patient' else None,
                 'patient_notes.csv': 'patient_username' if role == 'patient' else 'mhwp_username',
-                'mhwp_schedule.csv': 'mhwp_username' if role == 'mhwp' else None
+                'mhwp_schedule.csv': 'mhwp_username' if role == 'mhwp' else None,
+                'mhwp_schedule_template.csv': ['mhwp_username'] if role == 'mhwp' else None
             }
 
             for file, column in deletes.items():

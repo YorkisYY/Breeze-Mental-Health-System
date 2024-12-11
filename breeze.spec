@@ -10,11 +10,11 @@ a = Analysis(
         ('data/*.csv', 'data'),
         ('utils/email_config.ini', 'utils')
     ],
-    hiddenimports=[],
+    hiddenimports=['numpy.core', 'pandas.core.arrays'],
+    excludes=['numpy.random', 'pandas.plotting', 'matplotlib.backends']
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,

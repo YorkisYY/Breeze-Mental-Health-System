@@ -4,7 +4,6 @@ import calendar
 import pandas as pd
 from tabulate import tabulate
 from os.path import exists
-import pandas as pd
 from datetime import datetime, timedelta
 from utils.notification import send_email_notification, get_email_by_username
 from config import *
