@@ -84,10 +84,19 @@ def balanced_assign_patients_and_mhwps(
             print(f" MHWP '{mhwp}' can't be assigned due to no schedule.")
 
     assignments = {mhwp: patients.copy() for mhwp, patients in current_assignments.items()}
+
+    # Get currently assigned patients
+    already_assigned_patients = {patient for patients in current_assignments.values() for patient in patients}
+
+    # Filter out already assigned patients
+    unassigned_patients = {patient: symptom 
+                          for patient, symptom in patients_with_symptoms.items() 
+                          if patient not in already_assigned_patients}
+
     assigned_mhwp_tracker = {mhwp: False for mhwp in eligible_mhwps}
 
-    # assign to patients
-    for patient, symptom in patients_with_symptoms.items():
+    # assign to unassigned patients only
+    for patient, symptom in unassigned_patients.items():
         # obtain mhwps who set schedules (according matching rules)
         eligible_mhwps_for_patient = [
             mhwp for mhwp, major in mhwps_with_major.items()

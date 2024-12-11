@@ -50,6 +50,7 @@ def get_mhwps_with_major(mhwp_data_path=MHWP_DATA_PATH):
     except Exception as e:
         print(f"Error reading MHWP data: {str(e)}")
     return mhwps
+
 def get_current_assignments(assignments_path="data/assignments.csv"):
     """
     Load current assignments from assignments.csv.
@@ -74,36 +75,32 @@ def update_mhwp_csv_with_assignments(assignments_path=ASSIGNMENTS_DATA_PATH, mhw
     current_assignments = get_current_assignments(assignments_path)
 
     # Load MHWP data
-    mhwps = []
     if not os.path.exists(mhwp_data_path):
         print(f"Error: MHWP data file '{mhwp_data_path}' not found.")
         return
 
     try:
         with open(mhwp_data_path, "r", encoding="utf-8") as file:
-            reader = csv.DictReader(file)
-            mhwps = [row for row in reader]
-    except Exception as e:
-        print(f"Error reading MHWP data: {str(e)}")
-        return
+            rows = list(csv.DictReader(file))
+            
+        # Update assigned_patients for each MHWP
+        for row in rows:
+            username = row["username"]
+            if username in current_assignments:
+                # Convert to set to remove duplicates
+                assigned_patients = set(current_assignments[username])
+                row["assigned_patients"] = ",".join(assigned_patients)
+            else:
+                row["assigned_patients"] = ""
 
-    # Update `assigned_patients` for each MHWP
-    for mhwp in mhwps:
-        mhwp_username = mhwp["username"]
-        if mhwp_username in current_assignments:
-            mhwp["assigned_patients"] = ",".join(current_assignments[mhwp_username])
-        else:
-            mhwp["assigned_patients"] = ""
-
-    # Save updated MHWP data
-    try:
+        # Save updated MHWP data
         with open(mhwp_data_path, "w", newline='', encoding="utf-8") as file:
-            writer = csv.DictWriter(file, fieldnames=mhwps[0].keys())
+            writer = csv.DictWriter(file, fieldnames=rows[0].keys())
             writer.writeheader()
-            writer.writerows(mhwps)
+            writer.writerows(rows)
         print("Updated `assigned_patients` in MHWP data.")
     except Exception as e:
-        print(f"Error writing to MHWP data: {str(e)}")
+        print(f"Error processing MHWP data: {str(e)}")
 
 def update_patients_csv_with_assignments(assignments_path=ASSIGNMENTS_DATA_PATH, patient_data_path=PATIENTS_DATA_PATH):
     """
@@ -112,49 +109,43 @@ def update_patients_csv_with_assignments(assignments_path=ASSIGNMENTS_DATA_PATH,
     # Load current assignments
     current_assignments = get_current_assignments(assignments_path)
 
-    # Reverse the assignments to map patient -> MHWP
+    # Create patient to MHWP mapping
     patient_to_mhwp = {patient: mhwp for mhwp, patients in current_assignments.items() for patient in patients}
 
     # Load patient data
-    patients = []
     if not os.path.exists(patient_data_path):
         print(f"Error: Patient data file '{patient_data_path}' not found.")
         return
 
     try:
         with open(patient_data_path, "r", encoding="utf-8") as file:
-            reader = csv.DictReader(file)
-            patients = [row for row in reader]
-    except Exception as e:
-        print(f"Error reading patient data: {str(e)}")
-        return
+            rows = list(csv.DictReader(file))
 
-    # Update `assigned_mhwp` for each patient
-    for patient in patients:
-        patient_username = patient["username"]
-        if patient_username in patient_to_mhwp:
-            patient["assigned_mhwp"] = patient_to_mhwp[patient_username]
-        else:
-            patient["assigned_mhwp"] = ""
+        # Update assigned_mhwp for each patient
+        for row in rows:
+            username = row["username"]
+            row["assigned_mhwp"] = patient_to_mhwp.get(username, "")
 
-    # Save updated patient data
-    try:
+        # Save updated patient data
         with open(patient_data_path, "w", newline='', encoding="utf-8") as file:
-            writer = csv.DictWriter(file, fieldnames=patients[0].keys())
+            writer = csv.DictWriter(file, fieldnames=rows[0].keys())
             writer.writeheader()
-            writer.writerows(patients)
+            writer.writerows(rows)
         print("Updated `assigned_mhwp` in patient data.")
     except Exception as e:
-        print(f"Error writing to patient data: {str(e)}")
+        print(f"Error processing patient data: {str(e)}")
 
 def save_assignments(assignments, assignments_path=ASSIGNMENTS_DATA_PATH):
     """
     Save assignments to assignments.csv.
     """
-    table_data = []
-    for mhwp, patients in assignments.items():
-        for patient in patients:
-            table_data.append([patient, mhwp])
+    # Convert to set of tuples to remove duplicates
+    unique_assignments = {(patient, mhwp) 
+                        for mhwp, patients in assignments.items() 
+                        for patient in set(patients)}
+    
+    # Convert back to list for writing
+    table_data = sorted(list(unique_assignments))
 
     with open(assignments_path, "w", newline='', encoding="utf-8") as file:
         writer = csv.writer(file)
