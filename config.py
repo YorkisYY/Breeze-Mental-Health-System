@@ -16,6 +16,7 @@ DATA_DIR = os.path.join(APP_DIR, 'data')
 #     os.makedirs(DATA_DIR)
 
 # Global file paths
+# Global file paths
 USER_DATA_PATH = os.path.join(DATA_DIR, 'user_data.csv')
 MOOD_DATA_PATH = os.path.join(DATA_DIR, 'mood_data.csv')
 PATIENTS_DATA_PATH = os.path.join(DATA_DIR, 'patients.csv')

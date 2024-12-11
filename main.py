@@ -22,9 +22,21 @@ def initialize_data_directory():
         os.makedirs(data_dir)
     
     # Copy initial CSV files if they don't exist
-    for csv_file in ['user_data.csv', 'mhwp.csv', 'patients.csv', 'assignments.csv', 
-                     'mhwp_schedule.csv', 'mhwp_schedule_template.csv', 
-                     'meditation_resources.csv']:
+    for csv_file in [
+        'user_data.csv',
+        'mhwp.csv', 
+        'patients.csv',
+        'assignments.csv',
+        'mhwp_schedule.csv',
+        'mhwp_schedule_template.csv',
+        'meditation_resources.csv',
+        'mood_data.csv',
+        'patient_journaling.csv',
+        'mental_assessments.csv',
+        'patient_notes.csv',
+        'comments.csv',
+        'appointments.csv'
+    ]:
         target_file = os.path.join(data_dir, csv_file)
         if not os.path.exists(target_file):
             source_file = os.path.join(app_dir, 'data', csv_file)
@@ -54,7 +66,8 @@ def main():
     
     # Update config paths if needed
     if data_dir != DATA_DIR:
-        print(f"Using data directory: {data_dir}")
+        pass
+        # print(f"Using data directory: {data_dir}")
     
     update_mhwp_schedules(silent=True)
     display_banner()
