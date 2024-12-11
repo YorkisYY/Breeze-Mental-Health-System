@@ -206,6 +206,7 @@ def plot_mood(patient_username):
             plt.title(f"Mood Trend for {patient_username}")  # Set the chart title
 
             # Format the timestamps to display as date and time (only the date part)
+            mood_data["timestamp"] = mood_data["timestamp"].str.split(".", n=1).str[0]
             formatted_dates = pd.to_datetime(mood_data["timestamp"])
             formatted_dates = formatted_dates.dt.strftime('%Y-%m-%d: %H:%M')  # Format the dates
 
@@ -331,10 +332,10 @@ def display_dashboard(mhwp_username):
 if __name__ == '__main__':  # This block of code will only be executed when the script is run directly, not when it's imported as a module.
 
     # 1. Display the dashboard for a specific MHWP ('hougege'), which includes patient and appointment details
-    display_dashboard('hougege')
+    display_dashboard('mhwp2')
 
     # 2. Plot the mood trend for a specific patient ('houdidi3')
-    plot_mood("houdidi3")
-
-    # 3. Show the detailed patient record for 'houdidi3' managed by the MHWP ('hougege')
-    patient_record_menu('houdidi3', 'hougege')
+    # plot_mood("houdidi3")
+    #
+    # # 3. Show the detailed patient record for 'houdidi3' managed by the MHWP ('hougege')
+    # patient_record_menu('houdidi3', 'hougege')
