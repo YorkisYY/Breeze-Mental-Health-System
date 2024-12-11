@@ -442,11 +442,23 @@ def view_patients_for_mhwp():
             print(f"An unexpected error occurred: {e}")
 
 
+if __name__ == '__main__':  # This block of code will only be executed when the script is run directly, not when it's imported as a module.
 
-if __name__ == '__main__':
-    # view_patients_for_mhwp()
+    # 1. View the patients assigned to a specific MHWP (Mental Health Worker)
+    view_patients_for_mhwp()
+
+    # 2. Display the summary for the MHWP, including workload and patient statistics
     display_mhwp_summary()
+
+    # 3. Show a summary of the appointments, which may include appointment counts, statuses, etc.
     display_booking_summary()
-    # get_patients_for_mhwp('hougege')
-    # display_summary()
-#     appointments = load_appointments()
+
+    # 4. Retrieve patients assigned to a specific MHWP ('hougege') and display their details
+    get_patients_for_mhwp('hougege')
+
+    # 5. Display the overall summary report, which might include general patient health statistics or MHWP activity
+    display_summary()
+
+    # 6. Load the appointments data and store it in the variable 'appointments'
+    appointments = load_appointments()
+
