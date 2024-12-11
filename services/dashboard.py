@@ -152,8 +152,8 @@ def display_patient_summary_tabulate(summary_data):
         print("No patient data available.")
         return
 
-    print("Patient Summary:")
-    print(tabulate(summary_data, headers="keys", tablefmt="grid"))  # Display the patient summary in a grid format using tabulate
+    #print("Patient Summary:")
+    #print(tabulate(summary_data, headers="keys", tablefmt="grid"))  # Display the patient summary in a grid format using tabulate
 
 
 def display_patient_summary(summary_data):
@@ -271,7 +271,7 @@ def predict_emotion(new_document, word_index, idf, centers):
 # Predict emotion using the pre-trained model for a new comment
 new_comment = "feeling a bit stressed"  # Example new comment
 predicted_cluster = predict_emotion(new_comment, word_index, idf, centers)
-print(f"Predicted cluster for the new comment: {predicted_cluster}")
+#print(f"Predicted cluster for the new comment: {predicted_cluster}")
 
 
 def display_dashboard(mhwp_username):

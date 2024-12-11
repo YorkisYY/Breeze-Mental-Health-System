@@ -108,7 +108,7 @@ model = {
 try:
     with open('emotion_model.pkl', 'rb') as f:
         model = pickle.load(f)
-    print("load！")
+#    print("load！")
 except FileNotFoundError:
     with open('emotion_model.pkl', 'wb') as f:
         pickle.dump(model, f)
