@@ -6,7 +6,10 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('data/*.csv', 'data')],  # Include CSV files
+    datas=[
+        ('data/*.csv', 'data'),
+        ('utils/email_config.ini', 'utils')
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -17,7 +20,6 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False
 )
-
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(

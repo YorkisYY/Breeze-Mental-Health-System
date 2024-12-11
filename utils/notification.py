@@ -4,19 +4,23 @@ from email.mime.multipart import MIMEMultipart
 import csv
 import configparser
 import os
-
+import sys
 
 def load_email_config(config_file="email_config.ini"):
     """
     Load SMTP configuration from an INI file.
     """
-   
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(script_dir, config_file)
+    if getattr(sys, 'frozen', False):
+        # Running as executable
+        config_path = os.path.join(sys._MEIPASS, 'utils', config_file)
+    else:
+        # Running as script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        config_path = os.path.join(script_dir, config_file)
+
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Config file not found: {config_path}")
 
-    
     config = configparser.ConfigParser()
     config.read(config_path)
     smtp_settings = config["SMTP"]
