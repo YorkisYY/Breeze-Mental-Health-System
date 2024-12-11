@@ -312,9 +312,17 @@ def list_appointments_for_mhw(mhw_username, file_path=APPOINTMENTS_DATA_PATH):
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
+            today = datetime.today().date()
             for row in reader:
-                if row['mhwp_username'] == mhw_username:
+                appointment_date=datetime.strptime(row['date'], "%Y/%m/%d").date()
+                if (
+                    row['mhwp_username'] == mhw_username and
+                    appointment_date >= today and
+                    row['status'] in ["pending", "confirmed"]
+                ):
                     appointments.append(row)
+            appointments.sort(key=lambda x: (x['date'], x['timeslot']))
+
             # Check if any appointments were found
             if not appointments:
                 print(f"\nNo appointments found for {mhw_username}")

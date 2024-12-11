@@ -52,13 +52,13 @@ def handle_login():
             status = df[df['username'] == user.username]['account_status'].values[0]
             if status == 'inactive':
                 print("Your account is disabled. Please contact admin to reactivate.")
-                return False
+                return True  
         elif user.role == "patient":
             df = pd.read_csv(PATIENTS_DATA_PATH) # read patients data from config
             status = df[df['username'] == user.username]['account_status'].values[0]
             if status == 'inactive':
                 print("Your account is disabled. Please contact admin to reactivate.")
-                return False
+                return True  
 
         print(f"You are logged in as {user.role}.")
         match user.role:
