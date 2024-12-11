@@ -8,10 +8,11 @@ a = Analysis(
     binaries=[],
     datas=[
         ('data/*.csv', 'data'),
-        ('utils/email_config.ini', 'utils')
+        ('utils/email_config.ini', 'utils'),
+        ('emotion_model.pkl', '.')
     ],
     hiddenimports=['numpy.core', 'pandas.core.arrays'],
-    excludes=['numpy.random', 'pandas.plotting', 'matplotlib.backends']
+    excludes=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

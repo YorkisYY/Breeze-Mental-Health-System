@@ -152,8 +152,8 @@ def display_patient_summary_tabulate(summary_data):
         print("No patient data available.")
         return
 
-    #print("Patient Summary:")
-    #print(tabulate(summary_data, headers="keys", tablefmt="grid"))  # Display the patient summary in a grid format using tabulate
+    print("Patient Summary:")
+    print(tabulate(summary_data, headers="keys", tablefmt="grid"))  # Display the patient summary in a grid format using tabulate
 
 
 def display_patient_summary(summary_data):

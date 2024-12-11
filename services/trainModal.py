@@ -155,15 +155,15 @@ def train_modal():
         'centers': centers
     }
 
-    # Check if the model file already exists
-    try:
-        with open('emotion_model.pkl', 'rb') as f:
-            model = pickle.load(f)  # Load the existing model from file
-        print("Model loaded successfully.")
-    except FileNotFoundError:
-        with open('emotion_model.pkl', 'wb') as f:
-            pickle.dump(model, f)  # Save the new model to a file
-        print("Model saved successfully.")
+# Check if the model file already exists
+try:
+    with open('emotion_model.pkl', 'rb') as f:
+        model = pickle.load(f)  # Load the existing model from file
+    # print("Model loaded successfully.")
+except FileNotFoundError:
+    with open('emotion_model.pkl', 'wb') as f:
+        pickle.dump(model, f)  # Save the new model to a file
+    # print("Model saved successfully.")
 
 if __name__ == "__main__":
     train_modal()
