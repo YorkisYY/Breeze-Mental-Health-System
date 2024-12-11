@@ -268,12 +268,6 @@ def predict_emotion(new_document, word_index, idf, centers):
     return cluster_id
 
 
-# Predict emotion using the pre-trained model for a new comment
-new_comment = "feeling a bit stressed"  # Example new comment
-predicted_cluster = predict_emotion(new_comment, word_index, idf, centers)
-print(f"Predicted cluster for the new comment: {predicted_cluster}")
-
-
 def display_dashboard(mhwp_username):
     """
     Display the patient dashboard, including summary data, and allow the user to interact with patient details.
