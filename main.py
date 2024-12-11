@@ -9,6 +9,18 @@ from model import *
 from config import *
 from model.mhwp_management.mhwp_schedule import *
 
+def check_data_directory_permissions():
+    try:
+        test_file = os.path.join(DATA_DIR, 'test.txt')
+        with open(test_file, 'w') as f:
+            f.write('test')
+        os.remove(test_file)
+        return True
+    except Exception as e:
+        print(f"Permission error: {e}")
+        return False
+
+
 def initialize_data_directory():
     """Create data directory and extract initial CSV files if needed"""
     # Define data directory relative to executable
@@ -61,6 +73,10 @@ def show_menu():
     return input("Select an option (1/2/3): ")
 
 def main():
+    data_dir = initialize_data_directory()
+    if not check_data_directory_permissions():
+        print("Error: Cannot write to data directory")
+        return
     # Initialize data directory first
     data_dir = initialize_data_directory()
     

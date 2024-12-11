@@ -349,7 +349,7 @@ def book_appointment(user, date, timeslot, schedule_file, assignments_file, appo
 
 def cancel_appointment_with_display(user, schedule_file, appointment_file):
     """
-    Allow a patient to view and cancel their appointments.
+    Allow a patient to view and cancel their upcoming appointments.
     """
     try:
         # Load appointments for the patient
@@ -360,9 +360,26 @@ def cancel_appointment_with_display(user, schedule_file, appointment_file):
             print("No appointments found to cancel.")
             return
 
-        # Display appointment list
-        print("\nYour current appointments:")
-        user_appointments = user_appointments[user_appointments['status'] != 'cancelled']
+        # Convert 'date' to datetime safely
+        user_appointments = user_appointments.copy()  # Avoid SettingWithCopyWarning
+        user_appointments['date'] = pd.to_datetime(user_appointments['date'], format='%Y/%m/%d', errors='coerce')
+
+        # Get today's date
+        today = pd.Timestamp.now().normalize()  # Ensure it's a Timestamp
+
+        # Filter out cancelled appointments and keep only those from today onwards
+        user_appointments = user_appointments[
+            (user_appointments['status'] != 'cancelled') &
+            (user_appointments['date'] >= today)
+        ]
+
+        if user_appointments.empty:
+            print("No upcoming appointments to cancel.")
+            return
+
+        # Display filtered appointment list
+        print("\nYour upcoming appointments:")
+        user_appointments['date'] = user_appointments['date'].dt.strftime("%Y/%m/%d")
         print(tabulate(user_appointments, headers='keys', tablefmt='grid', showindex=False))
 
         # Enter the ID to cancel the appointment
@@ -400,6 +417,8 @@ def cancel_appointment_with_display(user, schedule_file, appointment_file):
         print(f"Error: {appointment_file} not found.")
     except Exception as e:
         print(f"Unexpected error: {e}")
+
+
 
 
 def cancel_appointment(user, appointment_id, schedule_file, appointment_file):

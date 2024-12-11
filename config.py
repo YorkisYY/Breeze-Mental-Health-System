@@ -3,19 +3,15 @@ import sys
 
 # Get application directory
 if getattr(sys, 'frozen', False):
-    APP_DIR = sys._MEIPASS
+    APP_DIR = os.path.dirname(sys.executable)
 else:
     APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Set data directory in program folder
 DATA_DIR = os.path.join(APP_DIR, 'data')
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
 
-# # Create data directory if it doesn't exist
-# DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
-# if not os.path.exists(DATA_DIR):
-#     os.makedirs(DATA_DIR)
-
-# Global file paths
 # Global file paths
 USER_DATA_PATH = os.path.join(DATA_DIR, 'user_data.csv')
 MOOD_DATA_PATH = os.path.join(DATA_DIR, 'mood_data.csv')
