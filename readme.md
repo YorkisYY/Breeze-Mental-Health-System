@@ -1,4 +1,4 @@
-WHAT ARE WE WORKING ON !!!!-----------------------------------------------------
+
 ## 13-th Commit: schedule management and auto update
 ----------
 **Arthur: 2024_12_09 07:39**
