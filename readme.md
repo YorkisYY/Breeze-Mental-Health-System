@@ -1,4 +1,11 @@
 WHAT ARE WE WORKING ON !!!!-----------------------------------------------------
+
+## 14-th Commit: schedule management and auto update
+----------
+**Arthur: 2025_01_09 00:08**
+1. add requirements.txt file for module requirement tracking.
+2. exclude build and dist folder from git tracking.
+
 ## 13-th Commit: schedule management and auto update
 ----------
 **Arthur: 2024_12_09 07:39**
