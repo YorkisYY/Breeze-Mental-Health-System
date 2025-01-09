@@ -9,5 +9,6 @@ venv/
 dist/
 build/
 .venv/
+.idea/
 
 *.log

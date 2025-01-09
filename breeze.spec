@@ -7,11 +7,13 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('data/*.csv', 'data'),
-        ('utils/email_config.ini', 'utils'),
+        ('data', 'data'),
+        ('services', 'services'),
+        ('utils', 'utils'),
+        ('model', 'model'),
         ('emotion_model.pkl', '.')
     ],
-    hiddenimports=['numpy.core', 'pandas.core.arrays'],
+    hiddenimports=['numpy.core', 'numpy._core.multiarray', 'pandas.core.arrays','services','utils','model'],
     excludes=[],
     hookspath=[],
     hooksconfig={},

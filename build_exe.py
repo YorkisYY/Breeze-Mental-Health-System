@@ -17,7 +17,7 @@ def build_exe():
     print("Copied emotion_model.pkl to dist folder")
     
     # Clean up build folder
-    clean_build()
+    # clean_build()
 
 if __name__ == "__main__":
     build_exe()
