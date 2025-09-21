@@ -1,136 +1,143 @@
-WHAT ARE WE WORKING ON !!!!-----------------------------------------------------
+Breeze Mental Health Management System 🌞
+A comprehensive mental health management system built in Python that facilitates communication and care coordination between patients and Mental Health Wellbeing Personnel (MHWP).
+🌟 Features
+For Patients
 
-## 14-th Commit: schedule management and auto update
-----------
-**Arthur: 2025_01_09 00:08**
-1. add requirements.txt file for module requirement tracking.
-2. exclude build and dist folder from git tracking.
+Account Management: Secure registration, login, and profile updates
+Health & Wellbeing Tracking:
 
-## 13-th Commit: schedule management and auto update
-----------
-**Arthur: 2024_12_09 07:39**
-1. add schedule template management for mhwp. Now the mhwp have more freedom in create, update, delete schedule template. 
-2. add auto update for mhwp schedule based on the schedule template. up to 4 weeks ahead.
-3. change multiple schedule table display for better formatting.
-4. modularize the mhwp code for better readability.
-5. disable the summary module seems it is still in development. waiting for @PengFfeiWang to finish it.
-
-## 12-th Commit: disable/enable user account
-----------
-**Arthur: 2024_12_03 11:19**
-1. add confirmation for the admin before cleaning up the mhwp schedule data.(need further cleaning by Desheng)
-2. add user account status management for admin. changed files: 
-model/admin.py, model/user_account_management/user_data_manage.py, services/login.py
-3. add list_all_users() in utils to list all users from mhwp and patients to select one.
-
-## Eleventh Commit
-----------
-**Chao-Wei: 2024_11_29 2:42**
-1. Add up the mhwp.csv for the future upcoming feature.
-2. the mhwp.csv would be simlutaneously updated with the user_data.csv.
-3. Add up the symptoms attribution for patients and major for the mhwp.
-4. new user registration would be required to choose their sypmtoms or major for the allocation of MHWP.
-5. debugs 
-
-## Tenth Commit
-----------
-**Chao-Wei: 2024_11_27 21:19**
-1. Add up patient.csv for the future upcoming feature.
-2. the patient.csv would be simlutaneously updated with the user_data.csv.
-3. Add up the admin allocation function for patients.
-
-## ninth Commit 
----------- 
-**Shaoxiong Bai: 2024_11_26 21:19** 
-### add up a series of new features
-1. Add up a new patient comment and MHWP reading feature. Particularly, add new comment.py and commnents.csv
-2. Add up a new patient journaling and MHWP reading feature. Particularly, add new journaling.py and patient_journaling.csv
-3. Add up a new automatic questionnaire for patient mental health status and MHWP reading feature. Particularly, add new questionnaire.py and mental_assessments.csv  
-4. Add up a new patient note for the MHWP feature. Particularly, add new patient_notes.csv
-5. Add up a new meditation resource viewing feature. Particularly, add new meditation.py and meditation_resources.csv
-6. Integrate the MHWP view patient records feature, including (1)view mood tracker, (2)view patient journaling, (3)view mental health assessments, and (4)add patient record. Particularly, add a brand new patient_records.py file
-7. Add up a series of buttons in mhwp.py and patient.py files.
-
-## Eigth Commit
-----------
-**CHAO-WEI : 2024_11_25 18:05**
-### add up initial functions for mhwp calender and mhwp and debugs
-1. add the function for mhwp calender
+Mood tracking with color-coded system (Green/Blue/Yellow/Orange/Red)
+Personal journaling entries
+Mental health questionnaires with automated feedback
 
 
-## Seventh Commit
-----------
-**CHAO-WEI : 2024_11_25 11:58**
-### Fix up the bug of the previous commit related to logout within admin and mhwp, and modify the code of mhwp.py
-1. remove the doctor.py, as the role is not needed 
-2. remove the code related to doctor which would create bugs.
-3. append the function that patients can change their username, email,emergency_email now
-4. append the function that admin can change others' email, emergency_email.
+Appointment Management: Book, cancel, and view appointments with assigned MHWPs
+Meditation Resources: Search and explore guided meditation content
+Medical Records: View personal medical history and treatment records
+Comment System: Provide feedback on appointments and care quality
 
-## Sixth Commit
-----------
-**Arthur Hou: 2024_11_25 02:48**
-### merge qxj's commit on mhwp's functions
-1. change all instance of mhw to mhwp for naming consistency.
-2. modify slight to mhwp.py for robustness.
+For Mental Health Workers (MHWP)
 
-## Fifth Commit
-----------
-**Arthur Hou: 2024_11_24 20:09**
+Schedule Management: Set availability templates and modify schedules
+Patient Management: View assigned patients and their records
+Appointment Handling: Confirm, cancel, and manage patient appointments
+Patient Records Access:
 
-### major change to the code structure, suggest doing subsequent development based on this commit.
-1. Modularize the whole frame
-    1. removed __init__.py from services. since the dependencies are now defined in each module themselves.
-    2. Modularize user registration function register_user() to \\services\\registration.py
-    3. Modularize login handling function handle_login() to \\services\\login.py; In handle_login() break each model's page into different function.
-        * modularize admin's login page to handle_admin_menu() to \\model\\admin.py
-        * modularize doctor's login page to handle_doctor_menu() to \\model\\doctor.py
-        * modularize mhw's login page to handle_mhw_menu() to \\model\\mhwp.py
-        * modularize patient's login page to handle_patient_menu() to \\model\\patient.py
-2. Add patient mood tracking page.
-2. Add patient mood tracking page.
-    1. see \\services\\mood_tracking.py; the function is called when choose the corresponding selection in handle_patient_menu().
-3. fix the bug that cause the program to exit after registration.
-4. remove \\data\\patient_data.csv since it is redundant. All user info stored in \\data\\user_data.csv
-5. place all the csv file path in config.py. The csv file path for classes and functions are easily controlled in this way. State 'from config import XXX_DATA_PATH' at the top of your code.
-3. fix the bug that cause the program to exit after registration.
-4. remove \\data\\patient_data.csv since it is redundant. All user info stored in \\data\\user_data.csv
-5. place all the csv file path in config.py. The csv file path for classes and functions are easily controlled in this way. State 'from config import XXX_DATA_PATH' at the top of your code.
+View mood tracking data with visualizations
+Access patient journals and assessments
+Add medical notes and treatment records
 
-## Fourth Commit
-----------
-**CHAO-WEI:**
 
-- 1. Added roles of MHWP, Doctor into menu
-- 2. Change the entire frame
+Dashboard: Comprehensive overview of patient status and trends
+Email Notifications: Automated appointment confirmations and updates
 
-## Third Commit
-----------
-**CHAO-WEI:**
+For Administrators
 
-- 1. Added the admin function which can allow admin to manage other users's data such as delete, update.
-- 2. user now can cancel their own account, and the admin can delete the user's data.
-- 3. admin should insert the code to login which is 0000
-- 4. The program can run, allowing the username and password to be compared with data in the CSV file
-- 5. user can change their own username and password 
-- 6. registation would compare the username with the data in the CSV file, avoiding the same username.
-- 7. create the __intit__ file to form the package file 
-- 8. !need update for MHWP function!
+User Management: Create, modify, and deactivate user accounts
+Assignment System: Intelligently assign patients to MHWPs based on:
 
-## Second Commit
-----------
-**CHAO-WEI:**
+MHWP specializations (Emotional Management, Behavioral Therapy, Severe Disorders, General Wellbeing)
+Patient symptoms and conditions
+MHWP availability and workload
 
-- 1. Removed the GUI file as we don't want to use it.
-- 2. Created the basic functionality of the program in `user` and implemented the entry logic in the main functionality.
-- 3. After testing, the table can be created and data can be inserted into the table.
-- 4. The program can run, allowing the username and password to be compared with data in the CSV file.
 
-**Date:** 2024.11.14.1:04
-## First commit
-----------
-**CHAO-WEI:**
+System Analytics: View comprehensive reports and statistics
+Account Status Control: Enable/disable user accounts as needed
 
-- 1. Create the project on GitHub. Commit the starter code from moodle.
+🏗️ System Architecture
+Core Components
 
-**Date:**2024.11.11 1:06
+Model Layer: User management, patient/MHWP data handling, admin functions
+Services Layer: Business logic for appointments, mood tracking, notifications
+Utils Layer: Helper functions, email configuration, user interface utilities
+
+Key Technologies
+
+Python 3.x: Core programming language
+Pandas: Data manipulation and CSV file handling
+Matplotlib: Data visualization for mood trends
+SMTP: Email notification system
+Scikit-learn: Machine learning for mood prediction (TF-IDF + K-means clustering)
+
+📁 Project Structure
+breeze-mental-health/
+├── main.py                 # Application entry point
+├── config.py              # Configuration and file paths
+├── model/                 # Data models and business logic
+│   ├── admin.py
+│   ├── patient.py
+│   ├── mhwp.py
+│   └── user_account_management/
+├── services/              # Core services
+│   ├── login.py
+│   ├── registration.py
+│   ├── mood_tracking.py
+│   ├── appointment.py
+│   └── dashboard.py
+├── utils/                 # Utility functions
+│   ├── notification.py
+│   ├── display_banner.py
+│   └── email_config.ini
+└── data/                  # CSV data files
+    ├── user_data.csv
+    ├── patients.csv
+    ├── mhwp.csv
+    └── appointments.csv
+🚀 Installation & Setup
+Prerequisites
+
+Python 3.8 or higher
+pip package manager
+
+Required Libraries
+bashpip install pandas matplotlib tabulate
+Configuration
+
+Email Setup (Optional):
+
+Edit utils/email_config.ini with your SMTP settings
+Default configuration uses Gmail SMTP
+
+
+Data Directory:
+
+The system automatically creates necessary CSV files
+Initial data structure is set up on first run
+
+
+
+Running the Application
+bashpython main.py
+👥 User Roles & Access
+Default Verification Codes
+
+Admin Registration: 0000
+MHWP Registration: 0000
+Patient Registration: No code required
+
+MHWP Specializations
+
+Emotional Management: Anxiety, Depression, PTSD, Bipolar Disorder
+Behavioral Therapy: OCD, ADHD, Eating Disorder, Substance Abuse
+Severe Disorders: Schizophrenia, Borderline Personality Disorder
+General Wellbeing: Other conditions and general support
+
+📊 Key Features Deep Dive
+Intelligent Assignment System
+The system automatically assigns patients to MHWPs based on:
+
+Symptom Matching: Patients are matched with MHWPs whose specialization covers their conditions
+Workload Balancing: Distribution considers current patient loads
+Schedule Availability: Only MHWPs with set schedules receive assignments
+
+Mood Tracking & Analytics
+
+5-Point Color System: Visual mood representation
+Trend Analysis: Matplotlib visualizations show mood patterns over time
+Predictive Analytics: Machine learning model predicts mood based on journal entries
+
+Appointment Management
+
+Real-time Scheduling: Dynamic schedule updates with conflict prevention
+Status Tracking: Pending → Confirmed → Completed workflow
+Automated Notifications: Email alerts for all appointment changes
