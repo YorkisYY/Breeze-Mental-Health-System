@@ -1,6 +1,6 @@
-Breeze Mental Health Management System 🌞
+Breeze Mental Health Management System
 A comprehensive mental health management system built in Python that facilitates communication and care coordination between patients and Mental Health Wellbeing Personnel (MHWP).
-🌟 Features
+Features
 For Patients
 
 Account Management: Secure registration, login, and profile updates
@@ -44,7 +44,7 @@ MHWP availability and workload
 System Analytics: View comprehensive reports and statistics
 Account Status Control: Enable/disable user accounts as needed
 
-🏗️ System Architecture
+System Architecture
 Core Components
 
 Model Layer: User management, patient/MHWP data handling, admin functions
@@ -59,7 +59,7 @@ Matplotlib: Data visualization for mood trends
 SMTP: Email notification system
 Scikit-learn: Machine learning for mood prediction (TF-IDF + K-means clustering)
 
-📁 Project Structure
+Project Structure
 breeze-mental-health/
 ├── main.py                 # Application entry point
 ├── config.py              # Configuration and file paths
@@ -83,7 +83,7 @@ breeze-mental-health/
     ├── patients.csv
     ├── mhwp.csv
     └── appointments.csv
-🚀 Installation & Setup
+Installation & Setup
 Prerequisites
 
 Python 3.8 or higher
@@ -108,7 +108,7 @@ Initial data structure is set up on first run
 
 Running the Application
 bashpython main.py
-👥 User Roles & Access
+User Roles & Access
 Default Verification Codes
 
 Admin Registration: 0000
@@ -122,7 +122,7 @@ Behavioral Therapy: OCD, ADHD, Eating Disorder, Substance Abuse
 Severe Disorders: Schizophrenia, Borderline Personality Disorder
 General Wellbeing: Other conditions and general support
 
-📊 Key Features Deep Dive
+Key Features
 Intelligent Assignment System
 The system automatically assigns patients to MHWPs based on:
 
